@@ -1,0 +1,15 @@
+{
+  "000": "Success",
+  "004": "General Error",
+  "063": "Credential mismatch / token not provided",
+  "068": "Response received too late (timeout)",
+  "077": "Data not found",
+  "091": "Issuer or switch is inoperative",
+  "094": "Duplicate Transmission",
+  "096": "System Malfunction",
+  "099": "Invalid token",
+  "298": "Token expired",
+  "299": "Token is invalid",
+  "400": "Bad Request",
+  "401": "Username or password is incorrect"
+}
