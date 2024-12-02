@@ -1,24 +1,17 @@
 package com.rekrutmen.rest_api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ResetPasswordRequest {
 
+    @JsonProperty("email")
     private String email;
-    private String nik;
 
-    // Getters and setters
-    public String getEmail() {
-        return email;
-    }
+    @JsonProperty("no_identitas")
+    private String noIdentitas;
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getNik() {
-        return nik;
-    }
-
-    public void setNik(String nik) {
-        this.nik = nik;
-    }
 }
