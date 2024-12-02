@@ -4,32 +4,32 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "peserta_kontak")
 @Getter
 @Setter
-public class Kontak {
+public class PesertaKontak {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_kontak_peserta", nullable = false)
     private Integer idKontakPeserta;
 
-    @Column(length = 50)
+    @Column(name = "id_peserta", length = 50, nullable = false)
     private Integer idPeserta;
 
-    @Column(length = 50)
+    @Column(name = "nama_kontak", length = 50, nullable = false)
     private String namaKontak;
 
-    @Column(length = 50)
+    @Column(name = "hub_kontak", length = 50)
     private String hubKontak;
 
-    @Column(length = 50)
+    @Column(name = "telp_kontak", length = 50)
     private String telpKontak;
 
-    @Column(length = 50)
+    @Column(name = "email_kontak", length = 50)
     private String emailKontak;
 
+    @Column(name = "alamat_kontak")
     private String alamatKontak;
 }
