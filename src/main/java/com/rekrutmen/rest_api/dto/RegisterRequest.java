@@ -8,9 +8,16 @@ import lombok.Setter;
 @Setter
 public class RegisterRequest {
 
+    @JsonProperty("username")
     private String username;
+
+    @JsonProperty("nama")
     private String nama;
+
+    @JsonProperty("password")
     private String password;
+
+    @JsonProperty("email")
     private String email;
 
     @JsonProperty("no_identitas")
