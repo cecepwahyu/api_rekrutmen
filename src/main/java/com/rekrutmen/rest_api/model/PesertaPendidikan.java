@@ -30,10 +30,10 @@ public class PesertaPendidikan {
     private String jurusan;
 
     @Column(name = "thn_masuk", length = 4)
-    private Character thnMasuk;
+    private String thnMasuk;
 
     @Column(name = "thn_lulus", length = 4)
-    private Character thnLulus;
+    private String thnLulus;
 
     @Column(name = "nilai", length = 10)
     private String nilai;
