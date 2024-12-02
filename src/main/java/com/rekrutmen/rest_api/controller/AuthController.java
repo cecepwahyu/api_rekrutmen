@@ -2,6 +2,7 @@ package com.rekrutmen.rest_api.controller;
 
 import com.rekrutmen.rest_api.dto.ResetPasswordRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
+import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.model.Profile;
 import com.rekrutmen.rest_api.service.ProfileService;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
@@ -27,8 +28,8 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<ResponseWrapper<Object>> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
         // Validate email and nik
-        Optional<Profile> profile = profileService.validateEmailAndNik(resetPasswordRequest.getEmail(), resetPasswordRequest.getNik());
-        if (profile.isEmpty()) {
+        Optional<Peserta> peserta = profileService.validateEmailAndNoIdentitas(resetPasswordRequest.getEmail(), resetPasswordRequest.getNoIdentitas());
+        if (peserta.isEmpty()) {
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     "400",
                     responseCodeUtil.getMessage("400"),
@@ -42,7 +43,7 @@ public class AuthController {
         // Prepare response data
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("email", resetPasswordRequest.getEmail());
-        responseData.put("nik", resetPasswordRequest.getNik());
+        responseData.put("nik", resetPasswordRequest.getNoIdentitas());
         responseData.put("Your OTP code is: ", otpCode);
 
         // Prepare response data
