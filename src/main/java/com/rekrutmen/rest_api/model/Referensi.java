@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "tbl_referensi")
 @Getter
@@ -14,23 +12,24 @@ public class Referensi {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ref_idx", nullable = false)
     private Integer refIdx;
 
-    @Column(length = 50)
+    @Column(name = "ref_group1", length = 20)
     private String refGroup1;
 
-    @Column(length = 50)
+    @Column(name = "ref_group2", length = 20)
     private String refGroup2;
 
-    @Column(length = 50)
+    @Column(name = "ref_code", length = 50)
     private String refCode;
 
-    @Column(length = 50)
+    @Column(name = "ref_desc", length = 50)
     private String refDesc;
 
-    @Column(length = 50)
+    @Column(name = "ref_code2", length = 50)
     private String refCode2;
 
-    @Column(length = 50)
+    @Column(name = "ref_desc2", length = 50)
     private String refDesc2;
 }
