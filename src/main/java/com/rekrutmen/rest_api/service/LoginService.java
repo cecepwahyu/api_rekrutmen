@@ -1,6 +1,6 @@
 package com.rekrutmen.rest_api.service;
 
-import com.rekrutmen.rest_api.model.User;
+import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.model.Login;
 import com.rekrutmen.rest_api.repository.LoginRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class LoginService {
         loginRepository.save(login);
     }
 
-    public Optional<User> getUserByEmail(String email) {
+    public Optional<Peserta> getUserByEmail(String email) {
         return loginRepository.findByEmail(email);
     }
 }
