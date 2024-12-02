@@ -36,5 +36,5 @@ public class Profile {
     private LocalDateTime updatedAt;
 
     @Column(length = 16)
-    private String nik;
+    private String noIdentitas;
 }

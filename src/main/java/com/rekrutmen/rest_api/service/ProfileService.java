@@ -13,82 +13,86 @@ import java.util.Optional;
 public class ProfileService {
 
     @Autowired
-    private ProfileRepository profileRepository;
+    private PesertaRepository pesertaRepository;
 
     @Autowired
-    private KerabatRepository kerabatRepository;
+    private PesertaKontakRepository pesertaKontakRepository;
 
     @Autowired
-    private RiwayatPendidikanRepository riwayatPendidikanRepository;
+    private PesertaPendidikanRepository pesertaPendidikanRepository;
 
     @Autowired
-    private PengalamanKerjaRepository pengalamanKerjaRepository;
+    private PesertaPengalamanRepository pesertaPengalamanRepository;
 
     @Autowired
-    private RiwayatOrganisasiRepository riwayatOrganisasiRepository;
+    private PesertaOrganisasiRepository pesertaOrganisasiRepository;
 
-    public void createProfile(Profile profile) {
-        profileRepository.save(profile);
+    public void createProfile(Peserta peserta) {
+        pesertaRepository.save(peserta);
     }
 
-    public boolean isNikExist(String nik) {
-        return profileRepository.existsByNik(nik);
+//    public boolean isNikExist(String noIdentitas) {
+//        return pesertaRepository.existsByNik(noIdentitas);
+//    }
+
+    public boolean isNoIdentitasExist(String noIdentitas) {
+        return pesertaRepository.existsByNoIdentitas(noIdentitas);
     }
 
-    public Optional<Profile> validateEmailAndNik(String email, String nik) {
-        return profileRepository.findByEmailAndNik(email, nik);
+    public Optional<Peserta> validateEmailAndNoIdentitas(String email, String noIdentitas) {
+        return pesertaRepository.findByEmailAndNoIdentitas(email, noIdentitas);
     }
 
 
-    public Profile updateProfile(Profile profile) {
-        return profileRepository.save(profile);
+    public Peserta updateProfile(Peserta peserta) {
+        return pesertaRepository.save(peserta);
     }
 
     @Transactional
-    public void updateKerabat(Integer profileId, List<Kerabat> family) {
+    public void updateKerabat(Integer idPeserta, List<PesertaKontak> family) {
         // Remove existing family records
-        kerabatRepository.deleteByProfileId(profileId);
+        pesertaKontakRepository.deleteByIdPeserta(idPeserta);
 
         // Insert new family records
         family.forEach(kerabat -> {
-            kerabat.setProfileId(profileId);
-            kerabatRepository.save(kerabat);
+            kerabat.setIdPeserta(idPeserta);
+            pesertaKontakRepository.save(kerabat);
         });
     }
 
     @Transactional
-    public void updatePendidikan(Integer profileId, List<RiwayatPendidikan> education) {
+    public void updatePendidikan(Integer idPeserta, List<PesertaPendidikan> education) {
         // Remove existing education records
-        riwayatPendidikanRepository.deleteByProfileId(profileId);
+        pesertaPendidikanRepository.deleteByIdPeserta(idPeserta); // Corrected method name
 
         // Insert new education records
         education.forEach(pendidikan -> {
-            pendidikan.setProfileId(profileId);
-            riwayatPendidikanRepository.save(pendidikan);
+            pendidikan.setIdPeserta(idPeserta);
+            pesertaPendidikanRepository.save(pendidikan);
         });
     }
 
     @Transactional
-    public void updatePengalamanKerja(Integer profileId, List<PengalamanKerja> work) {
+    public void updatePengalamanKerja(Integer idPeserta, List<PesertaPengalaman> work) {
         // Remove existing education records
-        riwayatPendidikanRepository.deleteByProfileId(profileId);
+        pesertaPendidikanRepository.deleteByIdPeserta(idPeserta);
 
         // Insert new education records
         work.forEach(pendidikan -> {
-            pendidikan.setProfileId(profileId);
-            pengalamanKerjaRepository.save(pendidikan);
+            pendidikan.setIdPeserta(idPeserta);
+            pesertaPengalamanRepository.save(pendidikan);
         });
     }
 
     @Transactional
-    public void updateOrganisasi(Integer profileId, List<RiwayatOrganisasi> work) {
+    public void updateOrganisasi(Integer profileId, List<PesertaOrganisasi> work) {
         // Remove existing education records
-        riwayatPendidikanRepository.deleteByProfileId(profileId);
+        pesertaPendidikanRepository.deleteByIdPeserta(profileId);
 
         // Insert new education records
         work.forEach(pendidikan -> {
-            pendidikan.setProfileId(profileId);
-            riwayatOrganisasiRepository.save(pendidikan);
+            pendidikan.setIdPeserta(profileId);
+            pesertaOrganisasiRepository.save(pendidikan);
         });
     }
 }
