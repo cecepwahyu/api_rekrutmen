@@ -1,6 +1,7 @@
 package com.rekrutmen.rest_api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,36 +20,43 @@ public class Peserta {
     private Integer idPeserta;
 
     @Column(name = "username", length = 50, nullable = false)
+    @Size(max = 50, message = "Username cannot exceed 50 characters")
     private String username;
 
-    @Column(name = "password", length = 50, nullable = false)
+    @Column(name = "password", length = 100, nullable = false)
+    @Size(max = 100, message = "Password cannot exceed 50 characters")
     private String password;
 
-    @Column(name = "nama", length = 50, nullable = false)
+    @Column(name = "nama", length = 50)
+    @Size(max = 50, message = "Nama cannot exceed 50 characters")
     private String nama;
 
-    @Column(name = "no_identitas", length = 16, nullable = false)
+    @Column(name = "no_identitas", length = 16)
     private String noIdentitas;
 
     @Column(name = "tempat_lahir", length = 50)
+    @Size(max = 50, message = "Tempat Lahir cannot exceed 50 characters")
     private String tempatLahir;
 
     @Column(name = "tgl_lahir")
     private LocalDate tglLahir;
 
-    @Column(name = "jns_kelamin", nullable = false)
+    @Column(name = "jns_kelamin")
     private Integer jnsKelamin;
 
     @Column(name = "agama")
     private Integer agama;
 
     @Column(name = "alamat_identitas", length = 50)
+    @Size(max = 50, message = "Alamat Identitas cannot exceed 50 characters")
     private String alamatIdentitas;
 
     @Column(name = "provinsi_identitas", length = 50)
+    @Size(max = 50, message = "Provinsi cannot exceed 50 characters")
     private String provinsiIdentitas;
 
     @Column(name = "kota_identitas", length = 50)
+    @Size(max = 50, message = "Kota cannot exceed 50 characters")
     private String kotaIdentitas;
 
     @Column(name = "kecamatan_identitas", length = 50)
@@ -98,4 +106,8 @@ public class Peserta {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "token", length = 250)
+    @Size(max = 250, message = "Token cannot exceed 250 characters")
+    private String token;
 }
