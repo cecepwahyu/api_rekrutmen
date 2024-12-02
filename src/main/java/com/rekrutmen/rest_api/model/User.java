@@ -1,84 +1,52 @@
 package com.rekrutmen.rest_api.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_users")
+@Table(name = "tbl_user")
+@Getter
+@Setter
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id_users;
+    @Column(name = "id_user", nullable = false)
+    private Integer idUser;
 
+    @Column(name = "flg_status", length = 1)
+    private Character flgStatus;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
+
+    @Column(name = "username", length = 50)
     private String username;
 
-    @Column(length = 50)
+    @Column(name = "nama", length = 50)
     private String nama;
 
-    @Column(length = 50)
+    @Column(name = "password", length = 50)
     private String password;
 
-    @Column(length = 50)
-    private String email;
+    @Column(name = "ip_login", length = 20)
+    private String ipLogin;
 
-    private String token;
+    @Column(name = "tgl_status")
+    private LocalDateTime tglStatus;
 
-    public User() {
+    @Column(name = "id_session", length = 100)
+    private String idSession;
 
-    }
-
-    //All-argument constructor
-    public User(String username, String password, String email) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-    }
-
-    // Getters and setters
-    public int getIdUsers() {
-        return id_users;
-    }
-
-    public void setIdUsers(int id) {
-        this.id_users = id_users;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getNama() {
-        return nama;
-    }
-
-    public void setNama(String author) {
-        this.nama = nama;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
+    @Column(name = "id_group", length = 20)
+    private String idGroup;
 }
