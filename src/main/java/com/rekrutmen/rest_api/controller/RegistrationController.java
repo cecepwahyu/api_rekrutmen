@@ -2,11 +2,13 @@ package com.rekrutmen.rest_api.controller;
 
 import com.rekrutmen.rest_api.dto.RegisterRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
+import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.model.Profile;
-import com.rekrutmen.rest_api.model.User;
 import com.rekrutmen.rest_api.service.ProfileService;
-import com.rekrutmen.rest_api.service.UserService;
+import com.rekrutmen.rest_api.service.PesertaService;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,8 +22,10 @@ import java.util.Map;
 @RequestMapping("/api/register")
 public class RegistrationController {
 
+    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+
     @Autowired
-    private UserService userService;
+    private PesertaService pesertaService;
 
     @Autowired
     private ProfileService profileService;
@@ -35,7 +39,8 @@ public class RegistrationController {
     @PostMapping
     public ResponseEntity<ResponseWrapper<Object>> register(@RequestBody RegisterRequest registerRequest) {
         // Check if username or email is already taken
-        if (userService.isUsernameTaken(registerRequest.getUsername())) {
+        if (pesertaService.isUsernameTaken(registerRequest.getUsername())) {
+            logger.warn("Username: {} already registered!", registerRequest.getUsername());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     "400",
                     responseCodeUtil.getMessage("400"),
@@ -43,7 +48,8 @@ public class RegistrationController {
             ));
         }
 
-        if (userService.isEmailTaken(registerRequest.getEmail())) {
+        if (pesertaService.isEmailTaken(registerRequest.getEmail())) {
+            logger.warn("Email: {} already registered!", registerRequest.getEmail());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     "400",
                     responseCodeUtil.getMessage("400"),
@@ -51,7 +57,8 @@ public class RegistrationController {
             ));
         }
 
-        if (profileService.isNikExist(registerRequest.getNik())) {
+        if (pesertaService.isNoIdentitasExist(registerRequest.getNoIdentitas())) {
+            logger.warn("No Identitas: {} already registered!", registerRequest.getNoIdentitas());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     "400",
                     responseCodeUtil.getMessage("400"),
@@ -63,25 +70,27 @@ public class RegistrationController {
         String encryptedPassword = passwordEncoder.encode(registerRequest.getPassword());
 
         // Create and save new user
-        User newUser = new User();
+        Peserta newUser = new Peserta();
         newUser.setUsername(registerRequest.getUsername());
         newUser.setPassword(encryptedPassword);
         newUser.setEmail(registerRequest.getEmail());
-        userService.registerUser(newUser);
+        pesertaService.registerUser(newUser);
 
         // Create and save new profile
-        Profile profile = new Profile();
-        //profile.setUserId(newUser.getIdUsers());
-        profile.setEmail(registerRequest.getEmail());
-        profile.setNik(registerRequest.getNik());
-        profile.setCreatedAt(LocalDateTime.now());
-        profileService.createProfile(profile);
+//        Profile profile = new Profile();
+//        //profile.setUserId(newUser.getIdUsers());
+//        profile.setEmail(registerRequest.getEmail());
+//        profile.setNik(registerRequest.getNik());
+//        profile.setCreatedAt(LocalDateTime.now());
+//        profileService.createProfile(profile);
 
-        userService.registerUser(newUser);
+        pesertaService.registerUser(newUser);
+
+        logger.info("Successfully register username: {}, No Identitas: {}, Email: {}, Password: {}", registerRequest.getUsername(), registerRequest.getNoIdentitas(), registerRequest.getEmail(), registerRequest.getPassword());
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("username", registerRequest.getUsername());
-        responseData.put("nik", registerRequest.getNik());
+        responseData.put("no_identitas", registerRequest.getNoIdentitas());
         responseData.put("email", registerRequest.getEmail());
         responseData.put("password", registerRequest.getPassword());
 
