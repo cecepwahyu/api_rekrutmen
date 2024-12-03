@@ -43,6 +43,18 @@ public class ProfileService {
         return pesertaRepository.findByEmailAndNoIdentitas(email, noIdentitas);
     }
 
+    public Optional<Peserta> validateOtp(String otp) {
+        return pesertaRepository.findByOtp(otp);
+    }
+
+    public void updateOtp(Integer idPeserta, String otpCode) {
+        Optional<Peserta> pesertaOptional = pesertaRepository.findById(Long.valueOf(idPeserta));
+        if (pesertaOptional.isPresent()) {
+            Peserta peserta = pesertaOptional.get();
+            peserta.setOtp(otpCode);
+            pesertaRepository.save(peserta);
+        }
+    }
 
     public Peserta updateProfile(Peserta peserta) {
         return pesertaRepository.save(peserta);
