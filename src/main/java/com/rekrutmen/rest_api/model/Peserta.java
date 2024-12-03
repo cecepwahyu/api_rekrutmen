@@ -110,4 +110,7 @@ public class Peserta {
     @Column(name = "token", length = 250)
     @Size(max = 250, message = "Token cannot exceed 250 characters")
     private String token;
+
+    @Column(name = "otp", length = 6)
+    private String otp;
 }
