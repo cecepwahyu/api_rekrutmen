@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Lowongan {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Use IDENTITY for serial type in PostgreSQL
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_lowongan", nullable = false)
     private Integer idLowongan;
 
@@ -25,9 +25,9 @@ public class Lowongan {
     private String judulLowongan;
 
     @Column(name = "slug", nullable = false, length = 255)
-    private String slug; // Removed `unique = true` as it is handled by the unique constraint
+    private String slug;
 
-    @Column(name = "posisi", nullable = false, length = 100) // Corrected to match the DDL
+    @Column(name = "posisi", nullable = false, length = 100)
     private String posisi;
 
     @Column(name = "tentang_pekerjaan", nullable = false, columnDefinition = "TEXT")
