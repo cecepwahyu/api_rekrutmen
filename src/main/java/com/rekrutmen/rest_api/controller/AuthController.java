@@ -5,6 +5,7 @@ import com.rekrutmen.rest_api.dto.ResetPasswordRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.model.Profile;
+import com.rekrutmen.rest_api.service.EmailService;
 import com.rekrutmen.rest_api.service.ProfileService;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import org.slf4j.Logger;
@@ -26,6 +27,9 @@ public class AuthController {
 
     @Autowired
     private ProfileService profileService;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
@@ -56,6 +60,9 @@ public class AuthController {
 
         // Update OTP in the database
         profileService.updateOtp(peserta.getIdPeserta(), otpCode);
+
+        // Send OTP via email
+        emailService.sendOtpEmail(resetPasswordRequest.getEmail(), otpCode);
 
         // Prepare response data
         Map<String, Object> responseData = new HashMap<>();
