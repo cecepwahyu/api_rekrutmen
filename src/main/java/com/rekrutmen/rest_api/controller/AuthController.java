@@ -28,12 +28,15 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<ResponseWrapper<Object>> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
         // Validate email and nik
-        Optional<Peserta> peserta = profileService.validateEmailAndNoIdentitas(resetPasswordRequest.getEmail(), resetPasswordRequest.getNoIdentitas());
-        if (peserta.isEmpty()) {
+        Optional<Peserta> peserta = profileService.validateEmailAndNoIdentitas(
+                resetPasswordRequest.getEmail(),
+                resetPasswordRequest.getNoIdentitas()
+        );
+        if (peserta.isPresent()) {
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     "400",
                     responseCodeUtil.getMessage("400"),
-                    "Invalid email or NIK"
+                    "Invalid email or No Identitas"
             ));
         }
 
@@ -43,8 +46,8 @@ public class AuthController {
         // Prepare response data
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("email", resetPasswordRequest.getEmail());
-        responseData.put("nik", resetPasswordRequest.getNoIdentitas());
-        responseData.put("Your OTP code is: ", otpCode);
+        responseData.put("no_identitas", resetPasswordRequest.getNoIdentitas());
+        responseData.put("Your OTP code is", otpCode);
 
         // Prepare response data
         return ResponseEntity.ok(new ResponseWrapper<>(
