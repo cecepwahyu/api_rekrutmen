@@ -74,16 +74,7 @@ public class RegistrationController {
         newUser.setUsername(registerRequest.getUsername());
         newUser.setPassword(encryptedPassword);
         newUser.setEmail(registerRequest.getEmail());
-        pesertaService.registerUser(newUser);
-
-        // Create and save new profile
-//        Profile profile = new Profile();
-//        //profile.setUserId(newUser.getIdUsers());
-//        profile.setEmail(registerRequest.getEmail());
-//        profile.setNik(registerRequest.getNik());
-//        profile.setCreatedAt(LocalDateTime.now());
-//        profileService.createProfile(profile);
-
+        newUser.setNoIdentitas(registerRequest.getNoIdentitas());
         pesertaService.registerUser(newUser);
 
         logger.info("Successfully register username: {}, No Identitas: {}, Email: {}, Password: {}", registerRequest.getUsername(), registerRequest.getNoIdentitas(), registerRequest.getEmail(), registerRequest.getPassword());
