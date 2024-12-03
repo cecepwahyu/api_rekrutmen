@@ -6,10 +6,14 @@ import com.rekrutmen.rest_api.model.*;
 import com.rekrutmen.rest_api.service.PesertaService;
 import com.rekrutmen.rest_api.service.ProfileService;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,6 +21,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/profile")
 public class ProfileController {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired
     private ProfileService profileService;
@@ -29,7 +35,8 @@ public class ProfileController {
     @PutMapping("/{idPeserta}/edit")
     public ResponseEntity<ResponseWrapper<Object>> editProfile(
             @PathVariable Integer idPeserta,
-            @RequestBody EditProfileRequest request
+            @RequestBody EditProfileRequest request,
+            HttpServletRequest httpRequest
     ) {
         // Retrieve the existing profile
         Optional<Peserta> optionalPeserta = pesertaService.getProfileByIdPeserta(idPeserta);
@@ -41,8 +48,34 @@ public class ProfileController {
             ));
         }
 
+        //Checking duplicate email
+        if (pesertaService.isEmailTaken(request.getEmail())) {
+            logger.warn("Email: {} already exist!", request.getEmail());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    "400",
+                    responseCodeUtil.getMessage("400"),
+                    "Email already exist"
+            ));
+        }
+
+        //Checking duplicate telp number
+        if (pesertaService.isTelpTaken(request.getTelp())) {
+            logger.warn("Telp: {} already exist!", request.getTelp());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    "400",
+                    responseCodeUtil.getMessage("400"),
+                    "Telp already exist"
+            ));
+        }
+
         // Get the Peserta object from Optional
         Peserta existingPeserta = optionalPeserta.get();
+
+        //Get IP Address user
+        String ipAddress = httpRequest.getHeader("X-Forwarded-For");
+        if (ipAddress == null || ipAddress.isEmpty()) {
+            ipAddress = httpRequest.getRemoteAddr();
+        }
 
         // Update profile data
         existingPeserta.setNama(request.getNama() != null ? request.getNama() : existingPeserta.getNama());
@@ -66,10 +99,10 @@ public class ProfileController {
         existingPeserta.setPendidikanTerakhir(request.getPendidikanTerakhir() != null ? request.getPendidikanTerakhir() : existingPeserta.getPendidikanTerakhir());
         existingPeserta.setStatusKawin(request.getStatusKawin() != null ? request.getStatusKawin() : existingPeserta.getStatusKawin());
         existingPeserta.setIdSession(request.getIdSession() != null ? request.getIdSession() : existingPeserta.getIdSession());
-        existingPeserta.setIpLogin(request.getIpLogin() != null ? request.getIpLogin() : existingPeserta.getIpLogin());
+        existingPeserta.setIpLogin(ipAddress);
         existingPeserta.setFlgStatus(request.getFlgStatus() != null ? request.getFlgStatus() : existingPeserta.getFlgStatus());
         existingPeserta.setTglStatus(request.getTglStatus() != null ? request.getTglStatus() : existingPeserta.getTglStatus());
-        existingPeserta.setUpdatedAt(request.getUpdatedAt() != null ? request.getUpdatedAt() : existingPeserta.getUpdatedAt());
+        existingPeserta.setUpdatedAt(LocalDateTime.now());
 
         profileService.updateProfile(existingPeserta);
 
