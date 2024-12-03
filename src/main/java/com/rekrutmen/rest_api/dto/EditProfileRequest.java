@@ -47,6 +47,21 @@ public class EditProfileRequest {
     @JsonProperty("desa_identitas")
     private String desaIdentitas;
 
+    @JsonProperty("alamat_domisili")
+    private String alamatDomisili;
+
+    @JsonProperty("provinsi_domisili")
+    private String provinsiDomisili;
+
+    @JsonProperty("kota_domisili")
+    private String kotaDomisili;
+
+    @JsonProperty("kecamatan_domisili")
+    private String kecamatanDomisili;
+
+    @JsonProperty("desa_domisili")
+    private String desaDomisili;
+
     @JsonProperty("telp")
     private String telp;
 
