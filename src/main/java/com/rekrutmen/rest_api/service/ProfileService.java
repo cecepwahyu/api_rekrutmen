@@ -49,21 +49,21 @@ public class ProfileService {
     }
 
     @Transactional
-    public void updateKerabat(Integer idPeserta, List<PesertaKontak> family) {
-        // Remove existing family records
+    public void updateKerabat(Integer idPeserta, List<PesertaKontak> contact) {
+        // Remove existing contact records
         pesertaKontakRepository.deleteByIdPeserta(idPeserta);
 
-        // Insert new family records
-        family.forEach(kerabat -> {
-            kerabat.setIdPeserta(idPeserta);
-            pesertaKontakRepository.save(kerabat);
+        // Insert new contact records
+        contact.forEach(kontak -> {
+            kontak.setIdPeserta(idPeserta);
+            pesertaKontakRepository.save(kontak);
         });
     }
 
     @Transactional
     public void updatePendidikan(Integer idPeserta, List<PesertaPendidikan> education) {
         // Remove existing education records
-        pesertaPendidikanRepository.deleteByIdPeserta(idPeserta); // Corrected method name
+        pesertaPendidikanRepository.deleteByIdPeserta(idPeserta);
 
         // Insert new education records
         education.forEach(pendidikan -> {
@@ -74,25 +74,25 @@ public class ProfileService {
 
     @Transactional
     public void updatePengalamanKerja(Integer idPeserta, List<PesertaPengalaman> work) {
-        // Remove existing education records
-        pesertaPendidikanRepository.deleteByIdPeserta(idPeserta);
+        // Remove existing work records
+        pesertaPengalamanRepository.deleteByIdPeserta(idPeserta);
 
-        // Insert new education records
-        work.forEach(pendidikan -> {
-            pendidikan.setIdPeserta(idPeserta);
-            pesertaPengalamanRepository.save(pendidikan);
+        // Insert new work records
+        work.forEach(pekerjaan -> {
+            pekerjaan.setIdPeserta(idPeserta);
+            pesertaPengalamanRepository.save(pekerjaan);
         });
     }
 
     @Transactional
     public void updateOrganisasi(Integer profileId, List<PesertaOrganisasi> work) {
-        // Remove existing education records
-        pesertaPendidikanRepository.deleteByIdPeserta(profileId);
+        // Remove existing organization records
+        pesertaOrganisasiRepository.deleteByIdPeserta(profileId);
 
-        // Insert new education records
-        work.forEach(pendidikan -> {
-            pendidikan.setIdPeserta(profileId);
-            pesertaOrganisasiRepository.save(pendidikan);
+        // Insert new organization records
+        work.forEach(organisasi -> {
+            organisasi.setIdPeserta(profileId);
+            pesertaOrganisasiRepository.save(organisasi);
         });
     }
 }
