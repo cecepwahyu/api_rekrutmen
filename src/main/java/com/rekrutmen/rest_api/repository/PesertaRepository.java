@@ -8,9 +8,12 @@ import java.util.Optional;
 public interface PesertaRepository extends JpaRepository<Peserta, Long> {
     Optional<Peserta> findByEmail(String email);
     //boolean existsByNik(String noIdentitas);
+    Optional<Peserta> findByIdPeserta(Integer idPeserta);
     Optional<Peserta> findByEmailAndNoIdentitas(String email, String noIdentitas);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
+    boolean existsByTelp(String telp);
     boolean existsByNoIdentitas(String noIdentitas);
+    Optional<Peserta> findByToken(String token);
 }
 

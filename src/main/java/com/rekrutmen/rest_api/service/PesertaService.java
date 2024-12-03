@@ -30,12 +30,20 @@ public class PesertaService {
         return pesertaRepository.findByEmail(email);
     }
 
+    public Optional<Peserta> getProfileByIdPeserta(Integer idPeserta) {
+        return pesertaRepository.findByIdPeserta(idPeserta);
+    }
+
     public boolean isUsernameTaken(String username) {
         return pesertaRepository.existsByUsername(username);
     }
 
     public boolean isEmailTaken(String email) {
         return pesertaRepository.existsByEmail(email);
+    }
+
+    public boolean isTelpTaken(String telp) {
+        return pesertaRepository.existsByTelp(telp);
     }
 
     public Peserta registerUser(Peserta user) {
