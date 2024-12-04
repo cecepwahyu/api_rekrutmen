@@ -3,9 +3,9 @@ package com.rekrutmen.rest_api.controller;
 import com.rekrutmen.rest_api.dto.RegisterRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Peserta;
-import com.rekrutmen.rest_api.model.Profile;
 import com.rekrutmen.rest_api.service.ProfileService;
 import com.rekrutmen.rest_api.service.PesertaService;
+import com.rekrutmen.rest_api.util.MaskingUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,7 +77,13 @@ public class RegistrationController {
         newUser.setNoIdentitas(registerRequest.getNoIdentitas());
         pesertaService.registerUser(newUser);
 
-        logger.info("Successfully register username: {}, No Identitas: {}, Email: {}, Password: {}", registerRequest.getUsername(), registerRequest.getNoIdentitas(), registerRequest.getEmail(), registerRequest.getPassword());
+        logger.info(
+                "Successfully register username: {}, No Identitas: {}, Email: {}, Password: {}",
+                registerRequest.getUsername(),
+                registerRequest.getNoIdentitas(),
+                registerRequest.getEmail(),
+                MaskingUtil.maskPassword(registerRequest.getPassword())
+        );
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("username", registerRequest.getUsername());
