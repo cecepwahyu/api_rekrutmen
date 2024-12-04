@@ -8,6 +8,7 @@ import com.rekrutmen.rest_api.model.Profile;
 import com.rekrutmen.rest_api.service.EmailService;
 import com.rekrutmen.rest_api.service.ProfileService;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,7 @@ public class AuthController {
     }
 
     @PostMapping("/otp-verification")
-    public ResponseEntity<ResponseWrapper<Object>> otpVerification(@RequestBody OtpVerificationRequest otpVerificationRequest) {
+    public ResponseEntity<ResponseWrapper<Object>> otpVerification(@Valid @RequestBody OtpVerificationRequest otpVerificationRequest) {
         // Validate OTP code
         Optional<Peserta> pesertaOptional = profileService.validateOtp(
                 otpVerificationRequest.getOtp()
