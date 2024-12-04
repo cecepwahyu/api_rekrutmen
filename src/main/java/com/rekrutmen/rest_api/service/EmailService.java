@@ -16,7 +16,7 @@ public class EmailService {
         message.setTo(toEmail);
         message.setSubject("Your OTP Code");
         message.setText("Your OTP code is: " + otpCode);
-        message.setFrom("seneng.banged@gmail.com");
+        message.setFrom("email@gmail.com");
 
         mailSender.send(message);
     }
