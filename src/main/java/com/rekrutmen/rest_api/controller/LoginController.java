@@ -7,6 +7,7 @@ import com.rekrutmen.rest_api.service.LoginService;
 import com.rekrutmen.rest_api.service.PesertaService;
 import com.rekrutmen.rest_api.util.JwtUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class LoginController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping
-    public ResponseEntity<ResponseWrapper<Object>> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ResponseWrapper<Object>> login(@Valid @RequestBody LoginRequest loginRequest) {
         logger.info("Login request received for email: {}", loginRequest.getEmail());
 
         // Retrieve user by email
