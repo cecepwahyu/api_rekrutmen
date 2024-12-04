@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            validationErrors.put(fieldName, errorMessage);
+            validationErrors.put("error", errorMessage);
         });
 
         // Log validation errors
