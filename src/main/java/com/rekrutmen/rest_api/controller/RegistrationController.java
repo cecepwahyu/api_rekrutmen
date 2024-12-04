@@ -7,6 +7,7 @@ import com.rekrutmen.rest_api.model.Profile;
 import com.rekrutmen.rest_api.service.ProfileService;
 import com.rekrutmen.rest_api.service.PesertaService;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class RegistrationController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping
-    public ResponseEntity<ResponseWrapper<Object>> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<ResponseWrapper<Object>> register(@Valid @RequestBody RegisterRequest registerRequest) {
         // Check if username or email is already taken
         if (pesertaService.isUsernameTaken(registerRequest.getUsername())) {
             logger.warn("Username: {} already registered!", registerRequest.getUsername());
