@@ -83,7 +83,7 @@ public class LoginController {
         return ResponseEntity.status(401).body(new ResponseWrapper<>(
                 "401",
                 responseCodeUtil.getMessage("401"),
-                "Invalid email or password"
+                null
         ));
     }
 }
