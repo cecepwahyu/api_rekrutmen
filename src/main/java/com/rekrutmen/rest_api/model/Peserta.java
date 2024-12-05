@@ -113,4 +113,10 @@ public class Peserta {
 
     @Column(name = "otp", length = 6)
     private String otp;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "token_updated_at")
+    private LocalDateTime tokenUpdatedAt;
 }

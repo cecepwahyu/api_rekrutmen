@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -48,6 +49,7 @@ public class LoginService {
 
                 // Update the token in the database
                 existingUser.setToken(token);
+                existingUser.setTokenUpdatedAt(LocalDateTime.now());
                 pesertaRepository.save(existingUser);
 
                 // Prepare response data
@@ -58,14 +60,14 @@ public class LoginService {
                 logger.info("Login successful for email: {}. Token generated: {}", loginRequest.getEmail(), token);
 
                 return ResponseEntity.ok(new ResponseWrapper<>(
-                        "000",
+                        responseCodeUtil.getCode("000"),
                         responseCodeUtil.getMessage("000"),
                         responseData
                 ));
             } else {
                 logger.warn("Invalid password for email: {}", loginRequest.getEmail());
                 return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                        "400",
+                        responseCodeUtil.getCode("400"),
                         responseCodeUtil.getMessage("400"),
                         "Invalid password"
                 ));
@@ -73,7 +75,7 @@ public class LoginService {
         } else {
             logger.warn("No user found for email: {}", loginRequest.getEmail());
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    "401",
+                    responseCodeUtil.getCode("401"),
                     responseCodeUtil.getMessage("401"),
                     "No user found"
             ));

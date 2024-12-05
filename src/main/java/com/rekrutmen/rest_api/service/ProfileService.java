@@ -27,18 +27,6 @@ public class ProfileService {
     @Autowired
     private PesertaOrganisasiRepository pesertaOrganisasiRepository;
 
-    public void createProfile(Peserta peserta) {
-        pesertaRepository.save(peserta);
-    }
-
-//    public boolean isNikExist(String noIdentitas) {
-//        return pesertaRepository.existsByNik(noIdentitas);
-//    }
-
-    public boolean isNoIdentitasExist(String noIdentitas) {
-        return pesertaRepository.existsByNoIdentitas(noIdentitas);
-    }
-
     public Optional<Peserta> validateEmailAndNoIdentitas(String email, String noIdentitas) {
         return pesertaRepository.findByEmailAndNoIdentitas(email, noIdentitas);
     }

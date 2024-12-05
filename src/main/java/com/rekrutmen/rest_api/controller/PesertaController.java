@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/profile")
-public class ProfileController {
+public class PesertaController {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
@@ -45,16 +45,6 @@ public class ProfileController {
                     "404",
                     responseCodeUtil.getMessage("404"),
                     "Profile not found"
-            ));
-        }
-
-        //Checking duplicate email
-        if (pesertaService.isEmailTaken(request.getEmail())) {
-            logger.warn("Email: {} already exist!", request.getEmail());
-            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
-                    responseCodeUtil.getMessage("400"),
-                    "Email already exist"
             ));
         }
 
@@ -95,7 +85,6 @@ public class ProfileController {
         existingPeserta.setKecamatanDomisili(request.getKecamatanDomisili() != null ? request.getKecamatanDomisili() : existingPeserta.getKecamatanDomisili());
         existingPeserta.setDesaDomisili(request.getDesaDomisili() != null ? request.getDesaDomisili() : existingPeserta.getDesaDomisili());
         existingPeserta.setTelp(request.getTelp() != null ? request.getTelp() : existingPeserta.getTelp());
-        existingPeserta.setEmail(request.getEmail() != null ? request.getEmail() : existingPeserta.getEmail());
         existingPeserta.setPendidikanTerakhir(request.getPendidikanTerakhir() != null ? request.getPendidikanTerakhir() : existingPeserta.getPendidikanTerakhir());
         existingPeserta.setStatusKawin(request.getStatusKawin() != null ? request.getStatusKawin() : existingPeserta.getStatusKawin());
         existingPeserta.setIdSession(request.getIdSession() != null ? request.getIdSession() : existingPeserta.getIdSession());

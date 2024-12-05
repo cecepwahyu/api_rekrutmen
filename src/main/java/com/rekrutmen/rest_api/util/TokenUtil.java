@@ -15,10 +15,10 @@ public class TokenUtil {
     private PesertaRepository pesertaRepository;
 
     /**
-     * Validates whether the provided token exists in the database and is not expired.
+     * Validates whether the provided token exists in the database.
      *
      * @param token the token to validate
-     * @return true if the token is valid, false otherwise
+     * @return true if the token exists and is valid, false otherwise
      */
     public boolean isValidToken(String token) {
         if (token == null || !token.startsWith("Bearer ") || token.length() <= 7) {
@@ -26,28 +26,43 @@ public class TokenUtil {
         }
 
         String actualToken = token.replace("Bearer ", "").trim();
+        return pesertaRepository.findByToken(actualToken).isPresent();
+    }
 
-        // Query the database for the token
-        Optional<Peserta> peserta = pesertaRepository.findByToken(actualToken);
-
-        if (peserta.isEmpty()) {
-            return false;
+    /**
+     * Checks if the token is expired based on the token's tokenUpdatedAt timestamp.
+     *
+     * @param token the token to validate
+     * @return true if the token is expired, false otherwise
+     */
+    public boolean isTokenExpired(String token) {
+        if (token == null || !token.startsWith("Bearer ") || token.length() <= 7) {
+            return true; // Invalid tokens are treated as expired
         }
 
-        // Check if the token is expired
-        Peserta foundPeserta = peserta.get();
-        return foundPeserta.getUpdatedAt() != null && !isTokenExpired(foundPeserta.getUpdatedAt());
+        String actualToken = token.replace("Bearer ", "").trim();
+
+        // Query the database for the token's updated_at field
+        Optional<Peserta> peserta = pesertaRepository.findByToken(actualToken);
+
+        // Directly validate the `updatedAt` field
+        if (peserta.isPresent()) {
+            LocalDateTime tokenUpdatedAt = peserta.get().getTokenUpdatedAt();
+            return tokenUpdatedAt == null || isTokenExpired(tokenUpdatedAt);
+        }
+
+        // Return true if no `updatedAt` is found
+        return true;
     }
 
     /**
      * Checks if the token is expired based on the last updated time.
      *
-     * @param updatedAt the timestamp of the token's last update
+     * @param tokenUpdatedAt the timestamp of the token's last update
      * @return true if the token is expired, false otherwise
      */
-    private boolean isTokenExpired(LocalDateTime updatedAt) {
-        // Assume token expiration is 1 hour after the updated_at timestamp
-        LocalDateTime expirationTime = updatedAt.plusHours(24);
+    private boolean isTokenExpired(LocalDateTime tokenUpdatedAt) {
+        LocalDateTime expirationTime = tokenUpdatedAt.plusHours(24);
         return LocalDateTime.now().isAfter(expirationTime);
     }
 }
