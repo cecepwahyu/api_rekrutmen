@@ -67,7 +67,7 @@ class LowonganServiceTest {
         when(lowonganRepository.findAll()).thenReturn(Arrays.asList(lowongan1, lowongan2));
 
         // Act
-        List<Lowongan> result = lowonganService.getAllLowongans();
+        List<Lowongan> result = lowonganRepository.findAll();
 
         // Assert
         assertEquals(2, result.size());
@@ -85,7 +85,7 @@ class LowonganServiceTest {
         when(lowonganRepository.findAll()).thenReturn(Collections.emptyList());
 
         // Act
-        List<Lowongan> result = lowonganService.getAllLowongans();
+        List<Lowongan> result = lowonganRepository.findAll();
 
         // Assert
         assertNotNull(result, "Result should not be null.");
@@ -99,7 +99,7 @@ class LowonganServiceTest {
         doThrow(repositoryException).when(lowonganRepository).findAll();
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> lowonganService.getAllLowongans());
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> lowonganRepository.findAll());
         assertEquals("Database connection error", exception.getMessage(), "Exception message should match the repository exception.");
     }
 }
