@@ -5,10 +5,7 @@ import com.rekrutmen.rest_api.model.Lowongan;
 import com.rekrutmen.rest_api.service.LowonganService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,4 +20,12 @@ public class LowonganController {
     public ResponseEntity<ResponseWrapper<List<Lowongan>>> getLowonganList(@RequestHeader("Authorization") String token) {
         return lowonganService.getLowonganList(token);
     }
+
+    @GetMapping("/{idLowongan}")
+    public ResponseEntity<ResponseWrapper<Lowongan>> getLowonganDetail(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long idLowongan) {
+        return lowonganService.getLowonganDetail(token, idLowongan);
+    }
+
 }
