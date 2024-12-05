@@ -65,9 +65,6 @@ public class EditProfileRequest {
     @JsonProperty("telp")
     private String telp;
 
-    @JsonProperty("email")
-    private String email;
-
     @JsonProperty("pendidikan_terakhir")
     private String pendidikanTerakhir;
 
