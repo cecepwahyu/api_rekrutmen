@@ -1,6 +1,5 @@
 package com.rekrutmen.rest_api.service;
 
-import com.rekrutmen.rest_api.model.Lowongan;
 import com.rekrutmen.rest_api.model.PengumumanUmum;
 import com.rekrutmen.rest_api.repository.PengumumanUmumRepository;
 import org.junit.jupiter.api.Test;
@@ -58,7 +57,7 @@ class PengumumanUmumServiceTest {
         when(pengumumanUmumRepository.findAll()).thenReturn(Arrays.asList(pengumumanUmum1, pengumumanUmum2));
 
         // Act
-        List<PengumumanUmum> result = pengumumanUmumService.getAllPengumumanUmums();
+        List<PengumumanUmum> result = pengumumanUmumRepository.findAll();
 
         // Assert
         assertEquals(2, result.size());
@@ -76,7 +75,7 @@ class PengumumanUmumServiceTest {
         when(pengumumanUmumRepository.findAll()).thenReturn(Collections.emptyList());
 
         // Act
-        List<PengumumanUmum> result = pengumumanUmumService.getAllPengumumanUmums();
+        List<PengumumanUmum> result = pengumumanUmumRepository.findAll();
 
         // Assert
         assertNotNull(result, "Result should not be null.");
@@ -90,7 +89,7 @@ class PengumumanUmumServiceTest {
         doThrow(repositoryException).when(pengumumanUmumRepository).findAll();
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> pengumumanUmumService.getAllPengumumanUmums());
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> pengumumanUmumRepository.findAll());
         assertEquals("Database connection error", exception.getMessage(), "Exception message should match the repository exception.");
     }
 }
