@@ -40,7 +40,7 @@ public class AuthService {
         if (pesertaOptional.isEmpty()) {
             logger.warn("Email {} or No Identitas {} invalid!", resetPasswordRequest.getEmail(), resetPasswordRequest.getNoIdentitas());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
                     "Invalid email or No Identitas"
             ));
@@ -58,7 +58,7 @@ public class AuthService {
         responseData.put("Your OTP code is", otpCode);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
-                "000",
+                responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
                 responseData
         ));
@@ -71,7 +71,7 @@ public class AuthService {
         if (pesertaOptional.isEmpty()) {
             logger.warn("OTP code: {} invalid!", otpVerificationRequest.getOtp());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
                     "Invalid OTP code"
             ));
@@ -82,7 +82,7 @@ public class AuthService {
         responseData.put("OTP is valid!", otpVerificationRequest.getOtp());
 
         return ResponseEntity.ok(new ResponseWrapper<>(
-                "000",
+                responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
                 responseData
         ));
