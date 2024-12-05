@@ -1,0 +1,16 @@
+version: '3.7'
+services:
+  api-rekrutmen:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: 'harbor.local/java-app/api-rekrutmen:v1'
+    container_name: 'api-rekrutmen'
+    tty: true
+    stdin_open: true
+    restart: 'unless-stopped'
+    ports:
+      - '9054:8080'
+    volumes:
+      - '/home/devftp/data/api-rekrutmen/config/timezone:/etc/timezone'
+      - '/home/devftp/data/api-rekrutmen/config:/APIREKRUTMEN/config'
