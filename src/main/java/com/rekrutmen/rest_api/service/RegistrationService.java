@@ -35,7 +35,7 @@ public class RegistrationService {
         if (pesertaService.isUsernameTaken(registerRequest.getUsername())) {
             logger.warn("Username: {} already registered!", registerRequest.getUsername());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
                     "Username already exist"
             ));
@@ -44,7 +44,7 @@ public class RegistrationService {
         if (pesertaService.isEmailTaken(registerRequest.getEmail())) {
             logger.warn("Email: {} already registered!", registerRequest.getEmail());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
                     "Email already registered"
             ));
@@ -53,7 +53,7 @@ public class RegistrationService {
         if (pesertaService.isNoIdentitasExist(registerRequest.getNoIdentitas())) {
             logger.warn("No Identitas: {} already registered!", registerRequest.getNoIdentitas());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
                     "NIK already registered"
             ));
@@ -85,7 +85,7 @@ public class RegistrationService {
         responseData.put("password", registerRequest.getPassword());
 
         return ResponseEntity.ok(new ResponseWrapper<>(
-                "000",
+                responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
                 responseData
         ));
