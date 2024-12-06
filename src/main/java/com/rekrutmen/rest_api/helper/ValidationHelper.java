@@ -1,6 +1,6 @@
 package com.rekrutmen.rest_api.helper;
 
-import com.rekrutmen.rest_api.model.User;
+import com.rekrutmen.rest_api.model.Peserta;
 
 import java.util.regex.Pattern;
 
@@ -11,27 +11,27 @@ public class ValidationHelper {
 
     /**
      * Validates the user input for login.
-     * @param user The User object containing email and password.
+     * @param peserta The User object containing email and password.
      * @return A validation error message if invalid, or null if valid.
      */
-    public static String validateLoginRequest(User user) {
-        if (user == null) {
+    public static String validateLoginRequest(Peserta peserta) {
+        if (peserta == null) {
             return "Request body cannot be null.";
         }
 
-        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+        if (peserta.getEmail() == null || peserta.getEmail().trim().isEmpty()) {
             return "Email is required.";
         }
 
-        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+        if (peserta.getPassword() == null || peserta.getPassword().trim().isEmpty()) {
             return "Password is required.";
         }
 
-        if (!Pattern.matches(EMAIL_REGEX, user.getEmail())) {
+        if (!Pattern.matches(EMAIL_REGEX, peserta.getEmail())) {
             return "Invalid email format.";
         }
 
-        if (user.getPassword().length() < 5) {
+        if (peserta.getPassword().length() < 5) {
             return "Password must be at least 5 characters long.";
         }
 
