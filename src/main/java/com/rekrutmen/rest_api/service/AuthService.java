@@ -1,6 +1,7 @@
 package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.OtpVerificationRequest;
+import com.rekrutmen.rest_api.dto.ResendOtpRequest;
 import com.rekrutmen.rest_api.dto.ResetPasswordRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Peserta;
@@ -55,6 +56,40 @@ public class AuthService {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("email", resetPasswordRequest.getEmail());
         responseData.put("no_identitas", resetPasswordRequest.getNoIdentitas());
+        responseData.put("Your OTP code is", otpCode);
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
+    }
+
+    public ResponseEntity<ResponseWrapper<Object>> handleResendOtp(ResendOtpRequest resendOtpRequest) {
+        Optional<Peserta> pesertaOptional = profileService.validateEmailAndNoIdentitas(
+                resendOtpRequest.getEmail(),
+                resendOtpRequest.getNoIdentitas()
+        );
+        logger.info("Request Data = {Email: {}, No Identitas: {}}", resendOtpRequest.getEmail(), resendOtpRequest.getNoIdentitas());
+
+        if (pesertaOptional.isEmpty()) {
+            logger.warn("Email {} or No Identitas {} invalid!", resendOtpRequest.getEmail(), resendOtpRequest.getNoIdentitas());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    "Invalid email or No Identitas"
+            ));
+        }
+
+        Peserta peserta = pesertaOptional.get();
+        String otpCode = generateOtp();
+        logger.info("OTP generated: {}", otpCode);
+        profileService.updateOtp(peserta.getIdPeserta(), otpCode);
+        emailService.sendOtpEmail(resendOtpRequest.getEmail(), otpCode);
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("email", resendOtpRequest.getEmail());
+        responseData.put("no_identitas", resendOtpRequest.getNoIdentitas());
         responseData.put("Your OTP code is", otpCode);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
