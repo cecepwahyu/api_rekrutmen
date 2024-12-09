@@ -1,6 +1,7 @@
 package com.rekrutmen.rest_api.controller;
 
 import com.rekrutmen.rest_api.dto.OtpVerificationRequest;
+import com.rekrutmen.rest_api.dto.ResendOtpRequest;
 import com.rekrutmen.rest_api.dto.ResetPasswordRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.service.AuthService;
@@ -21,6 +22,12 @@ public class AuthController {
     public ResponseEntity<ResponseWrapper<Object>> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
         //RequestValidatorUtil.validateResetPasswordRequest(resetPasswordRequest);
         return authService.handleResetPassword(resetPasswordRequest);
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<ResponseWrapper<Object>> resendOtp(@Valid @RequestBody ResendOtpRequest resendOtpRequest) {
+        //RequestValidatorUtil.validateResetPasswordRequest(resetPasswordRequest);
+        return authService.handleResendOtp(resendOtpRequest);
     }
 
     @PostMapping("/otp-verification")
