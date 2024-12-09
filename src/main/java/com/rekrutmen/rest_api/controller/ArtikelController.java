@@ -2,7 +2,6 @@ package com.rekrutmen.rest_api.controller;
 
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Artikel;
-import com.rekrutmen.rest_api.model.Lowongan;
 import com.rekrutmen.rest_api.service.ArtikelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
