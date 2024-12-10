@@ -12,5 +12,6 @@
   "298": "Token expired",
   "299": "Token is invalid",
   "400": "Bad Request",
-  "401": "Username or password is incorrect"
+  "401": "Username or password is incorrect",
+  "429": "Too Many Requests"
 }

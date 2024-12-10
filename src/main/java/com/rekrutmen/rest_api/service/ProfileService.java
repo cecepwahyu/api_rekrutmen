@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,13 +36,24 @@ public class ProfileService {
         return pesertaRepository.findByOtp(otp);
     }
 
-    public void updateOtp(Integer idPeserta, String otpCode) {
+    public void updateOtp(Integer idPeserta, String otpCode, LocalDateTime updatedAt) {
         Optional<Peserta> pesertaOptional = pesertaRepository.findById(Long.valueOf(idPeserta));
         if (pesertaOptional.isPresent()) {
             Peserta peserta = pesertaOptional.get();
             peserta.setOtp(otpCode);
+            peserta.setOtpUpdatedAt(updatedAt);
             pesertaRepository.save(peserta);
         }
+    }
+
+    public LocalDateTime updateOtpUpdatedAt(Integer idPeserta, LocalDateTime updatedAt) {
+        Optional<Peserta> pesertaOptional = pesertaRepository.findById(Long.valueOf(idPeserta));
+        if (pesertaOptional.isPresent()) {
+            Peserta peserta = pesertaOptional.get();
+            peserta.setOtpUpdatedAt(updatedAt);
+            pesertaRepository.save(peserta);
+        }
+        return updatedAt;
     }
 
     public Peserta updateProfile(Peserta peserta) {
@@ -95,4 +107,13 @@ public class ProfileService {
             pesertaOrganisasiRepository.save(organisasi);
         });
     }
+
+//    public Optional<LocalDateTime> getLastOtpTimestamp(Long idPeserta) {
+//        return pesertaRepository.findLastOtpTimestampByPesertaId(idPeserta);
+//    }
+//
+//    public void updateLastOtpTimestamp(Long pesertaId, LocalDateTime timestamp) {
+//        pesertaRepository.updateLastOtpTimestamp(pesertaId, timestamp);
+//    }
+
 }
