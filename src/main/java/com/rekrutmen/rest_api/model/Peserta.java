@@ -119,4 +119,7 @@ public class Peserta {
 
     @Column(name = "token_updated_at")
     private LocalDateTime tokenUpdatedAt;
+
+    @Column(name = "otp_updated_at")
+    private LocalDateTime otpUpdatedAt;
 }
