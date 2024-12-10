@@ -7,11 +7,14 @@ import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -49,8 +52,9 @@ public class AuthService {
 
         Peserta peserta = pesertaOptional.get();
         String otpCode = generateOtp();
+        LocalDateTime updatedAt = LocalDateTime.now();
         logger.info("OTP generated: {}", otpCode);
-        profileService.updateOtp(peserta.getIdPeserta(), otpCode);
+        profileService.updateOtp(peserta.getIdPeserta().intValue(), otpCode, updatedAt);
         emailService.sendOtpEmail(resetPasswordRequest.getEmail(), otpCode);
 
         Map<String, Object> responseData = new HashMap<>();
@@ -82,9 +86,25 @@ public class AuthService {
         }
 
         Peserta peserta = pesertaOptional.get();
+
+        // Check if the last OTP generation was less than 30 seconds ago
+        LocalDateTime lastOtpUpdatedAt = profileService.updateOtpUpdatedAt(peserta.getIdPeserta(), peserta.getOtpUpdatedAt());
+        LocalDateTime now = LocalDateTime.now();
+        if (lastOtpUpdatedAt != null && Duration.between(lastOtpUpdatedAt, now).getSeconds() < 30) {
+            long secondsRemaining = 30 - Duration.between(lastOtpUpdatedAt, now).getSeconds();
+            logger.warn("OTP resend request blocked for {}. Please wait {} seconds.", resendOtpRequest.getEmail(), secondsRemaining);
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("429"),
+                    "Please wait " + secondsRemaining + " seconds before resending OTP.",
+                    null
+            ));
+        }
+
+        // Generate and send OTP
         String otpCode = generateOtp();
+        LocalDateTime updatedAt = LocalDateTime.now();
         logger.info("OTP generated: {}", otpCode);
-        profileService.updateOtp(peserta.getIdPeserta(), otpCode);
+        profileService.updateOtp(peserta.getIdPeserta().intValue(), otpCode, updatedAt);
         emailService.sendOtpEmail(resendOtpRequest.getEmail(), otpCode);
 
         Map<String, Object> responseData = new HashMap<>();
@@ -98,6 +118,7 @@ public class AuthService {
                 responseData
         ));
     }
+
 
     public ResponseEntity<ResponseWrapper<Object>> handleOtpVerification(OtpVerificationRequest otpVerificationRequest) {
         Optional<Peserta> pesertaOptional = profileService.validateOtp(otpVerificationRequest.getOtp());
