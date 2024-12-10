@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -51,7 +52,7 @@ class AuthServiceTest {
 
         when(profileService.validateEmailAndNoIdentitas("test@example.com", "123456789"))
                 .thenReturn(Optional.of(mockPeserta));
-        doNothing().when(profileService).updateOtp(eq(1), anyString());
+        doNothing().when(profileService).updateOtp(eq(1), anyString(), LocalDateTime.parse("2024-12-10 08:22:47.463392"));
         doNothing().when(emailService).sendOtpEmail(eq("test@example.com"), anyString());
         when(responseCodeUtil.getMessage("000")).thenReturn("Success");
 
@@ -65,7 +66,7 @@ class AuthServiceTest {
         assertEquals("test@example.com", ((HashMap<?, ?>) response.getBody().getData()).get("email"));
 
         verify(profileService, times(1)).validateEmailAndNoIdentitas("test@example.com", "123456789");
-        verify(profileService, times(1)).updateOtp(eq(1), anyString());
+        verify(profileService, times(1)).updateOtp(eq(1), anyString(), LocalDateTime.parse("2024-12-10 08:22:47.463392"));
         verify(emailService, times(1)).sendOtpEmail(eq("test@example.com"), anyString());
     }
 
