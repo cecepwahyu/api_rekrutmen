@@ -22,6 +22,13 @@ public class ArtikelController {
         return artikelService.getArtikelList(token);
     }
 
+    @GetMapping("/paginated")
+    public ResponseEntity<ResponseWrapper<Object>> getPaginatedArticles(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page) {
+        return artikelService.getPaginatedArticles(token, page);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ResponseWrapper<Artikel>> getArtikelDetail(
             @RequestHeader("Authorization") String token,
