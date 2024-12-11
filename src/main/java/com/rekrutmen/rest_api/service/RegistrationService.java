@@ -71,7 +71,9 @@ public class RegistrationService {
         pesertaService.registerUser(newUser);
 
         logger.info(
-                "Successfully register username: {}, No Identitas: {}, Email: {}, Password: {}",
+                "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"username\": \"{}\", \"no_identitas\": \"{}\", \"email\": \"{}\", \"password\": \"{}\"}}",
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
                 registerRequest.getUsername(),
                 registerRequest.getNoIdentitas(),
                 registerRequest.getEmail(),
