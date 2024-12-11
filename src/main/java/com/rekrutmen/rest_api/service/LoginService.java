@@ -35,7 +35,7 @@ public class LoginService {
     }
 
     public ResponseEntity<ResponseWrapper<Object>> handleLogin(LoginRequest loginRequest) {
-        logger.info("Login request received for email: {}", loginRequest.getEmail());
+        logger.info("Request Data: {email: {}, password: {}}", loginRequest.getEmail(), loginRequest.getPassword());
 
         Optional<Peserta> optionalUser = pesertaRepository.findByEmail(loginRequest.getEmail());
 
