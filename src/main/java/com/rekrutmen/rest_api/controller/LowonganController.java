@@ -21,6 +21,13 @@ public class LowonganController {
         return lowonganService.getLowonganList(token);
     }
 
+    @GetMapping("/paginated")
+    public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongans(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page) {
+        return lowonganService.getPaginatedLowongans(token, page);
+    }
+
     @GetMapping("/{idLowongan}")
     public ResponseEntity<ResponseWrapper<Lowongan>> getLowonganDetail(
             @RequestHeader("Authorization") String token,
