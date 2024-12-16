@@ -13,9 +13,6 @@ import org.springframework.stereotype.Service;
 public class ProgresTahapanService {
 
     @Autowired
-    private ProgresTahapanService progresTahapanService;
-
-    @Autowired
     private TokenUtil tokenUtil;
 
     @Autowired
