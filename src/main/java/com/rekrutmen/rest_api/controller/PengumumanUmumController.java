@@ -1,7 +1,6 @@
 package com.rekrutmen.rest_api.controller;
 
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
-import com.rekrutmen.rest_api.model.Artikel;
 import com.rekrutmen.rest_api.model.PengumumanUmum;
 import com.rekrutmen.rest_api.service.PengumumanUmumService;
 import com.rekrutmen.rest_api.util.TokenUtil;
@@ -25,6 +24,13 @@ public class PengumumanUmumController {
     @GetMapping("/list")
     public ResponseEntity<ResponseWrapper<List<PengumumanUmum>>> getPengumumanUmumList(@RequestHeader("Authorization") String token) {
         return pengumumanUmumService.getAllPengumumanUmums(token);
+    }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<ResponseWrapper<Object>> getPaginatedPengumumanUmums(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page) {
+        return pengumumanUmumService.getPaginatedPengumumanUmums(token, page);
     }
 
     @GetMapping("/{id}")
