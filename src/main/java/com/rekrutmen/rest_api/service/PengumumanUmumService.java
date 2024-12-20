@@ -82,8 +82,8 @@ public class PengumumanUmumService {
             page = 0; // Default to the first page
         }
 
-        // Create a pageable object with the desired page and size
-        Pageable pageable = PageRequest.of(page, 6); // 6 articles per page
+        // Create a pageable object with the desired page and size, 6 articles per page
+        Pageable pageable = PageRequest.of(page, 6);
 
         // Fetch articles with pagination
         Page<PengumumanUmum> pengumumanUmumsPage = pengumumanUmumRepository.findAll(pageable);
