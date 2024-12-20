@@ -1,8 +1,12 @@
 package com.rekrutmen.rest_api.service;
 
+import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.repository.PesertaRepository;
+import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import com.rekrutmen.rest_api.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,7 +15,14 @@ import java.util.Optional;
 @Service
 public class PesertaService {
 
-    private final PesertaRepository pesertaRepository;
+    @Autowired
+    private PesertaRepository pesertaRepository;
+
+    @Autowired
+    private TokenUtil tokenUtil;
+
+    @Autowired
+    private ResponseCodeUtil responseCodeUtil;
 
     @Autowired
     public PesertaService(PesertaRepository pesertaRepository) {
@@ -52,6 +63,47 @@ public class PesertaService {
 
     public boolean isNoIdentitasExist(String noIdentitas) {
         return pesertaRepository.existsByNoIdentitas(noIdentitas);
+    }
+
+    public Peserta saveUser(Peserta peserta) {
+        return pesertaRepository.save(peserta);  // Use JpaRepository's save method
+    }
+
+    public ResponseEntity<ResponseWrapper<Peserta>> getPesertaDetail(String token, Integer idPeserta) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Fetch peserta details by ID Peserta
+        Peserta peserta = pesertaRepository.findByIdPeserta(idPeserta).orElse(null);
+
+        if (peserta == null) {
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    null
+            ));
+        }
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                peserta
+        ));
     }
 
 }

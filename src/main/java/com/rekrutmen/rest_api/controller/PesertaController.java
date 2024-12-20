@@ -3,8 +3,7 @@ package com.rekrutmen.rest_api.controller;
 import com.rekrutmen.rest_api.dto.EditProfileRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.*;
-import com.rekrutmen.rest_api.service.PesertaService;
-import com.rekrutmen.rest_api.service.ProfileService;
+import com.rekrutmen.rest_api.service.*;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -29,8 +29,56 @@ public class PesertaController {
 
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
+
     @Autowired
     private PesertaService pesertaService;
+
+    @Autowired
+    private PesertaPengalamanService pesertaPengalamanService;
+
+    @Autowired
+    private PesertaPendidikanService pesertaPendidikanService;
+
+    @Autowired
+    private PesertaOrganisasiService pesertaOrganisasiService;
+
+    @Autowired
+    private PesertaKontakService pesertaKontakService;
+
+    @GetMapping("/{idPeserta}")
+    public ResponseEntity<ResponseWrapper<Peserta>> getPesertaDetail(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta) {
+        return pesertaService.getPesertaDetail(token, idPeserta);
+    }
+
+    @GetMapping("/pengalaman/{idPeserta}")
+    public ResponseEntity<ResponseWrapper<PesertaPengalaman>> getPesertaPengalamanDetail(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta) {
+        return pesertaPengalamanService.getPesertaPengalamanDetail(token, idPeserta);
+    }
+
+    @GetMapping("/pendidikan/{idPeserta}")
+    public ResponseEntity<ResponseWrapper<PesertaPendidikan>> getPesertaPendidikanDetail(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta) {
+        return pesertaPendidikanService.getPesertaPendidikanDetail(token, idPeserta);
+    }
+
+    @GetMapping("/organisasi/{idPeserta}")
+    public ResponseEntity<ResponseWrapper<PesertaOrganisasi>> getPesertaOrganisasiDetail(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta) {
+        return pesertaOrganisasiService.getPesertaOrganisasiDetail(token, idPeserta);
+    }
+
+    @GetMapping("/kontak/{idPeserta}")
+    public ResponseEntity<ResponseWrapper<PesertaKontak>> getPesertaKontakDetail(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta) {
+        return pesertaKontakService.getPesertaKontakDetail(token, idPeserta);
+    }
 
     @PutMapping("/{idPeserta}/edit")
     public ResponseEntity<ResponseWrapper<Object>> editProfile(
@@ -41,12 +89,7 @@ public class PesertaController {
         // Retrieve the existing profile
         Optional<Peserta> optionalPeserta = pesertaService.getProfileByIdPeserta(idPeserta);
         if (optionalPeserta.isEmpty()) {
-            return ResponseEntity.status(404).body(new ResponseWrapper<>(
-                    "404",
-                    responseCodeUtil.getMessage("404"),
-                    "Profile not found"
-            ));
-        }
+         }
 
         //Checking duplicate telp number
         if (pesertaService.isTelpTaken(request.getTelp())) {

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class RegistrationService {
@@ -29,6 +30,9 @@ public class RegistrationService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
 
     public ResponseEntity<ResponseWrapper<Object>> handleRegister(RegisterRequest registerRequest) {
         // Check if username or email is already taken
@@ -68,7 +72,16 @@ public class RegistrationService {
         newUser.setPassword(encryptedPassword);
         newUser.setEmail(registerRequest.getEmail());
         newUser.setNoIdentitas(registerRequest.getNoIdentitas());
+        newUser.setFlgStatus('0');
         pesertaService.registerUser(newUser);
+
+        // Generate a verification token
+        String token = UUID.randomUUID().toString();
+        newUser.setToken(token);
+        pesertaService.saveUser(newUser);
+
+        // Send verification email
+        emailService.sendVerificationEmail(newUser.getEmail(), token);
 
         logger.info(
                 "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"username\": \"{}\", \"no_identitas\": \"{}\", \"email\": \"{}\", \"password\": \"{}\"}}",
