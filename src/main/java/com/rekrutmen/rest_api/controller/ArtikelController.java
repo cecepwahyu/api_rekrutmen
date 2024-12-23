@@ -29,10 +29,17 @@ public class ArtikelController {
         return artikelService.getPaginatedArticles(token, page);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<ResponseWrapper<Artikel>> getArtikelDetail(
             @RequestHeader("Authorization") String token,
             @PathVariable UUID id) {
         return artikelService.getArtikelDetail(token, id);
+    }
+
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<ResponseWrapper<Artikel>> getArtikelDetailSlug(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String slug) {
+        return artikelService.getArtikelDetailSlug(token, slug);
     }
 }
