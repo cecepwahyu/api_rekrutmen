@@ -26,6 +26,7 @@ public class ContentTypeValidationFilter extends OncePerRequestFilter {
         // Log request method and Content-Type
         logger.info("Request Method: " + request.getMethod());
         logger.info("Content-Type: " + request.getHeader("Content-Type"));
+        logger.info("Accept: " + request.getHeader("Accept"));
 
         // Validate Content-Type
         if (!MediaType.APPLICATION_JSON_VALUE.equalsIgnoreCase(request.getHeader("Content-Type"))) {
@@ -36,6 +37,18 @@ public class ContentTypeValidationFilter extends OncePerRequestFilter {
             response.getWriter().write("{\"error\":\"Invalid Content-Type. Expected application/json\"}");
             return;
         }
+
+        // Validate Accept header
+        if (!MediaType.APPLICATION_JSON_VALUE.equalsIgnoreCase(request.getHeader("Accept"))) {
+            logger.warn("Invalid Accept header. Expected application/json");
+
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write("{\"error\":\"Invalid Accept header. Expected application/json\"}");
+            return;
+        }
+
+        // Proceed with the filter chain
         filterChain.doFilter(request, response);
     }
 }
