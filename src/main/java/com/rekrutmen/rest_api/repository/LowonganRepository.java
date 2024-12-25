@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface LowonganRepository extends JpaRepository<Lowongan, Integer> {
     Optional<Lowongan> findByIdLowongan(Long idLowongan);
+    Optional<Lowongan> findBySlug(String slug);
 }
