@@ -28,11 +28,17 @@ public class LowonganController {
         return lowonganService.getPaginatedLowongans(token, page);
     }
 
-    @GetMapping("/{idLowongan}")
+    @GetMapping("/id/{idLowongan}")
     public ResponseEntity<ResponseWrapper<Lowongan>> getLowonganDetail(
             @RequestHeader("Authorization") String token,
             @PathVariable Long idLowongan) {
         return lowonganService.getLowonganDetail(token, idLowongan);
     }
 
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<ResponseWrapper<Lowongan>> getLowonganDetailSlug(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String slug) {
+        return lowonganService.getLowonganDetailSlug(token, slug);
+    }
 }

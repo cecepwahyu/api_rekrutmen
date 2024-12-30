@@ -140,4 +140,41 @@ public class LowonganService {
         ));
     }
 
+    //Get lowongan by Slug
+    public ResponseEntity<ResponseWrapper<Lowongan>> getLowonganDetailSlug(String token, String slug) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Fetch article details by ID
+        Lowongan lowongan = lowonganRepository.findBySlug(slug).orElse(null);
+
+        if (lowongan == null) {
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    null
+            ));
+        }
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                lowongan
+        ));
+    }
 }
