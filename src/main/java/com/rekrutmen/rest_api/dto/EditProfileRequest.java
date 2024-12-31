@@ -88,6 +88,9 @@ public class EditProfileRequest {
 
     private String token;
 
+    @JsonProperty("profile_picture")
+    private String profilePicture;
+
     // Family (Kontak Kerabat) data
     private List<PesertaKontakRequest> kontak;
 

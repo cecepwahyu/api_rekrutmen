@@ -128,4 +128,7 @@ public class Peserta {
 
     @Column(name = "no_peserta")
     private String noPeserta;
+
+    @Column(name = "profile_picture")
+    private String profilePicture;
 }
