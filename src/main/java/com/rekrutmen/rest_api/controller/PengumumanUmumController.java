@@ -33,10 +33,17 @@ public class PengumumanUmumController {
         return pengumumanUmumService.getPaginatedPengumumanUmums(token, page);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<ResponseWrapper<PengumumanUmum>> getPengumumanUmumDetail(
             @RequestHeader("Authorization") String token,
             @PathVariable UUID id) {
         return pengumumanUmumService.getPengumumanUmumDetail(token, id);
+    }
+
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<ResponseWrapper<PengumumanUmum>> getArtikelDetailSlug(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String slug) {
+        return pengumumanUmumService.getPengumumanUmumDetailSlug(token, slug);
     }
 }
