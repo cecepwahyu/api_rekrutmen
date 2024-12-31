@@ -5,6 +5,7 @@ import com.rekrutmen.rest_api.dto.RegisterRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.util.MaskingUtil;
+import com.rekrutmen.rest_api.util.OtpUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,13 +76,13 @@ public class RegistrationService {
         newUser.setFlgStatus('0');
         pesertaService.registerUser(newUser);
 
-        // Generate a verification token
-        String token = UUID.randomUUID().toString();
-        newUser.setToken(token);
+        // Generate a verification OTP
+        String otpCode = OtpUtil.generateOtp();
+        newUser.setOtp(otpCode);
         pesertaService.saveUser(newUser);
 
         // Send verification email
-        emailService.sendVerificationEmail(newUser.getEmail(), token);
+        emailService.sendOtpEmaiVerification(newUser.getEmail(), otpCode);
 
         logger.info(
                 "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"username\": \"{}\", \"no_identitas\": \"{}\", \"email\": \"{}\", \"password\": \"{}\"}}",
