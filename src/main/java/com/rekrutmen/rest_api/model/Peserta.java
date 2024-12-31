@@ -122,4 +122,10 @@ public class Peserta {
 
     @Column(name = "otp_updated_at")
     private LocalDateTime otpUpdatedAt;
+
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    @Column(name = "no_peserta")
+    private String noPeserta;
 }
