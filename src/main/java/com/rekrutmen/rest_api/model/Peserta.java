@@ -87,7 +87,7 @@ public class Peserta {
     private String email;
 
     @Column(name = "pendidikan_terakhir", length = 50)
-    private String pendidikanTerakhir;
+    private Integer pendidikanTerakhir;
 
     @Column(name = "status_kawin", length = 1)
     private Character statusKawin;
