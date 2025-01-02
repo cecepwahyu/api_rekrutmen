@@ -66,7 +66,7 @@ public class EditProfileRequest {
     private String telp;
 
     @JsonProperty("pendidikan_terakhir")
-    private String pendidikanTerakhir;
+    private Integer pendidikanTerakhir;
 
     @JsonProperty("status_kawin")
     private Character statusKawin;
@@ -87,6 +87,9 @@ public class EditProfileRequest {
     private LocalDateTime updatedAt;
 
     private String token;
+
+    @JsonProperty("profile_picture")
+    private String profilePicture;
 
     // Family (Kontak Kerabat) data
     private List<PesertaKontakRequest> kontak;

@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface PengumumanUmumRepository extends JpaRepository<PengumumanUmum, UUID> {
     Optional<PengumumanUmum> findById(UUID id);
+    Optional<PengumumanUmum> findBySlug(String slug);
 }

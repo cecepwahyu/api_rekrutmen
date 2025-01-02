@@ -1,6 +1,7 @@
 package com.rekrutmen.rest_api.controller;
 
 import com.rekrutmen.rest_api.dto.EditProfileRequest;
+import com.rekrutmen.rest_api.dto.PesertaInfoRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.*;
 import com.rekrutmen.rest_api.service.*;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -80,6 +80,21 @@ public class PesertaController {
         return pesertaKontakService.getPesertaKontakDetail(token, idPeserta);
     }
 
+    @GetMapping("/peserta-info/{idPeserta}")
+    public ResponseEntity<?> getPesertaInfo(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta
+    ) {
+        ResponseEntity<ResponseWrapper<PesertaInfoRequest>> response = pesertaService.getPesertaInfo(token, idPeserta);
+
+        if (response.getBody() != null && response.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.ok(response.getBody());
+        } else {
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        }
+    }
+
+
     @PutMapping("/{idPeserta}/edit")
     public ResponseEntity<ResponseWrapper<Object>> editProfile(
             @PathVariable Integer idPeserta,
@@ -91,13 +106,14 @@ public class PesertaController {
         if (optionalPeserta.isEmpty()) {
          }
 
-        //Checking duplicate telp number
-        if (pesertaService.isTelpTaken(request.getTelp())) {
-            logger.warn("Telp: {} already exist!", request.getTelp());
+        // Checking duplicate telp number
+        logger.info("Checking telp duplication for idPeserta: {}, telp: {}", idPeserta, request.getTelp());
+        if (pesertaService.isTelpTaken(request.getTelp(), idPeserta)) {
+            logger.warn("Telp: {} already exists!", request.getTelp());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     "400",
                     responseCodeUtil.getMessage("400"),
-                    "Telp already exist"
+                    "Telp already exists"
             ));
         }
 

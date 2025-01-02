@@ -87,7 +87,7 @@ public class Peserta {
     private String email;
 
     @Column(name = "pendidikan_terakhir", length = 50)
-    private String pendidikanTerakhir;
+    private Integer pendidikanTerakhir;
 
     @Column(name = "status_kawin", length = 1)
     private Character statusKawin;
@@ -122,4 +122,13 @@ public class Peserta {
 
     @Column(name = "otp_updated_at")
     private LocalDateTime otpUpdatedAt;
+
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    @Column(name = "no_peserta")
+    private String noPeserta;
+
+    @Column(name = "profile_picture")
+    private String profilePicture;
 }
