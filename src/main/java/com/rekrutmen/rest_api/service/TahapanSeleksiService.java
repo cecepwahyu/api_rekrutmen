@@ -46,8 +46,8 @@ public class TahapanSeleksiService {
             ));
         }
 
-        // Fetch all articles without pagination
-        List<TahapanSeleksi> tahapanSeleksis = tahapanSeleksiRepository.findAll();
+        // Fetch lowongan list ordered by idTahapan
+        List<TahapanSeleksi> tahapanSeleksis = tahapanSeleksiRepository.findAllOrderedByIdTahapan();
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
