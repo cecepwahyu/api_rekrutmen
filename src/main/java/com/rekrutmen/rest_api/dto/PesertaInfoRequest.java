@@ -9,12 +9,16 @@ public class PesertaInfoRequest {
 
     private String nama;
     private String username;
-    private String noPeserta;
+    private String lowonganId;
+    private String judulLowongan;
+    private String profilePicture;
 
     // Constructor matching the query
-    public PesertaInfoRequest(String nama, String username, String noPeserta) {
+    public PesertaInfoRequest(String nama, String username, String lowonganId, String judulLowongan, String profilePicture) {
         this.nama = nama;
         this.username = username;
-        this.noPeserta = noPeserta;
+        this.lowonganId = lowonganId;
+        this.judulLowongan = judulLowongan;
+        this.profilePicture = profilePicture;
     }
 }
