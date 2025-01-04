@@ -1,16 +1,22 @@
 package com.rekrutmen.rest_api.service;
 
-import com.rekrutmen.rest_api.dto.OtpVerificationRequest;
-import com.rekrutmen.rest_api.dto.ResetPasswordRequest;
-import com.rekrutmen.rest_api.dto.ResponseWrapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rekrutmen.rest_api.dto.*;
 import com.rekrutmen.rest_api.model.Peserta;
+import com.rekrutmen.rest_api.repository.PesertaRepository;
+import com.rekrutmen.rest_api.util.JwtUtil;
+import com.rekrutmen.rest_api.util.OtpUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +35,8 @@ public class AuthService {
 
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
+    @Autowired
+    private PesertaRepository pesertaRepository;
 
     public ResponseEntity<ResponseWrapper<Object>> handleResetPassword(ResetPasswordRequest resetPasswordRequest) {
         Optional<Peserta> pesertaOptional = profileService.validateEmailAndNoIdentitas(
@@ -40,16 +48,17 @@ public class AuthService {
         if (pesertaOptional.isEmpty()) {
             logger.warn("Email {} or No Identitas {} invalid!", resetPasswordRequest.getEmail(), resetPasswordRequest.getNoIdentitas());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
                     "Invalid email or No Identitas"
             ));
         }
 
         Peserta peserta = pesertaOptional.get();
-        String otpCode = generateOtp();
+        String otpCode = OtpUtil.generateOtp();
+        LocalDateTime updatedAt = LocalDateTime.now();
         logger.info("OTP generated: {}", otpCode);
-        profileService.updateOtp(peserta.getIdPeserta(), otpCode);
+        profileService.updateOtp(peserta.getIdPeserta().intValue(), otpCode, updatedAt);
         emailService.sendOtpEmail(resetPasswordRequest.getEmail(), otpCode);
 
         Map<String, Object> responseData = new HashMap<>();
@@ -58,11 +67,62 @@ public class AuthService {
         responseData.put("Your OTP code is", otpCode);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
-                "000",
+                responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
                 responseData
         ));
     }
+
+    public ResponseEntity<ResponseWrapper<Object>> handleResendOtp(ResendOtpRequest resendOtpRequest) {
+        Optional<Peserta> pesertaOptional = profileService.validateEmailAndNoIdentitas(
+                resendOtpRequest.getEmail(),
+                resendOtpRequest.getNoIdentitas()
+        );
+        logger.info("Request Data = {Email: {}, No Identitas: {}}", resendOtpRequest.getEmail(), resendOtpRequest.getNoIdentitas());
+
+        if (pesertaOptional.isEmpty()) {
+            logger.warn("Email {} or No Identitas {} invalid!", resendOtpRequest.getEmail(), resendOtpRequest.getNoIdentitas());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    "Invalid email or No Identitas"
+            ));
+        }
+
+        Peserta peserta = pesertaOptional.get();
+
+        // Check if the last OTP generation was less than 30 seconds ago
+        LocalDateTime lastOtpUpdatedAt = profileService.updateOtpUpdatedAt(peserta.getIdPeserta(), peserta.getOtpUpdatedAt());
+        LocalDateTime now = LocalDateTime.now();
+        if (lastOtpUpdatedAt != null && Duration.between(lastOtpUpdatedAt, now).getSeconds() < 30) {
+            long secondsRemaining = 30 - Duration.between(lastOtpUpdatedAt, now).getSeconds();
+            logger.warn("OTP resend request blocked for {}. Please wait {} seconds.", resendOtpRequest.getEmail(), secondsRemaining);
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("429"),
+                    "Please wait " + secondsRemaining + " seconds before resending OTP.",
+                    null
+            ));
+        }
+
+        // Generate and send OTP
+        String otpCode = OtpUtil.generateOtp();
+        LocalDateTime updatedAt = LocalDateTime.now();
+        logger.info("OTP generated: {}", otpCode);
+        profileService.updateOtp(peserta.getIdPeserta().intValue(), otpCode, updatedAt);
+        emailService.sendOtpEmail(resendOtpRequest.getEmail(), otpCode);
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("email", resendOtpRequest.getEmail());
+        responseData.put("no_identitas", resendOtpRequest.getNoIdentitas());
+        responseData.put("Your OTP code is", otpCode);
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
+    }
+
 
     public ResponseEntity<ResponseWrapper<Object>> handleOtpVerification(OtpVerificationRequest otpVerificationRequest) {
         Optional<Peserta> pesertaOptional = profileService.validateOtp(otpVerificationRequest.getOtp());
@@ -71,7 +131,7 @@ public class AuthService {
         if (pesertaOptional.isEmpty()) {
             logger.warn("OTP code: {} invalid!", otpVerificationRequest.getOtp());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
                     "Invalid OTP code"
             ));
@@ -82,14 +142,87 @@ public class AuthService {
         responseData.put("OTP is valid!", otpVerificationRequest.getOtp());
 
         return ResponseEntity.ok(new ResponseWrapper<>(
-                "000",
+                responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
                 responseData
         ));
     }
 
-    private String generateOtp() {
-        Random random = new Random();
-        return String.valueOf(100000 + random.nextInt(900000));
+    public ResponseEntity<ResponseWrapper<Object>> handleAccountVerification(AccountVerificationRequest accountVerificationRequest) {
+        Optional<Peserta> pesertaOptional = profileService.validateOtp(accountVerificationRequest.getOtp());
+        logger.info("Request Data = {OTP code: {}}", accountVerificationRequest.getOtp());
+
+        if (pesertaOptional.isEmpty()) {
+            logger.warn("OTP code: {} invalid!", accountVerificationRequest.getOtp());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    "Invalid OTP code"
+            ));
+        }
+
+        Peserta peserta = pesertaOptional.get();
+
+        // Update is_active to true
+        peserta.setIsActive(true);
+        peserta.setOtp(null);
+        pesertaRepository.save(peserta);
+
+        logger.info("Account verified successfully for Peserta ID: {}", peserta.getIdPeserta());
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("OTP is valid!", accountVerificationRequest.getOtp());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
     }
+
+    public ResponseEntity<ResponseWrapper<Object>> handleGetIdPeserta(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            logger.warn("Invalid Authorization Header");
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    "401", "Invalid Authorization Header", null
+            ));
+        }
+
+        String token = authHeader.substring(7);
+
+        try {
+            // Decode the token for additional details
+            Map<String, String> decodedToken = JwtUtil.decodeToken(token);
+            logger.info("Decoded Token Details = {header: {}, payload: {}, signature: {}}",
+                    decodedToken.get("header"), decodedToken.get("payload"), decodedToken.get("signature"));
+
+            // Parse payload JSON to retrieve idPeserta and email
+            String payload = decodedToken.get("payload");
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> payloadData = objectMapper.readValue(payload, Map.class);
+
+            String idPeserta = payloadData.get("idPeserta") != null ? payloadData.get("idPeserta").toString() : null;
+            String email = payloadData.get("email") != null ? payloadData.get("email").toString() : null;
+
+            if (idPeserta == null || email == null) {
+                logger.warn("ID Peserta or Email not found in token");
+                return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                        "400", "ID Peserta or Email not found in token", null
+                ));
+            }
+
+            // Log the extracted information
+            logger.info("Extracted Data from Token = {idPeserta: {}, email: {}}", idPeserta, email);
+
+            return ResponseEntity.ok(new ResponseWrapper<>(
+                    "000", "Success", Map.of("idPeserta", idPeserta, "email", email)
+            ));
+        } catch (Exception e) {
+            logger.error("Error extracting data from token: {}", e.getMessage(), e);
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    "401", "Invalid or expired token", null
+            ));
+        }
+    }
+
 }

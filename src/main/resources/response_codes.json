@@ -8,8 +8,10 @@
   "094": "Duplicate Transmission",
   "096": "System Malfunction",
   "099": "Invalid token",
+  "270": "Invalid request payload",
   "298": "Token expired",
   "299": "Token is invalid",
   "400": "Bad Request",
-  "401": "Username or password is incorrect"
+  "401": "Username or password is incorrect",
+  "429": "Too Many Requests"
 }

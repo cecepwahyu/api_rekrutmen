@@ -14,8 +14,8 @@ public class PesertaLowongan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
+    @Column(name = "id", updatable = false, nullable = false)
+    private String id;
 
     @Column(name = "id_lowongan", nullable = false)
     private Integer idLowongan;
@@ -31,5 +31,8 @@ public class PesertaLowongan {
 
     @Column(name = "last_status_update", length = 50)
     private LocalDateTime lastStatusUpdate;
+
+//    @Column(name = "tahun_aplikasi", length = 4)
+//    private Integer tahunAplikasi;
 
 }

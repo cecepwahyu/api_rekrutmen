@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -34,7 +35,7 @@ public class LoginService {
     }
 
     public ResponseEntity<ResponseWrapper<Object>> handleLogin(LoginRequest loginRequest) {
-        logger.info("Login request received for email: {}", loginRequest.getEmail());
+        logger.info("Request Data: {email: {}, password: {}}", loginRequest.getEmail(), loginRequest.getPassword());
 
         Optional<Peserta> optionalUser = pesertaRepository.findByEmail(loginRequest.getEmail());
 
@@ -43,29 +44,39 @@ public class LoginService {
             logger.info("User found for email: {}", loginRequest.getEmail());
 
             if (passwordEncoder.matches(loginRequest.getPassword(), existingUser.getPassword())) {
-                // Generate JWT token
-                String token = JwtUtil.generateToken(loginRequest.getEmail());
+                // Add idPeserta to token claims
+                Map<String, Object> claims = new HashMap<>();
+                claims.put("idPeserta", existingUser.getIdPeserta());
+                claims.put("email", loginRequest.getEmail());
+
+                // Generate JWT token with custom claims
+                String token = JwtUtil.generateTokenWithClaims(claims);
 
                 // Update the token in the database
                 existingUser.setToken(token);
+                existingUser.setTokenUpdatedAt(LocalDateTime.now());
                 pesertaRepository.save(existingUser);
 
                 // Prepare response data
                 Map<String, Object> responseData = new HashMap<>();
+                responseData.put("idPeserta", existingUser.getIdPeserta());
                 responseData.put("token", token);
                 responseData.put("email", loginRequest.getEmail());
+                responseData.put("isActive", existingUser.getIsActive());
 
-                logger.info("Login successful for email: {}. Token generated: {}", loginRequest.getEmail(), token);
+                logger.info("Response Data: {responseCode: {}, responseMessage: {}, data:{{email: {}, token: {}, idPeserta: {}, isActive: {}}}}",
+                        responseCodeUtil.getCode("000"), responseCodeUtil.getMessage("000"),
+                        loginRequest.getEmail(), token, existingUser.getIdPeserta(), existingUser.getIsActive());
 
                 return ResponseEntity.ok(new ResponseWrapper<>(
-                        "000",
+                        responseCodeUtil.getCode("000"),
                         responseCodeUtil.getMessage("000"),
                         responseData
                 ));
             } else {
                 logger.warn("Invalid password for email: {}", loginRequest.getEmail());
                 return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                        "400",
+                        responseCodeUtil.getCode("400"),
                         responseCodeUtil.getMessage("400"),
                         "Invalid password"
                 ));
@@ -73,10 +84,11 @@ public class LoginService {
         } else {
             logger.warn("No user found for email: {}", loginRequest.getEmail());
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    "401",
+                    responseCodeUtil.getCode("401"),
                     responseCodeUtil.getMessage("401"),
                     "No user found"
             ));
         }
     }
 }
+

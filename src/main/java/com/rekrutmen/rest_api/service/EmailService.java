@@ -14,9 +14,31 @@ public class EmailService {
     public void sendOtpEmail(String toEmail, String otpCode) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        message.setSubject("Your OTP Code");
-        message.setText("Your OTP code is: " + otpCode);
+        message.setSubject("Reset Password");
+        message.setText("Your Reset Password OTP code is: " + otpCode);
         message.setFrom("seneng.banged@gmail.com");
+
+        mailSender.send(message);
+    }
+
+    public void sendOtpEmaiVerification(String toEmail, String otpCode) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Email Verification");
+        message.setText("Your OTP Email Verification code is: " + otpCode);
+        message.setFrom("seneng.banged@gmail.com");
+
+        mailSender.send(message);
+    }
+
+    public void sendVerificationEmail(String toEmail, String token) {
+        // Construct the verification URL
+        String verificationUrl = "http://localhost:8080/api/register/verify?token=" + token;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Account Verification");
+        message.setText("Please click the following link to verify your account: " + verificationUrl);
 
         mailSender.send(message);
     }

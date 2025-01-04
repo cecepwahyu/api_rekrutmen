@@ -6,12 +6,10 @@ import com.rekrutmen.rest_api.service.PengumumanUmumService;
 import com.rekrutmen.rest_api.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/pengumuman-umum")
@@ -26,5 +24,26 @@ public class PengumumanUmumController {
     @GetMapping("/list")
     public ResponseEntity<ResponseWrapper<List<PengumumanUmum>>> getPengumumanUmumList(@RequestHeader("Authorization") String token) {
         return pengumumanUmumService.getAllPengumumanUmums(token);
+    }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<ResponseWrapper<Object>> getPaginatedPengumumanUmums(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page) {
+        return pengumumanUmumService.getPaginatedPengumumanUmums(token, page);
+    }
+
+    @GetMapping("/id/{id}")
+    public ResponseEntity<ResponseWrapper<PengumumanUmum>> getPengumumanUmumDetail(
+            @RequestHeader("Authorization") String token,
+            @PathVariable UUID id) {
+        return pengumumanUmumService.getPengumumanUmumDetail(token, id);
+    }
+
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<ResponseWrapper<PengumumanUmum>> getArtikelDetailSlug(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String slug) {
+        return pengumumanUmumService.getPengumumanUmumDetailSlug(token, slug);
     }
 }

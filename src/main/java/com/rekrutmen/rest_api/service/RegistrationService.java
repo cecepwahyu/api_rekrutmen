@@ -5,6 +5,7 @@ import com.rekrutmen.rest_api.dto.RegisterRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.util.MaskingUtil;
+import com.rekrutmen.rest_api.util.OtpUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class RegistrationService {
@@ -30,12 +32,15 @@ public class RegistrationService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private EmailService emailService;
+
     public ResponseEntity<ResponseWrapper<Object>> handleRegister(RegisterRequest registerRequest) {
         // Check if username or email is already taken
         if (pesertaService.isUsernameTaken(registerRequest.getUsername())) {
             logger.warn("Username: {} already registered!", registerRequest.getUsername());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
                     "Username already exist"
             ));
@@ -44,7 +49,7 @@ public class RegistrationService {
         if (pesertaService.isEmailTaken(registerRequest.getEmail())) {
             logger.warn("Email: {} already registered!", registerRequest.getEmail());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
                     "Email already registered"
             ));
@@ -53,7 +58,7 @@ public class RegistrationService {
         if (pesertaService.isNoIdentitasExist(registerRequest.getNoIdentitas())) {
             logger.warn("No Identitas: {} already registered!", registerRequest.getNoIdentitas());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
                     "NIK already registered"
             ));
@@ -64,28 +69,44 @@ public class RegistrationService {
 
         // Create and save new user
         Peserta newUser = new Peserta();
+        newUser.setNama(registerRequest.getNama());
         newUser.setUsername(registerRequest.getUsername());
         newUser.setPassword(encryptedPassword);
         newUser.setEmail(registerRequest.getEmail());
         newUser.setNoIdentitas(registerRequest.getNoIdentitas());
+        newUser.setFlgStatus('0');
         pesertaService.registerUser(newUser);
 
+        // Generate a verification OTP
+        String otpCode = OtpUtil.generateOtp();
+        newUser.setOtp(otpCode);
+        pesertaService.saveUser(newUser);
+
+        // Send verification email
+        emailService.sendOtpEmaiVerification(newUser.getEmail(), otpCode);
+
         logger.info(
-                "Successfully register username: {}, No Identitas: {}, Email: {}, Password: {}",
+                "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"nama\": \"{}\", \"username\": \"{}\", \"no_identitas\": \"{}\", \"email\": \"{}\", \"password\": \"{}\", \"OTP\": \"{}\"}}",
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                registerRequest.getNama(),
                 registerRequest.getUsername(),
                 registerRequest.getNoIdentitas(),
                 registerRequest.getEmail(),
-                MaskingUtil.maskPassword(registerRequest.getPassword())
+                MaskingUtil.maskPassword(registerRequest.getPassword()),
+                otpCode
         );
 
         Map<String, Object> responseData = new HashMap<>();
+        responseData.put("nama", registerRequest.getNama());
         responseData.put("username", registerRequest.getUsername());
         responseData.put("no_identitas", registerRequest.getNoIdentitas());
         responseData.put("email", registerRequest.getEmail());
         responseData.put("password", registerRequest.getPassword());
+        responseData.put("otp", otpCode);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
-                "000",
+                responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
                 responseData
         ));

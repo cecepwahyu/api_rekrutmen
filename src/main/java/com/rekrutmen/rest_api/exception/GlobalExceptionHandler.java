@@ -40,4 +40,19 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(responseWrapper, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(InvalidRequestExceptionHandler.class)
+    public ResponseEntity<ResponseWrapper<Object>> handleInvalidRequest(InvalidRequestExceptionHandler ex) {
+        // Log the exception details
+        logger.warn("Invalid Request: responseCode={}, responseMessage={}", ex.getCode(), ex.getMessage());
+
+        // Create response wrapper
+        ResponseWrapper<Object> responseWrapper = new ResponseWrapper<>(
+                ex.getCode(),
+                ex.getMessage(),
+                null
+        );
+
+        return new ResponseEntity<>(responseWrapper, HttpStatus.BAD_REQUEST);
+    }
 }
