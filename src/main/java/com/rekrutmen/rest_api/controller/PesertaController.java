@@ -1,12 +1,11 @@
 package com.rekrutmen.rest_api.controller;
 
-import com.rekrutmen.rest_api.dto.EditProfileRequest;
-import com.rekrutmen.rest_api.dto.PesertaInfoRequest;
-import com.rekrutmen.rest_api.dto.ResponseWrapper;
+import com.rekrutmen.rest_api.dto.*;
 import com.rekrutmen.rest_api.model.*;
 import com.rekrutmen.rest_api.service.*;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +43,9 @@ public class PesertaController {
 
     @Autowired
     private PesertaKontakService pesertaKontakService;
+
+    @Autowired
+    private PesertaDocumentsService pesertaDocumentsService;
 
     @GetMapping("/{idPeserta}")
     public ResponseEntity<ResponseWrapper<Peserta>> getPesertaDetail(
@@ -94,6 +96,13 @@ public class PesertaController {
         }
     }
 
+    @PutMapping("/{idPeserta}/update-profile-picture")
+    public ResponseEntity<ResponseWrapper<Object>> updateProfilePicture(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid UpdateProfilePictureRequest request
+    ) {
+        return pesertaService.updateProfilePicture(idPeserta, request.getBase64Image());
+    }
 
     @PutMapping("/{idPeserta}/edit")
     public ResponseEntity<ResponseWrapper<Object>> editProfile(
@@ -216,5 +225,167 @@ public class PesertaController {
                 responseCodeUtil.getMessage("000"),
                 "Profile updated successfully"
         ));
+    }
+
+    @GetMapping("/{idPeserta}/documents")
+    public ResponseEntity<List<Integer>> getIdDocumentsByUserId(@PathVariable Integer idPeserta) {
+        List<Integer> idDocuments = pesertaDocumentsService.getIdDocumentsByUserId(idPeserta);
+        return ResponseEntity.ok(idDocuments);
+    }
+
+    @PutMapping("/{idPeserta}/submit-ktp")
+    public ResponseEntity<ResponseWrapper<Object>> submitKtp(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateKtp(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-skck")
+    public ResponseEntity<ResponseWrapper<Object>> submitSkck(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateSkck(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-toefl")
+    public ResponseEntity<ResponseWrapper<Object>> submitToefl(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateToefl(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-kk")
+    public ResponseEntity<ResponseWrapper<Object>> submitKartuKeluarga(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateKartuKeluarga(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-suratsehat")
+    public ResponseEntity<ResponseWrapper<Object>> submitSuratSehat(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateSuratSehat(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-cv")
+    public ResponseEntity<ResponseWrapper<Object>> submitCv(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateCv(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-suratlamaran")
+    public ResponseEntity<ResponseWrapper<Object>> submitSuratLamaran(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateSuratLamaran(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-suratpernyataan")
+    public ResponseEntity<ResponseWrapper<Object>> submitSuratPernyataan(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateSuratPernyataan(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-ijazah")
+    public ResponseEntity<ResponseWrapper<Object>> submitIjazah(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateIjazah(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-transkrip")
+    public ResponseEntity<ResponseWrapper<Object>> submitTranskrip(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateTranskrip(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-fotofullbadan")
+    public ResponseEntity<ResponseWrapper<Object>> submitFotoFullBadan(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateFotoFullBadan(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-pasfoto")
+    public ResponseEntity<ResponseWrapper<Object>> submitPasFoto(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdatePasFoto(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
     }
 }

@@ -14,11 +14,17 @@ public class ProgresTahapanController {
     @Autowired
     private ProgresTahapanService progresTahapanService;
 
+    /**
+     * Fetches the progress detail for a specific id.
+     *
+     * @param token the authorization token.
+     * @param id    the id of the progress to fetch.
+     * @return ResponseEntity containing the progress detail.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<ResponseWrapper<ProgresTahapan>> getLowonganDetail(
             @RequestHeader("Authorization") String token,
             @PathVariable Integer id) {
         return progresTahapanService.getProgresTahapanDetail(token, id);
     }
-
 }

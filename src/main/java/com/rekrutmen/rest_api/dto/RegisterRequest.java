@@ -10,6 +10,10 @@ import lombok.Setter;
 public class RegisterRequest {
 
     @NotBlank
+    @JsonProperty("nama")
+    private String nama;
+
+    @NotBlank
     @Pattern(regexp = "^[^\\s]+$",
             message = "Invalid payload request"
     )

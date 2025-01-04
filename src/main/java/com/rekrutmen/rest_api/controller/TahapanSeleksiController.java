@@ -24,4 +24,31 @@ public class TahapanSeleksiController {
         return tahapanSeleksiService.getTahapanSeleksi(token);
     }
 
+    /**
+     * Fetches all tahapan for a specific lowongan.
+     *
+     * @param token      the authorization token.
+     * @param lowonganId the id of the lowongan.
+     * @return ResponseEntity containing the list of tahapan.
+     */
+    @GetMapping("/lowongan/id/{lowonganId}/tahapan")
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanByLowongan(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer lowonganId) {
+        return tahapanSeleksiService.getTahapanByLowonganId(token, lowonganId);
+    }
+
+    /**
+     * Fetches all tahapan for a specific lowongan.
+     *
+     * @param token      the authorization token.
+     * @param slug the id of the lowongan.
+     * @return ResponseEntity containing the list of tahapan.
+     */
+    @GetMapping("/lowongan/slug/{slug}/tahapan")
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanBySlugLowongan(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String slug) {
+        return tahapanSeleksiService.getTahapanBySlug(token, slug);
+    }
 }

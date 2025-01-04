@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,4 +31,7 @@ public class PesertaLowonganRequest {
 
     @JsonProperty("tahun_aplikasi")
     private Integer tahunAplikasi;
+
+    @JsonProperty("id_user_documents")
+    private List<Integer> idUserDocuments; // Added this field to handle associated user documents
 }
