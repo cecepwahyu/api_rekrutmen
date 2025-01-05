@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface ProgresTahapanRepository extends JpaRepository<ProgresTahapan, Integer> {
     Optional<ProgresTahapan> findById(Integer id);
+
+    Optional<ProgresTahapan> findByIdLowongan(Integer idLowongan);
 }

@@ -1,6 +1,7 @@
 package com.rekrutmen.rest_api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,9 +10,11 @@ import lombok.Setter;
 public class PesertaPendidikanRequest {
 
     @JsonProperty("id_jenjang")
+    @NotNull
     private String idJenjang;
 
     @JsonProperty("nama_institusi")
+    @NotNull
     private String namaInstitusi;
 
     @JsonProperty("jurusan")

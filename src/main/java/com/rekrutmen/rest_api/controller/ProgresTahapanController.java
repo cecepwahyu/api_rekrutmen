@@ -22,9 +22,23 @@ public class ProgresTahapanController {
      * @return ResponseEntity containing the progress detail.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseWrapper<ProgresTahapan>> getLowonganDetail(
+    public ResponseEntity<ResponseWrapper<ProgresTahapan>> getProgresTahapanDetail(
             @RequestHeader("Authorization") String token,
             @PathVariable Integer id) {
         return progresTahapanService.getProgresTahapanDetail(token, id);
+    }
+
+    /**
+     * Fetches the progress detail by id_tahapan.
+     *
+     * @param token      the authorization token.
+     * @param idLowongan  the id_tahapan to fetch the progress for.
+     * @return ResponseEntity containing the progress detail.
+     */
+    @GetMapping("/tahapan/{idLowongan}")
+    public ResponseEntity<ResponseWrapper<ProgresTahapan>> getProgresTahapanByIdTahapan(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idLowongan) {
+        return progresTahapanService.getProgresTahapanByIdLowongan(token, idLowongan);
     }
 }

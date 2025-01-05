@@ -19,4 +19,7 @@ public class PesertaPengalamanRequest {
 
     @JsonProperty("deskripsi_kerja")
     private String deskripsiKerja;
+
+    @JsonProperty("surat_pengalaman_kerja")
+    private String suratPengalamanKerja;
 }

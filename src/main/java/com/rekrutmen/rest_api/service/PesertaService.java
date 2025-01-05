@@ -2,9 +2,7 @@ package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.PesertaInfoRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
-import com.rekrutmen.rest_api.dto.UpdateProfilePictureRequest;
 import com.rekrutmen.rest_api.model.Peserta;
-import com.rekrutmen.rest_api.model.PesertaLowongan;
 import com.rekrutmen.rest_api.repository.PesertaRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
@@ -149,7 +147,7 @@ public class PesertaService {
         Optional<PesertaInfoRequest> pesertaOptional = pesertaRepository.findPesertaInfoByIdPeserta(idPeserta);
 
         if (pesertaOptional.isEmpty()) {
-            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+            return ResponseEntity.status(200).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("077"),
                     responseCodeUtil.getMessage("077"),
                     null
@@ -157,6 +155,45 @@ public class PesertaService {
         }
 
         PesertaInfoRequest peserta = pesertaOptional.get();
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                peserta
+        ));
+    }
+
+    public ResponseEntity<ResponseWrapper<Object[]>> getPesertaData(String token, Integer idPeserta) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Fetch peserta details by ID Peserta
+        Optional<Object[]> pesertaOptional = pesertaRepository.findPesertaDataByIdPesertaRaw(idPeserta);
+
+        if (pesertaOptional.isEmpty()) {
+            return ResponseEntity.status(200).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    null
+            ));
+        }
+
+        Object[] peserta = pesertaOptional.get();
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),

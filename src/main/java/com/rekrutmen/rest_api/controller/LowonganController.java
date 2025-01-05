@@ -6,6 +6,7 @@ import com.rekrutmen.rest_api.model.Lowongan;
 import com.rekrutmen.rest_api.model.PesertaLowongan;
 import com.rekrutmen.rest_api.service.LowonganService;
 import com.rekrutmen.rest_api.service.PesertaLowonganService;
+import com.rekrutmen.rest_api.service.VwLowonganDokumenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,9 @@ public class LowonganController {
 
     @Autowired
     private PesertaLowonganService pesertaLowonganService;
+
+    @Autowired
+    private VwLowonganDokumenService vwLowonganDokumenService;
 
     @GetMapping("/list")
     public ResponseEntity<ResponseWrapper<List<Lowongan>>> getLowonganList(@RequestHeader("Authorization") String token) {
@@ -80,5 +84,12 @@ public class LowonganController {
 
         // Submit the application
         return pesertaLowonganService.handleSubmitLowongan(token, pesertaLowonganRequest);
+    }
+
+    @GetMapping("/dokumen/slug/{slug}")
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getDokumenBySlug(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String slug) {
+        return vwLowonganDokumenService.getDokumenBySlug(token, slug);
     }
 }

@@ -22,12 +22,23 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
     boolean existsByNoIdentitas(String noIdentitas);
 
     //Get Peserta Info
-    @Query("SELECT new com.rekrutmen.rest_api.dto.PesertaInfoRequest(p.nama, p.email, CAST(pl.id AS string), l.judulLowongan, p.profilePicture) " +
+    @Query("SELECT new com.rekrutmen.rest_api.dto.PesertaInfoRequest(p.nama, p.email, CAST(pl.id AS string), l.judulLowongan, p.profilePicture, CAST(l.idLowongan AS string)) " +
             "FROM Peserta p " +
             "JOIN PesertaLowongan pl ON p.idPeserta = pl.idPeserta " +
             "JOIN Lowongan l ON pl.idLowongan = l.idLowongan " +
             "WHERE p.idPeserta = :idPeserta")
     Optional<PesertaInfoRequest> findPesertaInfoByIdPeserta(@Param("idPeserta") Integer idPeserta);
+
+    //Get Peserta Info
+//    @Query("SELECT new com.rekrutmen.rest_api.dto.PesertaInfoRequest(p.nama, p.email, p.profilePicture) " +
+//            "FROM Peserta p " +
+//            "WHERE p.idPeserta = :idPeserta")
+//    Optional<PesertaInfoRequest> findPesertaDataByIdPeserta(@Param("idPeserta") Integer idPeserta);
+
+    @Query("SELECT p.nama, p.email, p.profilePicture " +
+            "FROM Peserta p " +
+            "WHERE p.idPeserta = :idPeserta")
+    Optional<Object[]> findPesertaDataByIdPesertaRaw(@Param("idPeserta") Integer idPeserta);
 
     // Update profile picture
     @Modifying
