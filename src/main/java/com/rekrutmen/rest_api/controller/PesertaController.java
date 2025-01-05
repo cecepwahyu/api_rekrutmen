@@ -96,6 +96,20 @@ public class PesertaController {
         }
     }
 
+    @GetMapping("/peserta-data/{idPeserta}")
+    public ResponseEntity<?> getPesertaData(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta
+    ) {
+        ResponseEntity<ResponseWrapper<Object[]>> response = pesertaService.getPesertaData(token, idPeserta);
+
+        if (response.getBody() != null && response.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.ok(response.getBody());
+        } else {
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        }
+    }
+
     @PutMapping("/{idPeserta}/update-profile-picture")
     public ResponseEntity<ResponseWrapper<Object>> updateProfilePicture(
             @PathVariable Integer idPeserta,
@@ -388,4 +402,109 @@ public class PesertaController {
                 request.getFileType()
         );
     }
+
+    @PutMapping("/pendidikan/{idPeserta}/insert")
+    public ResponseEntity<ResponseWrapper<List<PesertaPendidikan>>> insertPesertaPendidikan(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid List<PesertaPendidikanRequest> pendidikanRequests) {
+
+        logger.info("Request received to insert PesertaPendidikan for idPeserta: {}", idPeserta);
+
+        try {
+            // Delegate to service
+            ResponseEntity<ResponseWrapper<List<PesertaPendidikan>>> response =
+                    pesertaPendidikanService.insertPesertaPendidikan(token, idPeserta, pendidikanRequests);
+
+            logger.info("Successfully processed PesertaPendidikan for idPeserta: {}", idPeserta);
+            return response;
+
+        } catch (Exception e) {
+            logger.error("Error inserting PesertaPendidikan for idPeserta: {} - {}", idPeserta, e.getMessage(), e);
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    "500",
+                    "Internal Server Error",
+                    null
+            ));
+        }
+    }
+
+    @PutMapping("/pengalaman/{idPeserta}/insert")
+    public ResponseEntity<ResponseWrapper<List<PesertaPengalaman>>> insertPesertaPengalaman(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid List<PesertaPengalamanRequest> pengalamanRequests) {
+
+        logger.info("Request received to insert PesertaPengalaman for idPeserta: {}", idPeserta);
+
+        try {
+            // Delegate to service
+            ResponseEntity<ResponseWrapper<List<PesertaPengalaman>>> response =
+                    pesertaPengalamanService.insertPesertaPengalaman(token, idPeserta, pengalamanRequests);
+
+            logger.info("Successfully processed PesertaPengalaman for idPeserta: {}", idPeserta);
+            return response;
+
+        } catch (Exception e) {
+            logger.error("Error inserting PesertaPengalaman for idPeserta: {} - {}", idPeserta, e.getMessage(), e);
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    "500",
+                    "Internal Server Error",
+                    null
+            ));
+        }
+    }
+
+    @PutMapping("/organisasi/{idPeserta}/insert")
+    public ResponseEntity<ResponseWrapper<List<PesertaOrganisasi>>> insertPesertaOrganisasi(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid List<PesertaOrganisasiRequest> organisasiRequests) {
+
+        logger.info("Request received to insert PesertaOrganisasi for idPeserta: {}", idPeserta);
+
+        try {
+            // Delegate to service
+            ResponseEntity<ResponseWrapper<List<PesertaOrganisasi>>> response =
+                    pesertaOrganisasiService.insertPesertaOrganisasi(token, idPeserta, organisasiRequests);
+
+            logger.info("Successfully processed PesertaOrganisasi for idPeserta: {}", idPeserta);
+            return response;
+
+        } catch (Exception e) {
+            logger.error("Error inserting PesertaOrganisasi for idPeserta: {} - {}", idPeserta, e.getMessage(), e);
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    "500",
+                    "Internal Server Error",
+                    null
+            ));
+        }
+    }
+
+    @PutMapping("/kontak/{idPeserta}/insert")
+    public ResponseEntity<ResponseWrapper<List<PesertaKontak>>> insertPesertaKontak(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid List<PesertaKontakRequest> kontakRequests) {
+
+        logger.info("Request received to insert PesertaKontak for idPeserta: {}", idPeserta);
+
+        try {
+            // Delegate to service
+            ResponseEntity<ResponseWrapper<List<PesertaKontak>>> response =
+                    pesertaKontakService.insertPesertaKontak(token, idPeserta, kontakRequests);
+
+            logger.info("Successfully processed PesertaKontak for idPeserta: {}", idPeserta);
+            return response;
+
+        } catch (Exception e) {
+            logger.error("Error inserting PesertaKontak for idPeserta: {} - {}", idPeserta, e.getMessage(), e);
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    "500",
+                    "Internal Server Error",
+                    null
+            ));
+        }
+    }
+
 }
