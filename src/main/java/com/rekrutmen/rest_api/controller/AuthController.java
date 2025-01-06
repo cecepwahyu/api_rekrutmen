@@ -50,4 +50,10 @@ public class AuthController {
         logger.info("Received request to get ID Peserta");
         return authService.handleGetIdPeserta(authHeader);
     }
+
+    @PutMapping("/update-password")
+    public ResponseEntity<ResponseWrapper<Object>> updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
+        logger.info("Received request to update password for email: {}", updatePasswordRequest.getEmail());
+        return authService.handleUpdatePassword(updatePasswordRequest);
+    }
 }

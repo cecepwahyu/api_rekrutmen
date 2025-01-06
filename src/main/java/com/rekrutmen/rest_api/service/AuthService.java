@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -35,6 +36,10 @@ public class AuthService {
 
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Autowired
     private PesertaRepository pesertaRepository;
 
@@ -223,6 +228,41 @@ public class AuthService {
                     "401", "Invalid or expired token", null
             ));
         }
+    }
+
+    public ResponseEntity<ResponseWrapper<Object>> handleUpdatePassword(UpdatePasswordRequest updatePasswordRequest) {
+        if (!updatePasswordRequest.getNewPassword().equals(updatePasswordRequest.getConfirmPassword())) {
+            logger.warn("New password and confirm password do not match");
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    "Passwords do not match",
+                    null
+            ));
+        }
+
+        Optional<Peserta> pesertaOptional = pesertaRepository.findByEmail(updatePasswordRequest.getEmail());
+        if (pesertaOptional.isEmpty()) {
+            logger.warn("No user found with email: {}", updatePasswordRequest.getEmail());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("404"),
+                    "User not found",
+                    null
+            ));
+        }
+
+        Peserta peserta = pesertaOptional.get();
+        String encryptedPassword = passwordEncoder.encode(updatePasswordRequest.getNewPassword());
+        peserta.setPassword(encryptedPassword);
+        peserta.setUpdatedAt(LocalDateTime.now());
+        pesertaRepository.save(peserta);
+
+        logger.info("Password updated successfully for email: {}", updatePasswordRequest.getEmail());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                "Password updated successfully",
+                null
+        ));
     }
 
 }
