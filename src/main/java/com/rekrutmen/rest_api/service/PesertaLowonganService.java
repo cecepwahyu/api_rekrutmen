@@ -2,9 +2,10 @@ package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.PesertaLowonganRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
+import com.rekrutmen.rest_api.model.LowonganPesertaDocuments;
 import com.rekrutmen.rest_api.model.PesertaLowongan;
+import com.rekrutmen.rest_api.repository.LowonganPesertaDocumentsRepository;
 import com.rekrutmen.rest_api.repository.PesertaLowonganRepository;
-import com.rekrutmen.rest_api.util.JwtUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
 import org.slf4j.Logger;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 public class PesertaLowonganService {
@@ -25,6 +25,9 @@ public class PesertaLowonganService {
 
     @Autowired
     private PesertaLowonganRepository pesertaLowonganRepository;
+
+    @Autowired
+    private LowonganPesertaDocumentsRepository lowonganPesertaDocumentsRepository;
 
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
@@ -59,24 +62,80 @@ public class PesertaLowonganService {
         pesertaLowongan.setStatus("Applied");
         pesertaLowongan.setTanggalAplikasi(LocalDateTime.now());
         pesertaLowongan.setLastStatusUpdate(LocalDateTime.now());
-        //pesertaLowongan.setTahunAplikasi(2024);
 
-        pesertaLowonganRepository.save(pesertaLowongan);
+        PesertaLowongan savedPesertaLowongan = pesertaLowonganRepository.save(pesertaLowongan);
+
+        // Insert related data into lowongan_peserta_documents
+        for (Integer idUserDocument : pesertaLowonganRequest.getIdUserDocuments()) {
+            LowonganPesertaDocuments lowonganPesertaDocument = new LowonganPesertaDocuments();
+            lowonganPesertaDocument.setIdPesertaLowongan(savedPesertaLowongan.getId());
+            lowonganPesertaDocument.setIdUserDocument(idUserDocument);
+            lowonganPesertaDocument.setSudahDiverifikasi(false);
+            lowonganPesertaDocument.setStatusVerifikasi("Pending");
+            // Save document record
+            lowonganPesertaDocumentsRepository.save(lowonganPesertaDocument);
+        }
 
         // Log the operation
-        logger.info("PesertaLowongan successfully submitted: {}", pesertaLowongan);
+        logger.info("PesertaLowongan successfully submitted: {}", savedPesertaLowongan);
 
         // Create response data
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("id", pesertaLowongan.getId());
-        responseData.put("idLowongan", pesertaLowongan.getIdLowongan());
-        responseData.put("idPeserta", pesertaLowongan.getIdPeserta());
-        responseData.put("status", pesertaLowongan.getStatus());
+        responseData.put("id", savedPesertaLowongan.getId());
+        responseData.put("idLowongan", savedPesertaLowongan.getIdLowongan());
+        responseData.put("idPeserta", savedPesertaLowongan.getIdPeserta());
+        responseData.put("status", savedPesertaLowongan.getStatus());
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
-                pesertaLowongan
+                savedPesertaLowongan
         ));
     }
+
+
+    /**
+     * Validates the token and fetches the lock status for a given idPeserta.
+     *
+     * @param token     the authorization token
+     * @param idPeserta the idPeserta to check
+     * @return the lock status response
+     */
+    public ResponseEntity<ResponseWrapper<String>> checkLockStatus(String token, Integer idPeserta) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Fetch lock status
+        String lockStatus;
+        try {
+            lockStatus = pesertaLowonganRepository.findLockStatusByIdPeserta(idPeserta);
+            if (lockStatus == null) {
+                return ResponseEntity.status(404).body(new ResponseWrapper<>(
+                        responseCodeUtil.getCode("404"),
+                        "Lock status not found for idPeserta: " + idPeserta,
+                        null
+                ));
+            }
+        } catch (Exception e) {
+            logger.error("Error fetching lock status for idPeserta {}: {}", idPeserta, e.getMessage(), e);
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("500"),
+                    "Internal server error while fetching lock status",
+                    null
+            ));
+        }
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                "Lock status fetched successfully",
+                lockStatus
+        ));
+    }
+
 }

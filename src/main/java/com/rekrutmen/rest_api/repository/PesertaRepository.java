@@ -3,6 +3,7 @@ package com.rekrutmen.rest_api.repository;
 import com.rekrutmen.rest_api.dto.PesertaInfoRequest;
 import com.rekrutmen.rest_api.model.Peserta;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -27,5 +28,11 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
             "JOIN Lowongan l ON pl.idLowongan = l.idLowongan " +
             "WHERE p.idPeserta = :idPeserta")
     Optional<PesertaInfoRequest> findPesertaInfoByIdPeserta(@Param("idPeserta") Integer idPeserta);
+
+    // Update profile picture
+    @Modifying
+    @Query("UPDATE Peserta p SET p.profilePicture = :profilePicture WHERE p.idPeserta = :idPeserta")
+    void updateProfilePicture(@Param("idPeserta") Integer idPeserta, @Param("profilePicture") String profilePicture);
+
 }
 

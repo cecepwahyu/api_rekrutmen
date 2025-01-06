@@ -69,6 +69,7 @@ public class RegistrationService {
 
         // Create and save new user
         Peserta newUser = new Peserta();
+        newUser.setNama(registerRequest.getNama());
         newUser.setUsername(registerRequest.getUsername());
         newUser.setPassword(encryptedPassword);
         newUser.setEmail(registerRequest.getEmail());
@@ -85,20 +86,24 @@ public class RegistrationService {
         emailService.sendOtpEmaiVerification(newUser.getEmail(), otpCode);
 
         logger.info(
-                "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"username\": \"{}\", \"no_identitas\": \"{}\", \"email\": \"{}\", \"password\": \"{}\"}}",
+                "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"nama\": \"{}\", \"username\": \"{}\", \"no_identitas\": \"{}\", \"email\": \"{}\", \"password\": \"{}\", \"OTP\": \"{}\"}}",
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
+                registerRequest.getNama(),
                 registerRequest.getUsername(),
                 registerRequest.getNoIdentitas(),
                 registerRequest.getEmail(),
-                MaskingUtil.maskPassword(registerRequest.getPassword())
+                MaskingUtil.maskPassword(registerRequest.getPassword()),
+                otpCode
         );
 
         Map<String, Object> responseData = new HashMap<>();
+        responseData.put("nama", registerRequest.getNama());
         responseData.put("username", registerRequest.getUsername());
         responseData.put("no_identitas", registerRequest.getNoIdentitas());
         responseData.put("email", registerRequest.getEmail());
         responseData.put("password", registerRequest.getPassword());
+        responseData.put("otp", otpCode);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),

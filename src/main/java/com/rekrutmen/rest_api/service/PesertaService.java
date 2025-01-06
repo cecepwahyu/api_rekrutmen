@@ -2,15 +2,20 @@ package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.PesertaInfoRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
+import com.rekrutmen.rest_api.dto.UpdateProfilePictureRequest;
 import com.rekrutmen.rest_api.model.Peserta;
+import com.rekrutmen.rest_api.model.PesertaLowongan;
 import com.rekrutmen.rest_api.repository.PesertaRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -160,5 +165,30 @@ public class PesertaService {
         ));
     }
 
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Object>> updateProfilePicture(Integer idPeserta, String base64Image) {
+        Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
+
+        if (pesertaOptional.isEmpty()) {
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    "077",
+                    "Peserta not found",
+                    null
+            ));
+        }
+
+        // Update the profile picture
+        pesertaRepository.updateProfilePicture(idPeserta, base64Image);
+
+        // Return the request body in the response's data field
+        Map<String, String> responseData = new HashMap<>();
+        responseData.put("base64_image", base64Image);
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                "000",
+                "Profile picture updated successfully",
+                responseData
+        ));
+    }
 
 }

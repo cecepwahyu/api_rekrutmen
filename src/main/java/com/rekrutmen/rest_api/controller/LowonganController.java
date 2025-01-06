@@ -48,6 +48,16 @@ public class LowonganController {
         return lowonganService.getLowonganDetailSlug(token, slug);
     }
 
+    /**
+     * Endpoint to check lock status for a specific idPeserta.
+     */
+    @GetMapping("/lock-status/{idPeserta}")
+    public ResponseEntity<ResponseWrapper<String>> checkLockStatus(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta) {
+        return pesertaLowonganService.checkLockStatus(token, idPeserta);
+    }
+
     @PostMapping("/slug/{slug}/apply")
     public ResponseEntity<ResponseWrapper<PesertaLowongan>> applyToLowonganBySlug(
             @RequestHeader("Authorization") String token,
