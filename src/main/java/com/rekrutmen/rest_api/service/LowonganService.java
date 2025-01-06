@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -49,8 +50,9 @@ public class LowonganService {
             ));
         }
 
-        // Fetch lowongan list
-        List<Lowongan> lowongans = lowonganRepository.findAll();
+        // Fetch lowongan list ordered by idLowongan in descending order
+        List<Lowongan> lowongans = lowonganRepository.findAll(Sort.by(Sort.Direction.DESC, "idLowongan"));
+
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -82,8 +84,8 @@ public class LowonganService {
             page = 0; // Default to the first page
         }
 
-        // Create a pageable object with the desired page and size
-        Pageable pageable = PageRequest.of(page, 6); // 6 articles per page
+        // Create a pageable object with the desired page, size, and sorting by idLowongan descending
+        Pageable pageable = PageRequest.of(page, 6, Sort.by(Sort.Direction.DESC, "idLowongan"));
 
         // Fetch articles with pagination
         Page<Lowongan> lowongansPage = lowonganRepository.findAll(pageable);
