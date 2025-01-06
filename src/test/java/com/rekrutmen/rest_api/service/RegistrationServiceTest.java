@@ -42,17 +42,17 @@ class RegistrationServiceTest {
     void testHandleRegister_SuccessfulRegistration() {
         // Arrange
         RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("new_user");
+        //registerRequest.setUsername("new_user");
         registerRequest.setEmail("new_email@bpddiy.com");
         registerRequest.setPassword("password123");
         registerRequest.setNoIdentitas("123456789");
 
         Peserta newPeserta = new Peserta();
-        newPeserta.setUsername("new_user");
+        //newPeserta.setUsername("new_user");
         newPeserta.setEmail("new_email@bpddiy.com");
         newPeserta.setNoIdentitas("123456789");
 
-        when(pesertaService.isUsernameTaken("new_user")).thenReturn(false);
+        //when(pesertaService.isUsernameTaken("new_user")).thenReturn(false);
         when(pesertaService.isEmailTaken("new_email@bpddiy.com")).thenReturn(false);
         when(pesertaService.isNoIdentitasExist("123456789")).thenReturn(false);
         when(passwordEncoder.encode("password123")).thenReturn("encrypted_password");
@@ -79,12 +79,12 @@ class RegistrationServiceTest {
     void testHandleRegister_WhenUsernameExists() {
         // Arrange
         RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("existing_user");
+        //registerRequest.setUsername("existing_user");
         registerRequest.setEmail("new_email@bpddiy.com");
         registerRequest.setPassword("password123");
         registerRequest.setNoIdentitas("123456789");
 
-        when(pesertaService.isUsernameTaken("existing_user")).thenReturn(true);
+        //when(pesertaService.isUsernameTaken("existing_user")).thenReturn(true);
         when(responseCodeUtil.getMessage("400")).thenReturn("Bad Request");
 
         // Act
@@ -95,7 +95,7 @@ class RegistrationServiceTest {
         assertEquals("400", response.getBody().getResponseCode());
         assertEquals("Username already exist", response.getBody().getData());
 
-        verify(pesertaService, times(1)).isUsernameTaken("existing_user");
+        //verify(pesertaService, times(1)).isUsernameTaken("existing_user");
         verifyNoInteractions(passwordEncoder);
     }
 
@@ -103,12 +103,12 @@ class RegistrationServiceTest {
     void testHandleRegister_WhenEmailExists() {
         // Arrange
         RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("new_user");
+        //registerRequest.setUsername("new_user");
         registerRequest.setEmail("existing_email@bpddiy.com");
         registerRequest.setPassword("password123");
         registerRequest.setNoIdentitas("123456789");
 
-        when(pesertaService.isUsernameTaken("new_user")).thenReturn(false);
+        //when(pesertaService.isUsernameTaken("new_user")).thenReturn(false);
         when(pesertaService.isEmailTaken("existing_email@bpddiy.com")).thenReturn(true);
         when(responseCodeUtil.getMessage("400")).thenReturn("Bad Request");
 
@@ -120,7 +120,7 @@ class RegistrationServiceTest {
         assertEquals("400", response.getBody().getResponseCode());
         assertEquals("Email already registered", response.getBody().getData());
 
-        verify(pesertaService, times(1)).isUsernameTaken("new_user");
+        //verify(pesertaService, times(1)).isUsernameTaken("new_user");
         verify(pesertaService, times(1)).isEmailTaken("existing_email@bpddiy.com");
         verifyNoInteractions(passwordEncoder);
     }
@@ -129,12 +129,12 @@ class RegistrationServiceTest {
     void testHandleRegister_WhenNoIdentitasExists() {
         // Arrange
         RegisterRequest registerRequest = new RegisterRequest();
-        registerRequest.setUsername("new_user");
+        //registerRequest.setUsername("new_user");
         registerRequest.setEmail("new_email@bpddiy.com");
         registerRequest.setPassword("password123");
         registerRequest.setNoIdentitas("existing_no_identitas");
 
-        when(pesertaService.isUsernameTaken("new_user")).thenReturn(false);
+        //when(pesertaService.isUsernameTaken("new_user")).thenReturn(false);
         when(pesertaService.isEmailTaken("new_email@bpddiy.com")).thenReturn(false);
         when(pesertaService.isNoIdentitasExist("existing_no_identitas")).thenReturn(true);
         when(responseCodeUtil.getMessage("400")).thenReturn("Bad Request");
@@ -147,7 +147,7 @@ class RegistrationServiceTest {
         assertEquals("400", response.getBody().getResponseCode());
         assertEquals("NIK already registered", response.getBody().getData());
 
-        verify(pesertaService, times(1)).isUsernameTaken("new_user");
+        //verify(pesertaService, times(1)).isUsernameTaken("new_user");
         verify(pesertaService, times(1)).isEmailTaken("new_email@bpddiy.com");
         verify(pesertaService, times(1)).isNoIdentitasExist("existing_no_identitas");
         verifyNoInteractions(passwordEncoder);

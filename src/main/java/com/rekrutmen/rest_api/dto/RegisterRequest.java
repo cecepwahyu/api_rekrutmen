@@ -13,12 +13,12 @@ public class RegisterRequest {
     @JsonProperty("nama")
     private String nama;
 
-    @NotBlank
-    @Pattern(regexp = "^[^\\s]+$",
-            message = "Invalid payload request"
-    )
-    @JsonProperty("username")
-    private String username;
+//    @NotBlank
+//    @Pattern(regexp = "^[^\\s]+$",
+//            message = "Invalid payload request"
+//    )
+//    @JsonProperty("username")
+//    private String username;
 
     @NotBlank
     @Pattern(

@@ -3,11 +3,14 @@ package com.rekrutmen.rest_api.service;
 import com.rekrutmen.rest_api.dto.PesertaLowonganRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.LowonganPesertaDocuments;
+import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.model.PesertaLowongan;
 import com.rekrutmen.rest_api.repository.LowonganPesertaDocumentsRepository;
 import com.rekrutmen.rest_api.repository.PesertaLowonganRepository;
+import com.rekrutmen.rest_api.repository.PesertaRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +33,15 @@ public class PesertaLowonganService {
     private LowonganPesertaDocumentsRepository lowonganPesertaDocumentsRepository;
 
     @Autowired
+    private PesertaRepository pesertaRepository;
+
+    @Autowired
     private ResponseCodeUtil responseCodeUtil;
 
     @Autowired
     private TokenUtil tokenUtil;
 
+    @Transactional
     public ResponseEntity<ResponseWrapper<PesertaLowongan>> handleSubmitLowongan(String token, PesertaLowonganRequest pesertaLowonganRequest) {
 
         // Validate token
@@ -51,6 +58,19 @@ public class PesertaLowonganService {
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Update is_final field in Peserta
+        try {
+            pesertaRepository.setPesertaIsFinal(pesertaLowonganRequest.getIdPeserta(), LocalDateTime.now());
+            logger.info("Peserta is_final updated to true for idPeserta: {}", pesertaLowonganRequest.getIdPeserta());
+        } catch (Exception e) {
+            logger.error("Error updating is_final for idPeserta: {}", pesertaLowonganRequest.getIdPeserta(), e);
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("500"),
+                    "Internal server error while updating is_final",
                     null
             ));
         }

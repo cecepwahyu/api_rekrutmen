@@ -286,7 +286,7 @@ public class PesertaController {
         );
     }
 
-    @PutMapping("/{idPeserta}/submit-kk")
+    @PutMapping("/{idPeserta}/submit-kartu-keluarga")
     public ResponseEntity<ResponseWrapper<Object>> submitKartuKeluarga(
             @PathVariable Integer idPeserta,
             @RequestBody @Valid SubmitDocumentRequest request) {
@@ -505,6 +505,14 @@ public class PesertaController {
                     null
             ));
         }
+    }
+
+    @PutMapping("/{idPeserta}/set-is-final")
+    public ResponseEntity<ResponseWrapper<Object>> setIsFinal(
+            @PathVariable Integer idPeserta,
+            @RequestHeader("Authorization") String token
+    ) {
+        return pesertaService.updateIsFinal(idPeserta);
     }
 
 }

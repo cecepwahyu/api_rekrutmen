@@ -14,8 +14,9 @@ public class EmailService {
     public void sendOtpEmail(String toEmail, String otpCode) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        message.setSubject("Reset Password");
-        message.setText("Your Reset Password OTP code is: " + otpCode);
+        String emailBody = "Your Reset Password OTP code is: " + otpCode + "\n\n" +
+                "Anda dapat melakukan verifikasi akun melalui link berikut: http://localhost:3000/account-verification";
+        message.setText(emailBody);
         message.setFrom("seneng.banged@gmail.com");
 
         mailSender.send(message);
@@ -24,8 +25,10 @@ public class EmailService {
     public void sendOtpEmaiVerification(String toEmail, String otpCode) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
-        message.setSubject("Email Verification");
-        message.setText("Your OTP Email Verification code is: " + otpCode);
+        message.setSubject("Account Verification");
+        String emailBody = "Your Reset Password OTP code is: " + otpCode + "\n\n" +
+                "Anda dapat melakukan verifikasi akun melalui link berikut: http://localhost:3000/account-verification";
+        message.setText(emailBody);
         message.setFrom("seneng.banged@gmail.com");
 
         mailSender.send(message);

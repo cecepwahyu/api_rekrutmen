@@ -24,7 +24,7 @@ public class RegistrationController {
 
     @PostMapping
     public ResponseEntity<ResponseWrapper<Object>> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        logger.info("Request Data = {Name: {}, Username: {}, No Identitas: {}, Email: {}, Password: {}}", registerRequest.getNama(), registerRequest.getUsername(), registerRequest.getNoIdentitas(), registerRequest.getEmail(), registerRequest.getPassword());
+        logger.info("Request Data = {Name: {}, Username: {}, No Identitas: {}, Email: {}, Password: {}}", registerRequest.getNama(), registerRequest.getNoIdentitas(), registerRequest.getEmail(), registerRequest.getPassword());
         return registrationService.handleRegister(registerRequest);
     }
 }

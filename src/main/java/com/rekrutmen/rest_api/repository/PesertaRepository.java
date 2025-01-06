@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface PesertaRepository extends JpaRepository<Peserta, Long> {
@@ -16,7 +17,7 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
     Optional<Peserta> findByToken(String token);
     Optional<Peserta> findByOtp(String otp);
     Optional<Peserta> findByTelp(String telp);
-    boolean existsByUsername(String username);
+    //boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     boolean existsByTelp(String telp);
     boolean existsByNoIdentitas(String noIdentitas);
@@ -29,12 +30,6 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
             "WHERE p.idPeserta = :idPeserta")
     Optional<PesertaInfoRequest> findPesertaInfoByIdPeserta(@Param("idPeserta") Integer idPeserta);
 
-    //Get Peserta Info
-//    @Query("SELECT new com.rekrutmen.rest_api.dto.PesertaInfoRequest(p.nama, p.email, p.profilePicture) " +
-//            "FROM Peserta p " +
-//            "WHERE p.idPeserta = :idPeserta")
-//    Optional<PesertaInfoRequest> findPesertaDataByIdPeserta(@Param("idPeserta") Integer idPeserta);
-
     @Query("SELECT p.nama, p.email, p.profilePicture " +
             "FROM Peserta p " +
             "WHERE p.idPeserta = :idPeserta")
@@ -44,6 +39,10 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
     @Modifying
     @Query("UPDATE Peserta p SET p.profilePicture = :profilePicture WHERE p.idPeserta = :idPeserta")
     void updateProfilePicture(@Param("idPeserta") Integer idPeserta, @Param("profilePicture") String profilePicture);
+
+    @Modifying
+    @Query("UPDATE Peserta p SET p.isFinal = true, p.updatedAt = :updatedAt WHERE p.idPeserta = :idPeserta")
+    void setPesertaIsFinal(@Param("idPeserta") Integer idPeserta, @Param("updatedAt") LocalDateTime updatedAt);
 
 }
 
