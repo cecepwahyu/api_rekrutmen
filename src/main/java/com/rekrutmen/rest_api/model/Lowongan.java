@@ -59,4 +59,22 @@ public class Lowongan {
 
     @Column(name = "kode_lowongan", columnDefinition = "TEXT")
     private String kodeLowongan;
+
+    @Column(name = "flg_approve")
+    private Boolean flgApprove;
+
+    @Column(name = "id_auth")
+    private Integer idAuth;
+
+    @Column(name = "min_height")
+    private Integer minHeight;
+
+    @Column(name = "is_height_mandatory", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isHeightMandatory;
+
+    @Column(name = "is_jobdesc")
+    private Boolean isJobdesc;
+
+    @Column(name = "min_education", columnDefinition = "JSONB")
+    private String minEducation;
 }
