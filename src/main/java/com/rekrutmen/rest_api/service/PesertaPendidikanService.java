@@ -3,7 +3,6 @@ package com.rekrutmen.rest_api.service;
 import com.rekrutmen.rest_api.dto.PesertaPendidikanRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.PesertaPendidikan;
-import com.rekrutmen.rest_api.model.PesertaPengalaman;
 import com.rekrutmen.rest_api.repository.PesertaPendidikanRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
@@ -30,7 +29,7 @@ public class PesertaPendidikanService {
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
 
-    public ResponseEntity<ResponseWrapper<PesertaPendidikan>> getPesertaPendidikanDetail(String token, Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<List<PesertaPendidikan>>> getPesertaPendidikanDetail(String token, Integer idPeserta) {
 
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
@@ -51,7 +50,7 @@ public class PesertaPendidikanService {
         }
 
         // Fetch peserta details by ID Peserta
-        PesertaPendidikan pesertaPendidikan = pesertaPendidikanRepository.findByIdPeserta(idPeserta).orElse(null);
+        List<PesertaPendidikan> pesertaPendidikan = pesertaPendidikanRepository.findByIdPeserta(idPeserta);
 
         if (pesertaPendidikan == null) {
             return ResponseEntity.status(200).body(new ResponseWrapper<>(
@@ -61,21 +60,7 @@ public class PesertaPendidikanService {
             ));
         }
 
-        logger.info(
-                "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"idPendidikan\": \"{}\", \"idPeserta\": \"{}\", \"idJenjang\": \"{}\", \"namaInstitusi\": \"{}\", \"jurusan\": \"{}\", \"thnMasuk\": \"{}\" \"thnLulus\": \"{}\" \"nilai\": \"{}\" \"gelar\": \"{}\" \"achievements\": \"{}\"}}",
-                responseCodeUtil.getCode("000"),
-                responseCodeUtil.getMessage("000"),
-                pesertaPendidikan.getIdPendidikan(),
-                pesertaPendidikan.getIdPeserta(),
-                pesertaPendidikan.getIdJenjang(),
-                pesertaPendidikan.getNamaInstitusi(),
-                pesertaPendidikan.getJurusan(),
-                pesertaPendidikan.getThnMasuk(),
-                pesertaPendidikan.getThnLulus(),
-                pesertaPendidikan.getNilai(),
-                pesertaPendidikan.getGelar(),
-                pesertaPendidikan.getAchievements()
-        );
+        logger.info("Response Data = {}", pesertaPendidikan);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),

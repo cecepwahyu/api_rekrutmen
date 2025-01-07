@@ -1,13 +1,9 @@
 package com.rekrutmen.rest_api.service;
 
-import com.rekrutmen.rest_api.dto.PesertaPendidikanRequest;
 import com.rekrutmen.rest_api.dto.PesertaPengalamanRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
-import com.rekrutmen.rest_api.model.Peserta;
-import com.rekrutmen.rest_api.model.PesertaPendidikan;
 import com.rekrutmen.rest_api.model.PesertaPengalaman;
 import com.rekrutmen.rest_api.repository.PesertaPengalamanRepository;
-import com.rekrutmen.rest_api.util.MaskingUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
 import org.slf4j.Logger;
@@ -33,7 +29,7 @@ public class PesertaPengalamanService {
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
 
-    public ResponseEntity<ResponseWrapper<PesertaPengalaman>> getPesertaPengalamanDetail(String token, Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<List<PesertaPengalaman>>> getPesertaPengalamanDetail(String token, Integer idPeserta) {
 
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
@@ -54,7 +50,7 @@ public class PesertaPengalamanService {
         }
 
         // Fetch peserta details by ID Peserta
-        PesertaPengalaman pesertaPengalaman = pesertaPengalamanRepository.findByIdPeserta(idPeserta).orElse(null);
+        List<PesertaPengalaman> pesertaPengalaman = pesertaPengalamanRepository.findByIdPeserta(idPeserta);
 
         if (pesertaPengalaman == null) {
             return ResponseEntity.status(200).body(new ResponseWrapper<>(
@@ -64,17 +60,7 @@ public class PesertaPengalamanService {
             ));
         }
 
-        logger.info(
-                "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"idDataKerja\": \"{}\", \"idPeserta\": \"{}\", \"namaInstansi\": \"{}\", \"posisiKerja\": \"{}\", \"periodeKerja\": \"{}\", \"deskripsiKerja\": \"{}\"}}",
-                responseCodeUtil.getCode("000"),
-                responseCodeUtil.getMessage("000"),
-                pesertaPengalaman.getIdDataKerja(),
-                pesertaPengalaman.getIdPeserta(),
-                pesertaPengalaman.getNamaInstansi(),
-                pesertaPengalaman.getPosisiKerja(),
-                pesertaPengalaman.getPeriodeKerja(),
-                pesertaPengalaman.getDeskripsiKerja()
-        );
+        logger.info("Response Data = {}", pesertaPengalaman);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),

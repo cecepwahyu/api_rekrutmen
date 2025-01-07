@@ -55,28 +55,28 @@ public class PesertaController {
     }
 
     @GetMapping("/pengalaman/{idPeserta}")
-    public ResponseEntity<ResponseWrapper<PesertaPengalaman>> getPesertaPengalamanDetail(
+    public ResponseEntity<ResponseWrapper<List<PesertaPengalaman>>> getPesertaPengalamanDetail(
             @RequestHeader("Authorization") String token,
             @PathVariable Integer idPeserta) {
         return pesertaPengalamanService.getPesertaPengalamanDetail(token, idPeserta);
     }
 
     @GetMapping("/pendidikan/{idPeserta}")
-    public ResponseEntity<ResponseWrapper<PesertaPendidikan>> getPesertaPendidikanDetail(
+    public ResponseEntity<ResponseWrapper<List<PesertaPendidikan>>> getPesertaPendidikanDetail(
             @RequestHeader("Authorization") String token,
             @PathVariable Integer idPeserta) {
         return pesertaPendidikanService.getPesertaPendidikanDetail(token, idPeserta);
     }
 
     @GetMapping("/organisasi/{idPeserta}")
-    public ResponseEntity<ResponseWrapper<PesertaOrganisasi>> getPesertaOrganisasiDetail(
+    public ResponseEntity<ResponseWrapper<List<PesertaOrganisasi>>> getPesertaOrganisasiDetail(
             @RequestHeader("Authorization") String token,
             @PathVariable Integer idPeserta) {
         return pesertaOrganisasiService.getPesertaOrganisasiDetail(token, idPeserta);
     }
 
     @GetMapping("/kontak/{idPeserta}")
-    public ResponseEntity<ResponseWrapper<PesertaKontak>> getPesertaKontakDetail(
+    public ResponseEntity<ResponseWrapper<List<PesertaKontak>>> getPesertaKontakDetail(
             @RequestHeader("Authorization") String token,
             @PathVariable Integer idPeserta) {
         return pesertaKontakService.getPesertaKontakDetail(token, idPeserta);
@@ -216,6 +216,7 @@ public class PesertaController {
                 organisasi.setPosisiOrganisasi(e.getPosisiOrganisasi());
                 organisasi.setPeriode(e.getPeriode());
                 organisasi.setDeskripsiKerja(e.getDeskripsiKerja());
+                organisasi.setSertifikat(e.getSertifikat());
                 return organisasi;
             }).collect(Collectors.toList());
             profileService.updateOrganisasi(idPeserta, organization);
@@ -229,6 +230,7 @@ public class PesertaController {
                 pekerjaan.setPosisiKerja(e.getPosisiKerja());
                 pekerjaan.setPeriodeKerja(e.getPeriodeKerja());
                 pekerjaan.setDeskripsiKerja(e.getDeskripsiKerja());
+                pekerjaan.setSuratPengalamanKerja(e.getSuratPengalamanKerja());
                 return pekerjaan;
             }).collect(Collectors.toList());
             profileService.updatePengalamanKerja(idPeserta, work);

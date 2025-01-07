@@ -1,10 +1,8 @@
 package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.PesertaOrganisasiRequest;
-import com.rekrutmen.rest_api.dto.PesertaPengalamanRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.PesertaOrganisasi;
-import com.rekrutmen.rest_api.model.PesertaPengalaman;
 import com.rekrutmen.rest_api.repository.PesertaOrganisasiRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
@@ -31,7 +29,7 @@ public class PesertaOrganisasiService {
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
 
-    public ResponseEntity<ResponseWrapper<PesertaOrganisasi>> getPesertaOrganisasiDetail(String token, Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<List<PesertaOrganisasi>>> getPesertaOrganisasiDetail(String token, Integer idPeserta) {
 
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
@@ -52,7 +50,7 @@ public class PesertaOrganisasiService {
         }
 
         // Fetch peserta details by ID Peserta
-        PesertaOrganisasi pesertaOrganisasi = pesertaOrganisasiRepository.findByIdPeserta(idPeserta).orElse(null);
+        List<PesertaOrganisasi> pesertaOrganisasi = pesertaOrganisasiRepository.findByIdPeserta(idPeserta);
 
         if (pesertaOrganisasi == null) {
             return ResponseEntity.status(200).body(new ResponseWrapper<>(
@@ -62,17 +60,7 @@ public class PesertaOrganisasiService {
             ));
         }
 
-        logger.info(
-                "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"idOrgPeserta\": \"{}\", \"idPeserta\": \"{}\", \"namaOrganisasi\": \"{}\", \"posisiOrganisasi\": \"{}\", \"periode\": \"{}\", \"deskripsiKerja\": \"{}\"}}",
-                responseCodeUtil.getCode("000"),
-                responseCodeUtil.getMessage("000"),
-                pesertaOrganisasi.getIdOrgPeserta(),
-                pesertaOrganisasi.getIdPeserta(),
-                pesertaOrganisasi.getNamaOrganisasi(),
-                pesertaOrganisasi.getPosisiOrganisasi(),
-                pesertaOrganisasi.getPeriode(),
-                pesertaOrganisasi.getDeskripsiKerja()
-        );
+        logger.info("Response Data = {}", pesertaOrganisasi);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),

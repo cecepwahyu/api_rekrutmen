@@ -1,10 +1,8 @@
 package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.PesertaKontakRequest;
-import com.rekrutmen.rest_api.dto.PesertaOrganisasiRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.PesertaKontak;
-import com.rekrutmen.rest_api.model.PesertaOrganisasi;
 import com.rekrutmen.rest_api.repository.PesertaKontakRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
@@ -31,7 +29,7 @@ public class PesertaKontakService {
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
 
-    public ResponseEntity<ResponseWrapper<PesertaKontak>> getPesertaKontakDetail(String token, Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<List<PesertaKontak>>> getPesertaKontakDetail(String token, Integer idPeserta) {
 
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
@@ -52,7 +50,7 @@ public class PesertaKontakService {
         }
 
         // Fetch peserta details by ID Peserta
-        PesertaKontak pesertaKontak = pesertaKontakRepository.findByIdPeserta(idPeserta).orElse(null);
+        List<PesertaKontak> pesertaKontak = pesertaKontakRepository.findByIdPeserta(idPeserta);
 
         if (pesertaKontak == null) {
             return ResponseEntity.status(200).body(new ResponseWrapper<>(
@@ -62,18 +60,7 @@ public class PesertaKontakService {
             ));
         }
 
-        logger.info(
-                "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"idKontakPeserta\": \"{}\", \"idPeserta\": \"{}\", \"namaKontak\": \"{}\", \"hubKontak\": \"{}\", \"telpKontak\": \"{}\", \"emailKontak\": \"{}\", \"alamatKontak\": \"{}\"}}",
-                responseCodeUtil.getCode("000"),
-                responseCodeUtil.getMessage("000"),
-                pesertaKontak.getIdKontakPeserta(),
-                pesertaKontak.getIdPeserta(),
-                pesertaKontak.getNamaKontak(),
-                pesertaKontak.getHubKontak(),
-                pesertaKontak.getTelpKontak(),
-                pesertaKontak.getEmailKontak(),
-                pesertaKontak.getAlamatKontak()
-        );
+        logger.info("Response Data = {}", pesertaKontak);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
