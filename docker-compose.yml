@@ -12,5 +12,4 @@ services:
     ports:
       - '9054:8080'
     volumes:
-      - '/home/devftp/data/api-rekrutmen/config/timezone:/etc/timezone'
       - '/home/devftp/data/api-rekrutmen/config:/APIREKRUTMEN/config'
