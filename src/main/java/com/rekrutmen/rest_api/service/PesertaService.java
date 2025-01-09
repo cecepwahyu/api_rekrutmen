@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,6 +166,45 @@ public class PesertaService {
         ));
     }
 
+    public ResponseEntity<ResponseWrapper<Object[]>> getPesertaData(String token, Integer idPeserta) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Fetch peserta details by ID Peserta
+        Optional<Object[]> pesertaOptional = pesertaRepository.findPesertaDataByIdPesertaRaw(idPeserta);
+
+        if (pesertaOptional.isEmpty()) {
+            return ResponseEntity.status(200).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    null
+            ));
+        }
+
+        Object[] peserta = pesertaOptional.get();
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                peserta
+        ));
+    }
+
     @Transactional
     public ResponseEntity<ResponseWrapper<Object>> updateProfilePicture(Integer idPeserta, String base64Image) {
         Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
@@ -188,6 +228,42 @@ public class PesertaService {
                 "000",
                 "Profile picture updated successfully",
                 responseData
+        ));
+    }
+
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Object>> updateIsFinal(Integer idPeserta) {
+        // Fetch the peserta by ID
+        Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
+
+        if (pesertaOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(new ResponseWrapper<>(
+                    "404",
+                    "Peserta not found",
+                    null
+            ));
+        }
+
+        Peserta peserta = pesertaOptional.get();
+
+        // Check if is_final is already true
+        if (Boolean.TRUE.equals(peserta.getIsFinal())) {
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    "400",
+                    "Peserta is_final is already true",
+                    null
+            ));
+        }
+
+        // Update the is_final field
+        peserta.setIsFinal(true);
+        peserta.setUpdatedAt(LocalDateTime.now());
+        pesertaRepository.save(peserta);
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                "000",
+                "Peserta is_final updated successfully",
+                null
         ));
     }
 

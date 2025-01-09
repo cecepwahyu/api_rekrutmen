@@ -29,4 +29,7 @@ public class PesertaPengalaman {
 
     @Column(name = "deskripsi_kerja")
     private String deskripsiKerja;
+
+    @Column(name = "surat_pengalaman_kerja")
+    private String suratPengalamanKerja;
 }

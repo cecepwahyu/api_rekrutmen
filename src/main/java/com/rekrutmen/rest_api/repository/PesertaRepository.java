@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface PesertaRepository extends JpaRepository<Peserta, Long> {
@@ -29,10 +30,19 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
             "WHERE p.idPeserta = :idPeserta")
     Optional<PesertaInfoRequest> findPesertaInfoByIdPeserta(@Param("idPeserta") Integer idPeserta);
 
+    @Query("SELECT p.nama, p.email, p.profilePicture " +
+            "FROM Peserta p " +
+            "WHERE p.idPeserta = :idPeserta")
+    Optional<Object[]> findPesertaDataByIdPesertaRaw(@Param("idPeserta") Integer idPeserta);
+
     // Update profile picture
     @Modifying
     @Query("UPDATE Peserta p SET p.profilePicture = :profilePicture WHERE p.idPeserta = :idPeserta")
     void updateProfilePicture(@Param("idPeserta") Integer idPeserta, @Param("profilePicture") String profilePicture);
+
+    @Modifying
+    @Query("UPDATE Peserta p SET p.isFinal = true, p.updatedAt = :updatedAt WHERE p.idPeserta = :idPeserta")
+    void setPesertaIsFinal(@Param("idPeserta") Integer idPeserta, @Param("updatedAt") LocalDateTime updatedAt);
 
 }
 

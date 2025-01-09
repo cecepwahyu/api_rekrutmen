@@ -5,7 +5,7 @@ FROM harbor.local/jdk/openjdk:21-slim
 WORKDIR /APIREKRUTMEN
 
 # Copy the project files into the container
-COPY api-rekrutmen.jar .
+COPY api-rekrutmen2.jar .
 
 # Expose port
 EXPOSE 8080
