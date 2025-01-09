@@ -29,6 +29,11 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
             "WHERE p.idPeserta = :idPeserta")
     Optional<PesertaInfoRequest> findPesertaInfoByIdPeserta(@Param("idPeserta") Integer idPeserta);
 
+    @Query("SELECT p.nama, p.email, p.profilePicture " +
+            "FROM Peserta p " +
+            "WHERE p.idPeserta = :idPeserta")
+    Optional<Object[]> findPesertaDataByIdPesertaRaw(@Param("idPeserta") Integer idPeserta);
+
     // Update profile picture
     @Modifying
     @Query("UPDATE Peserta p SET p.profilePicture = :profilePicture WHERE p.idPeserta = :idPeserta")

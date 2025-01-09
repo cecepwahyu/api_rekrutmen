@@ -17,10 +17,12 @@ public class PesertaLowongan {
     @Column(name = "id", updatable = false, nullable = false)
     private String id;
 
-    @Column(name = "id_lowongan", nullable = false)
+//    @Column(name = "id_lowongan", nullable = false)
+    @Column(name = "id_lowongan")
     private Integer idLowongan;
 
-    @Column(name = "id_peserta", length = 50, nullable = false)
+    //@Column(name = "id_peserta", length = 50, nullable = false)
+    @Column(name = "id_peserta", length = 50)
     private Integer idPeserta;
 
     @Column(name = "tanggal_aplikasi")

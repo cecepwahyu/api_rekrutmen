@@ -19,4 +19,7 @@ public class PesertaOrganisasiRequest {
 
     @JsonProperty("deskripsi_kerja")
     private String deskripsiKerja;
+
+    @JsonProperty("sertifikat")
+    private String sertifikat;
 }

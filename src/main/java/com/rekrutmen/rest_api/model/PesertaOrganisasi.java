@@ -31,4 +31,7 @@ public class PesertaOrganisasi {
 
     @Column(name = "deskripsi_kerja")
     private String deskripsiKerja;
+
+    @Column(name = "sertifikat")
+    private String sertifikat;
 }

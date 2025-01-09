@@ -131,4 +131,13 @@ public class Peserta {
 
     @Column(name = "profile_picture")
     private String profilePicture;
+
+    @Column(name = "tinggi")
+    private Integer tinggi;
+
+    @Column(name = "berat")
+    private Integer berat;
+
+    @Column(name = "is_final")
+    private Boolean isFinal;
 }

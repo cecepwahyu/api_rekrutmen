@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -74,6 +75,83 @@ public class PesertaLowonganService {
             lowonganPesertaDocument.setStatusVerifikasi("Pending");
             // Save document record
             lowonganPesertaDocumentsRepository.save(lowonganPesertaDocument);
+        }
+
+        // Log the operation
+        logger.info("PesertaLowongan successfully submitted: {}", savedPesertaLowongan);
+
+        // Create response data
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("id", savedPesertaLowongan.getId());
+        responseData.put("idLowongan", savedPesertaLowongan.getIdLowongan());
+        responseData.put("idPeserta", savedPesertaLowongan.getIdPeserta());
+        responseData.put("status", savedPesertaLowongan.getStatus());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                savedPesertaLowongan
+        ));
+    }
+
+    @Transactional
+    public ResponseEntity<ResponseWrapper<PesertaLowongan>> handleSubmitJobdesc(String token, PesertaLowonganRequest pesertaLowonganRequest) {
+
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Update is_final field in Peserta
+        try {
+            pesertaRepository.setPesertaIsFinal(pesertaLowonganRequest.getIdPeserta(), LocalDateTime.now());
+            logger.info("Peserta is_final updated to true for idPeserta: {}", pesertaLowonganRequest.getIdPeserta());
+        } catch (Exception e) {
+            logger.error("Error updating is_final for idPeserta: {}", pesertaLowonganRequest.getIdPeserta(), e);
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("500"),
+                    "Internal server error while updating is_final",
+                    null
+            ));
+        }
+
+        // Create and save new PesertaLowongan record
+        PesertaLowongan pesertaLowongan = new PesertaLowongan();
+        pesertaLowongan.setIdLowongan(pesertaLowonganRequest.getIdLowongan());
+        pesertaLowongan.setIdPeserta(pesertaLowonganRequest.getIdPeserta());
+        pesertaLowongan.setStatus("Applied");
+        pesertaLowongan.setTanggalAplikasi(LocalDateTime.now());
+        pesertaLowongan.setLastStatusUpdate(LocalDateTime.now());
+
+        PesertaLowongan savedPesertaLowongan = pesertaLowonganRepository.save(pesertaLowongan);
+
+        // Insert related data into lowongan_peserta_documents
+        List<Integer> userDocuments = pesertaLowonganRequest.getIdUserDocuments();
+        if (userDocuments != null && !userDocuments.isEmpty()) {
+            for (Integer idUserDocument : userDocuments) {
+                LowonganPesertaDocuments lowonganPesertaDocument = new LowonganPesertaDocuments();
+                lowonganPesertaDocument.setIdPesertaLowongan(savedPesertaLowongan.getId());
+                lowonganPesertaDocument.setIdUserDocument(idUserDocument);
+                lowonganPesertaDocument.setSudahDiverifikasi(false);
+                lowonganPesertaDocument.setStatusVerifikasi("Pending");
+                // Save document record
+                lowonganPesertaDocumentsRepository.save(lowonganPesertaDocument);
+            }
+        } else {
+            logger.warn("No user documents provided for idPesertaLowongan: {}", savedPesertaLowongan.getId());
         }
 
         // Log the operation

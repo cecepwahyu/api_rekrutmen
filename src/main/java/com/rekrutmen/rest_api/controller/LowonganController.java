@@ -6,6 +6,7 @@ import com.rekrutmen.rest_api.model.Lowongan;
 import com.rekrutmen.rest_api.model.PesertaLowongan;
 import com.rekrutmen.rest_api.service.LowonganService;
 import com.rekrutmen.rest_api.service.PesertaLowonganService;
+import com.rekrutmen.rest_api.service.VwLowonganDokumenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,9 @@ public class LowonganController {
 
     @Autowired
     private PesertaLowonganService pesertaLowonganService;
+
+    @Autowired
+    private VwLowonganDokumenService vwLowonganDokumenService;
 
     @GetMapping("/list")
     public ResponseEntity<ResponseWrapper<List<Lowongan>>> getLowonganList(@RequestHeader("Authorization") String token) {
@@ -80,5 +84,36 @@ public class LowonganController {
 
         // Submit the application
         return pesertaLowonganService.handleSubmitLowongan(token, pesertaLowonganRequest);
+    }
+
+    @PostMapping("/slug/{slug}/applyJobdesc")
+    public ResponseEntity<ResponseWrapper<PesertaLowongan>> applyToJobdescBySlug(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String slug,
+            @RequestBody PesertaLowonganRequest pesertaLowonganRequest) {
+        // Fetch lowongan details using slug
+        ResponseEntity<ResponseWrapper<Lowongan>> lowonganResponse = lowonganService.getLowonganDetailSlug(token, slug);
+
+        if (lowonganResponse.getStatusCode().isError() || lowonganResponse.getBody() == null) {
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    "400",
+                    "Lowongan not found",
+                    null
+            ));
+        }
+
+        // Set the idLowongan in PesertaLowonganRequest based on the fetched Lowongan
+        Lowongan lowongan = lowonganResponse.getBody().getData();
+        pesertaLowonganRequest.setIdLowongan(lowongan.getIdLowongan());
+
+        // Submit the application
+        return pesertaLowonganService.handleSubmitJobdesc(token, pesertaLowonganRequest);
+    }
+
+    @GetMapping("/dokumen/slug/{slug}")
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getDokumenBySlug(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String slug) {
+        return vwLowonganDokumenService.getDokumenBySlug(token, slug);
     }
 }
