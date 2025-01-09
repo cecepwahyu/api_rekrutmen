@@ -301,7 +301,7 @@ public class PesertaController {
         );
     }
 
-    @PutMapping("/{idPeserta}/submit-suratsehat")
+    @PutMapping("/{idPeserta}/submit-surat-keterangan-sehat")
     public ResponseEntity<ResponseWrapper<Object>> submitSuratSehat(
             @PathVariable Integer idPeserta,
             @RequestBody @Valid SubmitDocumentRequest request) {
@@ -327,7 +327,7 @@ public class PesertaController {
         );
     }
 
-    @PutMapping("/{idPeserta}/submit-suratlamaran")
+    @PutMapping("/{idPeserta}/submit-surat-lamaran")
     public ResponseEntity<ResponseWrapper<Object>> submitSuratLamaran(
             @PathVariable Integer idPeserta,
             @RequestBody @Valid SubmitDocumentRequest request) {
@@ -340,7 +340,7 @@ public class PesertaController {
         );
     }
 
-    @PutMapping("/{idPeserta}/submit-suratpernyataan")
+    @PutMapping("/{idPeserta}/submit-surat-pernyataan")
     public ResponseEntity<ResponseWrapper<Object>> submitSuratPernyataan(
             @PathVariable Integer idPeserta,
             @RequestBody @Valid SubmitDocumentRequest request) {
