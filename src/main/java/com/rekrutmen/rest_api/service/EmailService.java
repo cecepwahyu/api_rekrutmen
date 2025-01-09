@@ -17,7 +17,7 @@ public class EmailService {
         String emailBody = "Your Reset Password OTP code is: " + otpCode + "\n\n" +
                 "Anda dapat melakukan verifikasi akun melalui link berikut: http://localhost:3000/account-verification";
         message.setText(emailBody);
-        message.setFrom("seneng.banged@gmail.com");
+        message.setFrom("novian.andika@bpddiy.co.id");
 
         mailSender.send(message);
     }
@@ -29,7 +29,7 @@ public class EmailService {
         String emailBody = "Your Reset Password OTP code is: " + otpCode + "\n\n" +
                 "Anda dapat melakukan verifikasi akun melalui link berikut: http://localhost:3000/account-verification";
         message.setText(emailBody);
-        message.setFrom("seneng.banged@gmail.com");
+        message.setFrom("novian.andika@bpddiy.co.id");
 
         mailSender.send(message);
     }

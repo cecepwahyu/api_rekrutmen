@@ -72,9 +72,6 @@ public class Lowongan {
     @Column(name = "is_height_mandatory", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isHeightMandatory;
 
-    @Column(name = "is_jobdesc")
-    private Boolean isJobdesc;
-
-    @Column(name = "min_education", columnDefinition = "JSONB")
-    private String minEducation;
+    @Column(name = "max_age")
+    private String maxAge;
 }
