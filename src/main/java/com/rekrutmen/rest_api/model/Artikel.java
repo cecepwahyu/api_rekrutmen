@@ -14,7 +14,7 @@ import java.util.UUID;
 public class Artikel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
     @Column(nullable = false, length = 100)
@@ -43,4 +43,7 @@ public class Artikel {
 
     @Column(name = "created_by", nullable = false)
     private Integer createdBy;
+
+    @Column(name = "status_publish")
+    private Character statusPublish;
 }

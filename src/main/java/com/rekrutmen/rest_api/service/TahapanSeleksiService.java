@@ -1,10 +1,7 @@
 package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
-import com.rekrutmen.rest_api.model.Artikel;
-import com.rekrutmen.rest_api.model.ProgresTahapan;
 import com.rekrutmen.rest_api.model.TahapanSeleksi;
-import com.rekrutmen.rest_api.repository.ProgresTahapanRepository;
 import com.rekrutmen.rest_api.repository.TahapanSeleksiRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;

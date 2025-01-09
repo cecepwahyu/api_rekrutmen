@@ -2,9 +2,7 @@ package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.PesertaInfoRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
-import com.rekrutmen.rest_api.dto.UpdateProfilePictureRequest;
 import com.rekrutmen.rest_api.model.Peserta;
-import com.rekrutmen.rest_api.model.PesertaLowongan;
 import com.rekrutmen.rest_api.repository.PesertaRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;

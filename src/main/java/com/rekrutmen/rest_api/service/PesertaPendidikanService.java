@@ -3,7 +3,6 @@ package com.rekrutmen.rest_api.service;
 import com.rekrutmen.rest_api.dto.PesertaPendidikanRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.PesertaPendidikan;
-import com.rekrutmen.rest_api.model.PesertaPengalaman;
 import com.rekrutmen.rest_api.repository.PesertaPendidikanRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
