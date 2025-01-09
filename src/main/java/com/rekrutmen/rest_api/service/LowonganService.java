@@ -1,7 +1,6 @@
 package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
-import com.rekrutmen.rest_api.model.Artikel;
 import com.rekrutmen.rest_api.model.Lowongan;
 import com.rekrutmen.rest_api.repository.LowonganRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
