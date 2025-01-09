@@ -6,8 +6,10 @@ import com.rekrutmen.rest_api.model.LowonganPesertaDocuments;
 import com.rekrutmen.rest_api.model.PesertaLowongan;
 import com.rekrutmen.rest_api.repository.LowonganPesertaDocumentsRepository;
 import com.rekrutmen.rest_api.repository.PesertaLowonganRepository;
+import com.rekrutmen.rest_api.repository.PesertaRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class PesertaLowonganService {
 
     @Autowired
     private PesertaLowonganRepository pesertaLowonganRepository;
+
+    @Autowired
+    private PesertaRepository pesertaRepository;
 
     @Autowired
     private LowonganPesertaDocumentsRepository lowonganPesertaDocumentsRepository;
