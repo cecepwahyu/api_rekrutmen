@@ -92,4 +92,28 @@ public class LowonganController {
             @PathVariable String slug) {
         return vwLowonganDokumenService.getDokumenBySlug(token, slug);
     }
+
+    @PostMapping("/slug/{slug}/applyJobdesc")
+    public ResponseEntity<ResponseWrapper<PesertaLowongan>> applyToJobdescBySlug(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String slug,
+            @RequestBody PesertaLowonganRequest pesertaLowonganRequest) {
+        // Fetch lowongan details using slug
+        ResponseEntity<ResponseWrapper<Lowongan>> lowonganResponse = lowonganService.getLowonganDetailSlug(token, slug);
+
+        if (lowonganResponse.getStatusCode().isError() || lowonganResponse.getBody() == null) {
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    "400",
+                    "Lowongan not found",
+                    null
+            ));
+        }
+
+        // Set the idLowongan in PesertaLowonganRequest based on the fetched Lowongan
+        Lowongan lowongan = lowonganResponse.getBody().getData();
+        pesertaLowonganRequest.setIdLowongan(lowongan.getIdLowongan());
+
+        // Submit the application
+        return pesertaLowonganService.handleSubmitJobdesc(token, pesertaLowonganRequest);
+    }
 }

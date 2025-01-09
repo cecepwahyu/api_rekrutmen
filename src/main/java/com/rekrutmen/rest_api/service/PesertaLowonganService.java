@@ -113,6 +113,67 @@ public class PesertaLowonganService {
         ));
     }
 
+    @Transactional
+    public ResponseEntity<ResponseWrapper<PesertaLowongan>> handleSubmitJobdesc(String token, PesertaLowonganRequest pesertaLowonganRequest) {
+
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Update is_final field in Peserta
+        try {
+            pesertaRepository.setPesertaIsFinal(pesertaLowonganRequest.getIdPeserta(), LocalDateTime.now());
+            logger.info("Peserta is_final updated to true for idPeserta: {}", pesertaLowonganRequest.getIdPeserta());
+        } catch (Exception e) {
+            logger.error("Error updating is_final for idPeserta: {}", pesertaLowonganRequest.getIdPeserta(), e);
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("500"),
+                    "Internal server error while updating is_final",
+                    null
+            ));
+        }
+
+        // Create and save new PesertaLowongan record
+        PesertaLowongan pesertaLowongan = new PesertaLowongan();
+        pesertaLowongan.setIdLowongan(pesertaLowonganRequest.getIdLowongan());
+        pesertaLowongan.setIdPeserta(pesertaLowonganRequest.getIdPeserta());
+        pesertaLowongan.setStatus("Applied");
+        pesertaLowongan.setTanggalAplikasi(LocalDateTime.now());
+        pesertaLowongan.setLastStatusUpdate(LocalDateTime.now());
+
+        PesertaLowongan savedPesertaLowongan = pesertaLowonganRepository.save(pesertaLowongan);
+
+        // Log the operation
+        logger.info("PesertaLowongan successfully submitted: {}", savedPesertaLowongan);
+
+        // Create response data
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("id", savedPesertaLowongan.getId());
+        responseData.put("idLowongan", savedPesertaLowongan.getIdLowongan());
+        responseData.put("idPeserta", savedPesertaLowongan.getIdPeserta());
+        responseData.put("status", savedPesertaLowongan.getStatus());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                savedPesertaLowongan
+        ));
+    }
+
 
     /**
      * Validates the token and fetches the lock status for a given idPeserta.
