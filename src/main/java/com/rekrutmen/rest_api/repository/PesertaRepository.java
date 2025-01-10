@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface PesertaRepository extends JpaRepository<Peserta, Long> {
@@ -43,6 +44,27 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
     @Modifying
     @Query("UPDATE Peserta p SET p.isFinal = true, p.updatedAt = :updatedAt WHERE p.idPeserta = :idPeserta")
     void setPesertaIsFinal(@Param("idPeserta") Integer idPeserta, @Param("updatedAt") LocalDateTime updatedAt);
+
+    @Query(value = """
+    SELECT 
+        p.id_peserta AS peserta_id,
+        po.id_org_peserta AS organisasi_id, po.nama_organisasi, po.posisi_organisasi, 
+        po.periode AS organisasi_periode, po.deskripsi_kerja AS organisasi_deskripsi,
+        pp.id_pendidikan AS pendidikan_id, pp.id_jenjang AS pendidikan_jenjang, pp.nama_institusi,
+        pp.jurusan, pp.thn_masuk, pp.thn_lulus, pp.nilai, pp.gelar, pp.achievements,
+        pg.id_data_kerja AS pengalaman_id, pg.nama_instansi, pg.posisi_kerja,
+        pg.periode_kerja, pg.deskripsi_kerja AS pengalaman_deskripsi,
+        pk.id_kontak_peserta AS kontak_id, pk.nama_kontak, pk.hub_kontak,
+        pk.telp_kontak, pk.email_kontak, pk.alamat_kontak
+    FROM 
+        tbl_peserta p
+    LEFT JOIN peserta_organisasi po ON p.id_peserta = po.id_peserta
+    LEFT JOIN peserta_pendidikan pp ON p.id_peserta = pp.id_peserta
+    LEFT JOIN peserta_pengalaman pg ON p.id_peserta = pg.id_peserta
+    LEFT JOIN peserta_kontak pk ON p.id_peserta = pk.id_peserta
+    WHERE p.id_peserta = :idPeserta
+    """, nativeQuery = true)
+    List<Object[]> findPesertaDetails(@Param("idPeserta") Integer idPeserta);
 
 }
 

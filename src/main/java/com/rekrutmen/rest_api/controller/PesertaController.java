@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -81,6 +82,26 @@ public class PesertaController {
             @PathVariable Integer idPeserta) {
         return pesertaKontakService.getPesertaKontakDetail(token, idPeserta);
     }
+
+    @GetMapping("/{idPeserta}/details")
+    public ResponseEntity<ResponseWrapper<Map<String, Object>>> getPesertaDetails(
+            @PathVariable Integer idPeserta) {
+        try {
+            Map<String, Object> pesertaDetails = pesertaService.getPesertaDetails(idPeserta);
+            return ResponseEntity.ok(new ResponseWrapper<>(
+                    "000",
+                    "Data fetched successfully",
+                    pesertaDetails
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    "500",
+                    "Internal Server Error",
+                    null
+            ));
+        }
+    }
+
 
     @GetMapping("/peserta-info/{idPeserta}")
     public ResponseEntity<?> getPesertaInfo(
