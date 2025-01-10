@@ -4,11 +4,13 @@ import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Artikel;
 import com.rekrutmen.rest_api.repository.ArtikelRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import com.rekrutmen.rest_api.util.SFTPClient;
 import com.rekrutmen.rest_api.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -176,4 +178,33 @@ public class ArtikelService {
                 artikel
         ));
     }
+
+    public ResponseEntity<?> getArticleImage(String gambar) {
+
+        // Find the article by gambar
+        Artikel artikel = artikelRepository.findByGambar(gambar)
+                .orElseThrow(() -> new RuntimeException("Article not found"));
+
+        // Get the file path from the `gambar` column
+        String fileName = artikel.getGambar();
+        String filePath = "/home/devftp/data/karir/public/uploads/artikel/" + fileName;
+
+        // Log the file path
+        System.out.println("Resolved file path: " + filePath);
+
+        // Fetch the image from the FTP server
+        try (SFTPClient sftpClient = new SFTPClient("192.168.4.79", "devftp", "devftp")) {
+            byte[] imageBytes = sftpClient.downloadFile(filePath);
+
+            // Return the image as a response
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(imageBytes);
+        } catch (Exception e) {
+            e.printStackTrace(); // Log the stack trace for debugging
+            return ResponseEntity.status(500).body("Failed to fetch image: " + e.getMessage());
+        }
+    }
+
+
 }

@@ -42,4 +42,11 @@ public class ArtikelController {
             @PathVariable String slug) {
         return artikelService.getArtikelDetailSlug(token, slug);
     }
+
+    @GetMapping("/image/{gambar}")
+    public ResponseEntity<?> getArticleImage(@PathVariable String gambar) {
+        return artikelService.getArticleImage(gambar);
+    }
+
+
 }
