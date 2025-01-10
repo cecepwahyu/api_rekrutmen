@@ -517,4 +517,65 @@ public class PesertaController {
         return pesertaService.updateIsFinal(idPeserta);
     }
 
+    @DeleteMapping("/{idPeserta}/delete-ktp")
+    public ResponseEntity<ResponseWrapper<Object>> deleteKtp(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 1); // 1 = KTP
+    }
+
+    @DeleteMapping("/{idPeserta}/delete-skck")
+    public ResponseEntity<ResponseWrapper<Object>> deleteSkck(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 2); // 2 = SKCK
+    }
+
+    @DeleteMapping("/{idPeserta}/delete-toefl")
+    public ResponseEntity<ResponseWrapper<Object>> deleteToefl(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 3); // 3 = TOEFL
+    }
+
+    @DeleteMapping("/{idPeserta}/delete-kartu-keluarga")
+    public ResponseEntity<ResponseWrapper<Object>> deleteKartuKeluarga(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 4); // 4 = Kartu Keluarga
+    }
+
+    @DeleteMapping("/{idPeserta}/delete-surat-keterangan-sehat")
+    public ResponseEntity<ResponseWrapper<Object>> deleteSuratSehat(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 7); // 7 = Surat Keterangan Sehat
+    }
+
+    @DeleteMapping("/{idPeserta}/delete-cv")
+    public ResponseEntity<ResponseWrapper<Object>> deleteCv(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 8); // 8 = CV
+    }
+
+    @DeleteMapping("/{idPeserta}/delete-surat-lamaran")
+    public ResponseEntity<ResponseWrapper<Object>> deleteSuratLamaran(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 9); // 9 = Surat Lamaran
+    }
+
+    @DeleteMapping("/{idPeserta}/delete-surat-pernyataan")
+    public ResponseEntity<ResponseWrapper<Object>> deleteSuratPernyataan(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 10); // 10 = Surat Pernyataan
+    }
+
+    @DeleteMapping("/{idPeserta}/delete-ijazah")
+    public ResponseEntity<ResponseWrapper<Object>> deleteIjazah(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 11); // 11 = Ijazah
+    }
+
+    @DeleteMapping("/{idPeserta}/delete-transkrip")
+    public ResponseEntity<ResponseWrapper<Object>> deleteTranskrip(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 12); // 12 = Transkrip Nilai
+    }
+
+    @DeleteMapping("/{idPeserta}/delete-fotofullbadan")
+    public ResponseEntity<ResponseWrapper<Object>> deleteFotoFullBadan(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 13); // 13 = Foto Full Badan
+    }
+
+    @DeleteMapping("/{idPeserta}/delete-pasfoto")
+    public ResponseEntity<ResponseWrapper<Object>> deletePasFoto(@PathVariable Integer idPeserta) {
+        return pesertaDocumentsService.deleteDocument(idPeserta, 14); // 14 = Pas Foto
+    }
+
+
 }
