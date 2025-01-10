@@ -82,6 +82,7 @@ public class PesertaLowonganService {
         pesertaLowongan.setStatus("Applied");
         pesertaLowongan.setTanggalAplikasi(LocalDateTime.now());
         pesertaLowongan.setLastStatusUpdate(LocalDateTime.now());
+        pesertaLowongan.setIsRekrutmen(true);
 
         PesertaLowongan savedPesertaLowongan = pesertaLowonganRepository.save(pesertaLowongan);
 
@@ -154,6 +155,7 @@ public class PesertaLowonganService {
         pesertaLowongan.setStatus("Applied");
         pesertaLowongan.setTanggalAplikasi(LocalDateTime.now());
         pesertaLowongan.setLastStatusUpdate(LocalDateTime.now());
+        pesertaLowongan.setIsRekrutmen(false);
 
         PesertaLowongan savedPesertaLowongan = pesertaLowonganRepository.save(pesertaLowongan);
 
