@@ -1,6 +1,7 @@
 package com.rekrutmen.rest_api.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -11,11 +12,19 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Value("${app.base.url}")
+    private String baseUrl;
+
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
+
     public void sendOtpEmail(String toEmail, String otpCode) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
+        message.setSubject("Reset Password OTP");
         String emailBody = "Your Reset Password OTP code is: " + otpCode + "\n\n" +
-                "Anda dapat melakukan verifikasi akun melalui link berikut: http://localhost:3000/account-verification";
+                "Anda dapat melakukan verifikasi akun melalui link berikut: " + baseUrl + "/account-verification";
         message.setText(emailBody);
         message.setFrom("novian.andika@bpddiy.co.id");
 
@@ -27,7 +36,7 @@ public class EmailService {
         message.setTo(toEmail);
         message.setSubject("Account Verification");
         String emailBody = "Your Reset Password OTP code is: " + otpCode + "\n\n" +
-                "Anda dapat melakukan verifikasi akun melalui link berikut: http://localhost:3000/account-verification";
+                "Anda dapat melakukan verifikasi akun melalui link berikut: " + baseUrl + "/account-verification";
         message.setText(emailBody);
         message.setFrom("novian.andika@bpddiy.co.id");
 
