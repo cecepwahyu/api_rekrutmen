@@ -32,7 +32,7 @@ public class PesertaLowongan {
     @Column(name = "last_status_update", length = 50)
     private LocalDateTime lastStatusUpdate;
 
-//    @Column(name = "tahun_aplikasi", length = 4)
-//    private Integer tahunAplikasi;
+    @Column(name = "is_rekrutmen")
+    private Boolean isRekrutmen;
 
 }

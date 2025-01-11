@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface ArtikelRepository extends JpaRepository<Artikel, UUID> {
     Optional<Artikel> findById(UUID id);
     Optional<Artikel> findBySlug(String slug);
+    Optional<Artikel> findByGambar(String gambar);
 }

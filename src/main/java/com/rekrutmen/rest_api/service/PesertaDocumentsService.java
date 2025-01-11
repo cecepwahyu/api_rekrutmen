@@ -465,5 +465,29 @@ public class PesertaDocumentsService {
                 null
         ));
     }
+
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Object>> deleteDocument(Integer idPeserta, Integer jenisDokumen) {
+        // Check if the document exists
+        Optional<PesertaDocuments> existingDocument = documentsRepository.findByUserIdAndJenisDokumen(idPeserta, jenisDokumen);
+
+        if (existingDocument.isPresent()) {
+            // Delete the document
+            documentsRepository.deleteByUserIdAndJenisDokumen(idPeserta, jenisDokumen);
+
+            return ResponseEntity.ok(new ResponseWrapper<>(
+                    "000",
+                    "Document deleted successfully",
+                    null
+            ));
+        } else {
+            return ResponseEntity.status(404).body(new ResponseWrapper<>(
+                    "404",
+                    "Document not found",
+                    null
+            ));
+        }
+    }
+
 }
 

@@ -23,6 +23,13 @@ public class ContentTypeValidationFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Skip validation for the /image/{gambar} endpoint
+        String requestUri = request.getRequestURI();
+        if (requestUri.matches("/api/artikel/image/.*")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // Log request method and Content-Type
         logger.info("Request Method: " + request.getMethod());
         logger.info("Content-Type: " + request.getHeader("Content-Type"));

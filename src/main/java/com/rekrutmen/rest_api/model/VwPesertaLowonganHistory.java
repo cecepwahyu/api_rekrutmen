@@ -61,4 +61,7 @@ public class VwPesertaLowonganHistory {
 
     @Column(name = "status")
     private Character status;
+
+    @Column(name = "is_rekrutmen")
+    private Boolean isRekrutmen;
 }
