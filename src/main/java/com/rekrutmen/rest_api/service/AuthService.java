@@ -265,4 +265,50 @@ public class AuthService {
         ));
     }
 
+    public ResponseEntity<ResponseWrapper<Object>> handleChangePassword(ChangePasswordRequest changePasswordRequest) {
+        if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
+            logger.warn("New password and confirm password do not match for email: {}", changePasswordRequest.getEmail());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    "New password and confirm password do not match",
+                    null
+            ));
+        }
+
+        Optional<Peserta> pesertaOptional = pesertaRepository.findByEmail(changePasswordRequest.getEmail());
+        if (pesertaOptional.isEmpty()) {
+            logger.warn("No user found with email: {}", changePasswordRequest.getEmail());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("404"),
+                    "User not found",
+                    null
+            ));
+        }
+
+        Peserta peserta = pesertaOptional.get();
+
+        if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), peserta.getPassword())) {
+            logger.warn("Current password does not match for email: {}", changePasswordRequest.getEmail());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    "Current password is incorrect",
+                    null
+            ));
+        }
+
+        String encryptedPassword = passwordEncoder.encode(changePasswordRequest.getNewPassword());
+        peserta.setPassword(encryptedPassword);
+        peserta.setUpdatedAt(LocalDateTime.now());
+        pesertaRepository.save(peserta);
+
+        logger.info("Password changed successfully for email: {}", changePasswordRequest.getEmail());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                "Password changed successfully",
+                null
+        ));
+    }
+
+
 }

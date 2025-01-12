@@ -56,4 +56,11 @@ public class AuthController {
         logger.info("Received request to update password for email: {}", updatePasswordRequest.getEmail());
         return authService.handleUpdatePassword(updatePasswordRequest);
     }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<ResponseWrapper<Object>> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+        logger.info("Received request to change password for email: {}", changePasswordRequest.getEmail());
+        return authService.handleChangePassword(changePasswordRequest);
+    }
+
 }
