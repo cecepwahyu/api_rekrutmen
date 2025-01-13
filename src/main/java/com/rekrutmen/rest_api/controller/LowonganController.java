@@ -86,13 +86,6 @@ public class LowonganController {
         return pesertaLowonganService.handleSubmitLowongan(token, pesertaLowonganRequest);
     }
 
-    @GetMapping("/dokumen/slug/{slug}")
-    public ResponseEntity<ResponseWrapper<List<Object[]>>> getDokumenBySlug(
-            @RequestHeader("Authorization") String token,
-            @PathVariable String slug) {
-        return vwLowonganDokumenService.getDokumenBySlug(token, slug);
-    }
-
     @PostMapping("/slug/{slug}/applyJobdesc")
     public ResponseEntity<ResponseWrapper<PesertaLowongan>> applyToJobdescBySlug(
             @RequestHeader("Authorization") String token,
@@ -115,5 +108,12 @@ public class LowonganController {
 
         // Submit the application
         return pesertaLowonganService.handleSubmitJobdesc(token, pesertaLowonganRequest);
+    }
+
+    @GetMapping("/dokumen/slug/{slug}")
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getDokumenBySlug(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String slug) {
+        return vwLowonganDokumenService.getDokumenBySlug(token, slug);
     }
 }
