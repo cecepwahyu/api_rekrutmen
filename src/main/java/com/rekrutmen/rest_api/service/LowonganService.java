@@ -86,8 +86,8 @@ public class LowonganService {
         // Create a pageable object with the desired page, size, and sorting by idLowongan descending
         Pageable pageable = PageRequest.of(page, 6, Sort.by(Sort.Direction.DESC, "idLowongan"));
 
-        // Fetch articles with pagination
-        Page<Lowongan> lowongansPage = lowonganRepository.findAll(pageable);
+        // Fetch articles with pagination and apply custom query to filter by status and flg_approve
+        Page<Lowongan> lowongansPage = lowonganRepository.findByStatusAndFlgApprove(pageable);
 
         // Create a response wrapper with pagination info
         Map<String, Object> responseData = new HashMap<>();
@@ -102,6 +102,7 @@ public class LowonganService {
                 responseData
         ));
     }
+
 
     public ResponseEntity<ResponseWrapper<Lowongan>> getLowonganDetail(String token, Long idLowongan) {
 

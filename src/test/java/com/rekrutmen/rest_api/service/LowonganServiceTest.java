@@ -41,7 +41,7 @@ class LowonganServiceTest {
         lowongan1.setPersyaratan("Bachelor's degree in Computer Science or related field. Experience in test automation.");
         lowongan1.setPeriodeAwal(LocalDate.of(2024, 1, 1));
         lowongan1.setPeriodeAkhir(LocalDate.of(2024, 12, 12));
-        lowongan1.setStatus('0');
+        //lowongan1.setStatus('0');
         lowongan1.setCreatedAt(LocalDateTime.now());
         lowongan1.setUpdatedAt(LocalDateTime.now());
         lowongan1.setCreatedBy(1);
@@ -57,7 +57,7 @@ class LowonganServiceTest {
         lowongan2.setPersyaratan("Master's degree in Data Science. Experience in Python and machine learning.");
         lowongan2.setPeriodeAwal(LocalDate.of(2024, 2, 1));
         lowongan2.setPeriodeAkhir(LocalDate.of(2024, 6, 30));
-        lowongan2.setStatus('1');
+        //lowongan2.setStatus('1');
         lowongan2.setCreatedAt(LocalDateTime.now());
         lowongan2.setUpdatedAt(LocalDateTime.now());
         lowongan2.setCreatedBy(2);
