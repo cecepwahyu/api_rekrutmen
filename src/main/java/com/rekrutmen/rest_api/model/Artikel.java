@@ -43,4 +43,7 @@ public class Artikel {
 
     @Column(name = "created_by", nullable = false)
     private Integer createdBy;
+
+    @Column(name = "status_publish")
+    private Character statusPublish;
 }
