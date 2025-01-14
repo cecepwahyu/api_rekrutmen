@@ -195,6 +195,8 @@ public class PesertaController {
         existingPeserta.setFlgStatus(request.getFlgStatus() != null ? request.getFlgStatus() : existingPeserta.getFlgStatus());
         existingPeserta.setTglStatus(request.getTglStatus() != null ? request.getTglStatus() : existingPeserta.getTglStatus());
         existingPeserta.setUpdatedAt(LocalDateTime.now());
+        existingPeserta.setTinggi(request.getTinggi() != null ? request.getTinggi() : existingPeserta.getTinggi());
+        existingPeserta.setBerat(request.getBerat() != null ? request.getBerat() : existingPeserta.getBerat());
 
         profileService.updateProfile(existingPeserta);
 
