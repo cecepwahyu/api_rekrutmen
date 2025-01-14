@@ -46,4 +46,7 @@ public class Artikel {
 
     @Column(name = "status_publish")
     private Character statusPublish;
+
+    @Column(name = "approved")
+    private Boolean approved;
 }
