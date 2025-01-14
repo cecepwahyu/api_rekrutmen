@@ -59,6 +59,7 @@ public class LowonganService {
         ));
     }
 
+    // Lowongan Status 1 & 4
     public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongans(String token, Integer page) {
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
@@ -103,6 +104,95 @@ public class LowonganService {
         ));
     }
 
+    //GET REKRUTMEN LIST
+    public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongansRekrutmen(String token, Integer page) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Handle null or negative page numbers gracefully
+        if (page == null || page < 0) {
+            page = 0; // Default to the first page
+        }
+
+        // Create a pageable object with the desired page, size, and sorting by idLowongan descending
+        Pageable pageable = PageRequest.of(page, 6, Sort.by(Sort.Direction.DESC, "idLowongan"));
+
+        // Fetch articles with pagination and apply custom query to filter by status and flg_approve
+        Page<Lowongan> lowongansPage = lowonganRepository.findApprovedLowonganRekrutmen(pageable);
+
+        // Create a response wrapper with pagination info
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("content", lowongansPage.getContent());
+        responseData.put("currentPage", lowongansPage.getNumber());
+        responseData.put("totalItems", lowongansPage.getTotalElements());
+        responseData.put("totalPages", lowongansPage.getTotalPages());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
+    }
+
+    // GET JOB DESC
+    public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongansJobDesc(String token, Integer page) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Handle null or negative page numbers gracefully
+        if (page == null || page < 0) {
+            page = 0; // Default to the first page
+        }
+
+        // Create a pageable object with the desired page, size, and sorting by idLowongan descending
+        Pageable pageable = PageRequest.of(page, 6, Sort.by(Sort.Direction.DESC, "idLowongan"));
+
+        // Fetch articles with pagination and apply custom query to filter by status and flg_approve
+        Page<Lowongan> lowongansPage = lowonganRepository.findApprovedLowonganJobDesc(pageable);
+
+        // Create a response wrapper with pagination info
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("content", lowongansPage.getContent());
+        responseData.put("currentPage", lowongansPage.getNumber());
+        responseData.put("totalItems", lowongansPage.getTotalElements());
+        responseData.put("totalPages", lowongansPage.getTotalPages());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
+    }
 
     public ResponseEntity<ResponseWrapper<Lowongan>> getLowonganDetail(String token, Long idLowongan) {
 

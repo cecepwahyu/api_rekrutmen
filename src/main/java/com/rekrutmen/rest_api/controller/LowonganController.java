@@ -38,6 +38,20 @@ public class LowonganController {
         return lowonganService.getPaginatedLowongans(token, page);
     }
 
+    @GetMapping("/rekrutmen/paginated")
+    public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongansRekrutmen(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page) {
+        return lowonganService.getPaginatedLowongansRekrutmen(token, page);
+    }
+
+    @GetMapping("/jobdesc/paginated")
+    public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongansJobDesc(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page) {
+        return lowonganService.getPaginatedLowongansJobDesc(token, page);
+    }
+
     @GetMapping("/id/{idLowongan}")
     public ResponseEntity<ResponseWrapper<Lowongan>> getLowonganDetail(
             @RequestHeader("Authorization") String token,
