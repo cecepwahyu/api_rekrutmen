@@ -49,6 +49,7 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
     @Query(value = """
     SELECT 
         p.id_peserta AS peserta_id,
+        p.profile_picture AS profile_picture,
         po.id_org_peserta AS organisasi_id, po.nama_organisasi, po.posisi_organisasi, 
         po.periode AS organisasi_periode, po.deskripsi_kerja AS organisasi_deskripsi,
         pp.id_pendidikan AS pendidikan_id, pp.id_jenjang AS pendidikan_jenjang, pp.nama_institusi,
