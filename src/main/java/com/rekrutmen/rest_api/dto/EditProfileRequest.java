@@ -89,6 +89,12 @@ public class EditProfileRequest {
     @JsonProperty("profile_picture")
     private String profilePicture;
 
+    @JsonProperty("tinggi")
+    private Integer tinggi;
+
+    @JsonProperty("berat")
+    private Integer berat;
+
     // Family (Kontak Kerabat) data
     private List<PesertaKontakRequest> kontak;
 
