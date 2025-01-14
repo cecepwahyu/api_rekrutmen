@@ -5,6 +5,8 @@ import com.rekrutmen.rest_api.model.PengumumanUmum;
 import com.rekrutmen.rest_api.repository.PengumumanUmumRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,8 @@ import java.util.UUID;
 
 @Service
 public class PengumumanUmumService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PengumumanUmumService.class);
 
     @Autowired
     private PengumumanUmumRepository pengumumanUmumRepository;
@@ -85,8 +89,8 @@ public class PengumumanUmumService {
         // Create a pageable object with the desired page and size, 6 articles per page
         Pageable pageable = PageRequest.of(page, 6);
 
-        // Fetch articles with pagination
-        Page<PengumumanUmum> pengumumanUmumsPage = pengumumanUmumRepository.findAll(pageable);
+        // Fetch articles with pagination using the new repository method
+        Page<PengumumanUmum> pengumumanUmumsPage = pengumumanUmumRepository.findPublishedAndApproved(pageable);
 
         // Create a response wrapper with pagination info
         Map<String, Object> responseData = new HashMap<>();
