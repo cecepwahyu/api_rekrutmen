@@ -29,7 +29,7 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
             "FROM Peserta p " +
             "JOIN PesertaLowongan pl ON p.idPeserta = pl.idPeserta " +
             "JOIN Lowongan l ON pl.idLowongan = l.idLowongan " +
-            "WHERE p.idPeserta = :idPeserta")
+            "WHERE p.idPeserta = :idPeserta AND pl.isRekrutmen = TRUE")
     Optional<PesertaInfoRequest> findPesertaInfoByIdPeserta(@Param("idPeserta") Integer idPeserta);
 
     @Query("SELECT p.nama, p.email, p.profilePicture " +

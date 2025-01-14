@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/progress")
 public class ProgresTahapanController {
@@ -32,11 +34,11 @@ public class ProgresTahapanController {
      * Fetches the progress detail by id_tahapan.
      *
      * @param token      the authorization token.
-     * @param idLowongan  the id_tahapan to fetch the progress for.
+     * @param idLowongan the id_tahapan to fetch the progress for.
      * @return ResponseEntity containing the progress detail.
      */
     @GetMapping("/tahapan/{idLowongan}")
-    public ResponseEntity<ResponseWrapper<ProgresTahapan>> getProgresTahapanByIdTahapan(
+    public ResponseEntity<ResponseWrapper<List<ProgresTahapan>>> getProgresTahapanByIdTahapan(
             @RequestHeader("Authorization") String token,
             @PathVariable Integer idLowongan) {
         return progresTahapanService.getProgresTahapanByIdLowongan(token, idLowongan);

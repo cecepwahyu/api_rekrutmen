@@ -34,6 +34,9 @@ public class PesertaController {
     private PesertaService pesertaService;
 
     @Autowired
+    private PesertaLowonganService pesertaLowonganService;
+
+    @Autowired
     private PesertaPengalamanService pesertaPengalamanService;
 
     @Autowired
@@ -129,6 +132,15 @@ public class PesertaController {
         } else {
             return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
         }
+    }
+
+    @GetMapping("/jobdesc/query")
+    public ResponseEntity<ResponseWrapper<List<PesertaLowongan>>> getPesertaLowonganByCriteria(
+            @RequestHeader("Authorization") String token,
+            @RequestParam Integer idLowongan,
+            @RequestParam Integer idPeserta,
+            @RequestParam Boolean isRekrutmen) {
+        return pesertaLowonganService.getPesertaLowonganByCriteria(token, idLowongan, idPeserta, isRekrutmen);
     }
 
     @PutMapping("/{idPeserta}/update-profile-picture")

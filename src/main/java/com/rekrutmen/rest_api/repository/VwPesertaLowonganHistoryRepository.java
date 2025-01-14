@@ -15,4 +15,7 @@ public interface VwPesertaLowonganHistoryRepository extends JpaRepository<VwPese
     Optional<VwPesertaLowonganHistory> findBySlug(String slug);
 
     List<VwPesertaLowonganHistory> findAllByTahunAplikasi(Integer tahunAplikasi);
+
+    List<VwPesertaLowonganHistory> findAllByIsRekrutmenAndIdPeserta(Boolean isRekrutmen, Long idPeserta);
+
 }
