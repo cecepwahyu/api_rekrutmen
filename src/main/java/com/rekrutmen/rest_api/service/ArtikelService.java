@@ -59,7 +59,7 @@ public class ArtikelService {
         Pageable pageable = PageRequest.of(page, 6); // 6 articles per page
 
         // Fetch articles with pagination
-        Page<Artikel> artikelsPage = artikelRepository.findAll(pageable);
+        Page<Artikel> artikelsPage = artikelRepository.findPublishedAndApproved(pageable);
 
         // Create a response wrapper with pagination info
         Map<String, Object> responseData = new HashMap<>();
