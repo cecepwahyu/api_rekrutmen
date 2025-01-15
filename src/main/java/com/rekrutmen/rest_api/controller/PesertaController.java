@@ -120,6 +120,15 @@ public class PesertaController {
         }
     }
 
+    @GetMapping("/{idPeserta}/jobdesc")
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getPesertaLowonganNotRekrutmen(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta
+    ) {
+        return pesertaService.getPesertaLowonganNotRekrutmen(token, idPeserta);
+    }
+
+
     @GetMapping("/peserta-data/{idPeserta}")
     public ResponseEntity<?> getPesertaData(
             @RequestHeader("Authorization") String token,

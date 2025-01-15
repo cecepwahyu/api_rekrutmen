@@ -164,6 +164,44 @@ public class PesertaService {
         ));
     }
 
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getPesertaLowonganNotRekrutmen(String token, Integer idPeserta) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Fetch data from the repository
+        List<Object[]> results = pesertaRepository.findPesertaLowonganByIdPesertaAndIsRekrutmenFalse(idPeserta);
+
+        if (results.isEmpty()) {
+            return ResponseEntity.status(200).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    null
+            ));
+        }
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                results
+        ));
+    }
+
+
     public ResponseEntity<ResponseWrapper<Object[]>> getPesertaData(String token, Integer idPeserta) {
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
