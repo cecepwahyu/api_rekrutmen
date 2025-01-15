@@ -11,4 +11,19 @@ public interface TahapanAnnouncementsRepository extends JpaRepository<TahapanAnn
 
     @Query("SELECT t.content FROM TahapanAnnouncements t WHERE t.idLowongan = :idLowongan")
     String findContentByIdLowongan(@Param("idLowongan") Integer idLowongan);
+
+    @Query(value = """
+    SELECT *
+    FROM tahapan_announcements
+    WHERE id_lowongan = :idLowongan
+      AND id_announcement = (
+          SELECT MAX(id_announcement)
+          FROM tahapan_announcements
+          WHERE id_lowongan = :idLowongan
+            AND approved = true
+            AND status = 'P'
+      )
+    """, nativeQuery = true)
+    TahapanAnnouncements findLatestContentByIdLowongan(@Param("idLowongan") Integer idLowongan);
+
 }
