@@ -26,11 +26,6 @@ public class LowonganController {
     @Autowired
     private VwLowonganDokumenService vwLowonganDokumenService;
 
-    @GetMapping("/list")
-    public ResponseEntity<ResponseWrapper<List<Lowongan>>> getLowonganList(@RequestHeader("Authorization") String token) {
-        return lowonganService.getLowonganList(token);
-    }
-
     @GetMapping("/paginated")
     public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongans(
             @RequestHeader("Authorization") String token,

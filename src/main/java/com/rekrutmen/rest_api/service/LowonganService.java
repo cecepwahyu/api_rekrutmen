@@ -29,36 +29,6 @@ public class LowonganService {
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
 
-    public ResponseEntity<ResponseWrapper<List<Lowongan>>> getLowonganList(String token) {
-
-        // Validate token
-        if (!tokenUtil.isValidToken(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("299"),
-                    responseCodeUtil.getMessage("299"),
-                    null
-            ));
-        }
-
-        // Validate if token is expired
-        if (tokenUtil.isTokenExpired(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("298"),
-                    responseCodeUtil.getMessage("298"),
-                    null
-            ));
-        }
-
-        // Fetch lowongan list ordered by idLowongan in descending order
-        List<Lowongan> lowongans = lowonganRepository.findAll(Sort.by(Sort.Direction.DESC, "idLowongan"));
-
-        return ResponseEntity.ok(new ResponseWrapper<>(
-                responseCodeUtil.getCode("000"),
-                responseCodeUtil.getMessage("000"),
-                lowongans
-        ));
-    }
-
     // Lowongan Status 1 & 4
     public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongans(String token, Integer page) {
         // Validate token

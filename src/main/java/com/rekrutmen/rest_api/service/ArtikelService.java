@@ -75,34 +75,6 @@ public class ArtikelService {
         ));
     }
 
-    public ResponseEntity<ResponseWrapper<List<Artikel>>> getArtikelList(String token) {
-        // Validate token
-        if (!tokenUtil.isValidToken(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("299"),
-                    responseCodeUtil.getMessage("299"),
-                    null
-            ));
-        }
-
-        // Validate if token is expired
-        if (tokenUtil.isTokenExpired(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("298"),
-                    responseCodeUtil.getMessage("298"),
-                    null
-            ));
-        }
-
-        // Fetch all articles without pagination
-        List<Artikel> artikels = artikelRepository.findAll();
-        return ResponseEntity.ok(new ResponseWrapper<>(
-                responseCodeUtil.getCode("000"),
-                responseCodeUtil.getMessage("000"),
-                artikels
-        ));
-    }
-
     //Get artikel by ID
     public ResponseEntity<ResponseWrapper<Artikel>> getArtikelDetail(String token, UUID id) {
         // Validate token

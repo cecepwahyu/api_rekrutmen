@@ -35,50 +35,6 @@ class ArtikelServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void testGetArtikelList_WithValidToken() {
-        // Arrange
-        String validToken = "valid_token";
-        when(tokenUtil.isValidToken(validToken)).thenReturn(true);
-
-        Artikel artikel1 = createArtikel("Judul 1", "slug-1", "gambar1.jpg", "Isi artikel 1", 1, 1);
-        Artikel artikel2 = createArtikel("Judul 2", "slug-2", "gambar2.jpg", "Isi artikel 2", 2, 2);
-
-        List<Artikel> mockArtikels = Arrays.asList(artikel1, artikel2);
-        when(artikelRepository.findAll()).thenReturn(mockArtikels);
-
-        // Act
-        ResponseEntity<ResponseWrapper<List<Artikel>>> response = artikelService.getArtikelList(validToken);
-
-        // Assert
-        assertEquals(200, response.getStatusCodeValue());
-        assertEquals("000", response.getBody().getResponseCode());
-        assertEquals("Success", response.getBody().getResponseMessage());
-        assertEquals(2, response.getBody().getData().size());
-
-        verify(tokenUtil, times(1)).isValidToken(validToken);
-        verify(artikelRepository, times(1)).findAll();
-    }
-
-    @Test
-    void testGetArtikelList_WithInvalidToken() {
-        // Arrange
-        String invalidToken = "invalid_token";
-        when(tokenUtil.isValidToken(invalidToken)).thenReturn(false);
-
-        // Act
-        ResponseEntity<ResponseWrapper<List<Artikel>>> response = artikelService.getArtikelList(invalidToken);
-
-        // Assert
-        assertEquals(401, response.getStatusCodeValue());
-        assertEquals("401", response.getBody().getResponseCode());
-        assertEquals("Unauthorized", response.getBody().getResponseMessage());
-        assertEquals(null, response.getBody().getData());
-
-        verify(tokenUtil, times(1)).isValidToken(invalidToken);
-        verifyNoInteractions(artikelRepository);
-    }
-
     // Helper method to create mock Artikel objects
     private Artikel createArtikel(String judul, String slug, String gambar, String isi, Integer createdBy, Integer updatedBy) {
         Artikel artikel = new Artikel();

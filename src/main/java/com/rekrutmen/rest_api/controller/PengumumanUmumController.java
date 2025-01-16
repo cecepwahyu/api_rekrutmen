@@ -21,23 +21,11 @@ public class PengumumanUmumController {
     @Autowired
     private TokenUtil tokenUtil;
 
-    @GetMapping("/list")
-    public ResponseEntity<ResponseWrapper<List<PengumumanUmum>>> getPengumumanUmumList(@RequestHeader("Authorization") String token) {
-        return pengumumanUmumService.getAllPengumumanUmums(token);
-    }
-
     @GetMapping("/paginated")
     public ResponseEntity<ResponseWrapper<Object>> getPaginatedPengumumanUmums(
             @RequestHeader("Authorization") String token,
             @RequestParam(defaultValue = "0") int page) {
         return pengumumanUmumService.getPaginatedPengumumanUmums(token, page);
-    }
-
-    @GetMapping("/id/{id}")
-    public ResponseEntity<ResponseWrapper<PengumumanUmum>> getPengumumanUmumDetail(
-            @RequestHeader("Authorization") String token,
-            @PathVariable UUID id) {
-        return pengumumanUmumService.getPengumumanUmumDetail(token, id);
     }
 
     @GetMapping("/slug/{slug}")
