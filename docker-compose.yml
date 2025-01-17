@@ -15,3 +15,8 @@ services:
       - '9054:8080'
     volumes:
       - '/home/devftp/data/api-rekrutmen/config:/APIREKRUTMEN/config'
+
+
+networks:
+  network-rekrutmen-bpd-new:
+    driver: bridge
