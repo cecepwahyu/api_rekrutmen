@@ -165,7 +165,8 @@ public class ArtikelService {
         System.out.println("Resolved file path: " + filePath);
 
         // Fetch the image from the FTP server
-        try (SFTPClient sftpClient = new SFTPClient("192.168.4.79", "devftp", "devftp")) {
+        try (SFTPClient sftpClient = new SFTPClient("192.168.10.45", "root", "root")) {
+        //try (SFTPClient sftpClient = new SFTPClient("192.168.4.79", "devftp", "devftp")) {
             byte[] imageBytes = sftpClient.downloadFile(filePath);
 
             // Return the image as a response
