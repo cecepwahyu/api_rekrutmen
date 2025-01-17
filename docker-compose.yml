@@ -9,6 +9,8 @@ services:
     tty: true
     stdin_open: true
     restart: 'unless-stopped'
+    networks:
+      - network-rekrutmen-bpd-new
     ports:
       - '9054:8080'
     volumes:
