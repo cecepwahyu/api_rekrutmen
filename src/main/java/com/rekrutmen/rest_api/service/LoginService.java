@@ -17,11 +17,18 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class LoginService {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginService.class);
+    private static final String EMAIL_REGEX = "^[\\w-\\.+]+@[\\w-]+\\.[a-zA-Z]{2,}$";
+    private static final String PASSWORD_MIN_LENGTH_REGEX = ".{8,}";
+    private static final String PASSWORD_UPPERCASE_REGEX = ".*[A-Z].*";
+    private static final String PASSWORD_LOWERCASE_REGEX = ".*[a-z].*";
+    private static final String PASSWORD_DIGIT_REGEX = ".*\\d.*";
+    private static final String PASSWORD_SPECIAL_CHAR_REGEX = ".*[^a-zA-Z0-9].*";
 
     private final PesertaRepository pesertaRepository;
     private final ResponseCodeUtil responseCodeUtil;
@@ -36,6 +43,26 @@ public class LoginService {
 
     public ResponseEntity<ResponseWrapper<Object>> handleLogin(LoginRequest loginRequest) {
         logger.info("Request Data: {email: {}, password: {}}", loginRequest.getEmail(), loginRequest.getPassword());
+
+        // Validate email format
+        if (!isValidEmail(loginRequest.getEmail())) {
+            logger.warn("Invalid email format: {}", loginRequest.getEmail());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    "Invalid email format"
+            ));
+        }
+
+        // Validate password requirements
+        if (!isValidPassword(loginRequest.getPassword())) {
+            logger.warn("Password does not meet requirements");
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    "Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a digit, and a special character"
+            ));
+        }
 
         Optional<Peserta> optionalUser = pesertaRepository.findByEmail(loginRequest.getEmail());
 
@@ -89,6 +116,18 @@ public class LoginService {
                     "No user found"
             ));
         }
+    }
+
+    private boolean isValidEmail(String email) {
+        return Pattern.matches(EMAIL_REGEX, email);
+    }
+
+    private boolean isValidPassword(String password) {
+        return Pattern.matches(PASSWORD_MIN_LENGTH_REGEX, password) &&
+                Pattern.matches(PASSWORD_UPPERCASE_REGEX, password) &&
+                Pattern.matches(PASSWORD_LOWERCASE_REGEX, password) &&
+                Pattern.matches(PASSWORD_DIGIT_REGEX, password) &&
+                Pattern.matches(PASSWORD_SPECIAL_CHAR_REGEX, password);
     }
 }
 
