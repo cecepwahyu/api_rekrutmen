@@ -60,4 +60,11 @@ public class AuthController {
         return authService.handleChangePassword(changePasswordRequest);
     }
 
+    @PostMapping("/validate-token")
+    public ResponseEntity<ResponseWrapper<Object>> validateToken(@RequestHeader("Authorization") String authHeader) {
+        logger.info("Validating token");
+        return authService.validateToken(authHeader);
+    }
+
+
 }

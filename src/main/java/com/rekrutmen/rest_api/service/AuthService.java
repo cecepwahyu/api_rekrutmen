@@ -7,6 +7,7 @@ import com.rekrutmen.rest_api.repository.PesertaRepository;
 import com.rekrutmen.rest_api.util.JwtUtil;
 import com.rekrutmen.rest_api.util.OtpUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -306,6 +308,50 @@ public class AuthService {
                 "Password changed successfully",
                 null
         ));
+    }
+
+    public ResponseEntity<ResponseWrapper<Object>> validateToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            logger.warn("Invalid Authorization Header");
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    "401", "Invalid Authorization Header", null
+            ));
+        }
+
+        String token = authHeader.substring(7); // Extract the token
+
+        try {
+            // Validate the token and check expiration
+            if (!JwtUtil.isTokenValid(token)) {
+                logger.warn("Token is expired or invalid");
+                return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                        "401", "Token is expired or invalid", null
+                ));
+            }
+
+            // Parse the token to get claims
+            Claims claims = JwtUtil.parseToken(token);
+
+            // Optionally retrieve custom claims (like user ID, email, etc.)
+            String subject = claims.getSubject(); // Usually the user identifier
+            Date expiration = claims.getExpiration();
+
+            // Return success response
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("subject", subject);
+            responseData.put("expiration", expiration);
+
+            logger.info("Token is valid for subject: {}", subject);
+
+            return ResponseEntity.ok(new ResponseWrapper<>(
+                    "000", "Token is valid", responseData
+            ));
+        } catch (Exception e) {
+            logger.error("Token validation failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    "401", "Invalid or expired token", null
+            ));
+        }
     }
 
 
