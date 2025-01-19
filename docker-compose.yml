@@ -9,7 +9,14 @@ services:
     tty: true
     stdin_open: true
     restart: 'unless-stopped'
+    networks:
+      - network-rekrutmen-bpd-new
     ports:
       - '9054:8080'
     volumes:
       - '/home/devftp/data/api-rekrutmen/config:/APIREKRUTMEN/config'
+
+
+networks:
+  network-rekrutmen-bpd-new:
+    driver: bridge

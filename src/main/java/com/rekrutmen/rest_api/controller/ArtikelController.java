@@ -17,11 +17,6 @@ public class ArtikelController {
     @Autowired
     private ArtikelService artikelService;
 
-    @GetMapping("/list")
-    public ResponseEntity<ResponseWrapper<List<Artikel>>> getArtikelList(@RequestHeader("Authorization") String token) {
-        return artikelService.getArtikelList(token);
-    }
-
     @GetMapping("/paginated")
     public ResponseEntity<ResponseWrapper<Object>> getPaginatedArticles(
             @RequestHeader("Authorization") String token,

@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface PesertaRepository extends JpaRepository<Peserta, Long> {
@@ -23,13 +24,22 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
     boolean existsByTelp(String telp);
     boolean existsByNoIdentitas(String noIdentitas);
 
-    //Get Peserta Info
+    // Get Peserta Info
     @Query("SELECT new com.rekrutmen.rest_api.dto.PesertaInfoRequest(p.nama, p.email, CAST(pl.id AS string), l.judulLowongan, p.profilePicture, CAST(l.idLowongan AS string)) " +
             "FROM Peserta p " +
             "JOIN PesertaLowongan pl ON p.idPeserta = pl.idPeserta " +
             "JOIN Lowongan l ON pl.idLowongan = l.idLowongan " +
-            "WHERE p.idPeserta = :idPeserta")
+            "WHERE p.idPeserta = :idPeserta AND pl.isRekrutmen = TRUE")
     Optional<PesertaInfoRequest> findPesertaInfoByIdPeserta(@Param("idPeserta") Integer idPeserta);
+
+    // Get Peserta Job Desc
+    @Query(value = """
+    SELECT *
+    FROM peserta_lowongan
+    WHERE id_peserta = :idPeserta
+    AND is_rekrutmen = FALSE
+    """, nativeQuery = true)
+    List<Object[]> findPesertaLowonganByIdPesertaAndIsRekrutmenFalse(@Param("idPeserta") Integer idPeserta);
 
     @Query("SELECT p.nama, p.email, p.profilePicture " +
             "FROM Peserta p " +
@@ -48,6 +58,7 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
     @Query(value = """
     SELECT 
         p.id_peserta AS peserta_id,
+        p.profile_picture AS profile_picture,
         po.id_org_peserta AS organisasi_id, po.nama_organisasi, po.posisi_organisasi, 
         po.periode AS organisasi_periode, po.deskripsi_kerja AS organisasi_deskripsi,
         pp.id_pendidikan AS pendidikan_id, pp.id_jenjang AS pendidikan_jenjang, pp.nama_institusi,

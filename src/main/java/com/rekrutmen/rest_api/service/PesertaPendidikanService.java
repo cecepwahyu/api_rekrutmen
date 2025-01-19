@@ -69,7 +69,6 @@ public class PesertaPendidikanService {
         ));
     }
 
-
     /**
      * Insert multiple PesertaPendidikan records.
      */

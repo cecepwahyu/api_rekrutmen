@@ -2,15 +2,12 @@ package com.rekrutmen.rest_api.controller;
 
 import com.rekrutmen.rest_api.dto.*;
 import com.rekrutmen.rest_api.service.AuthService;
-import com.rekrutmen.rest_api.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")

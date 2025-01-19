@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -218,6 +219,34 @@ public class PesertaLowonganService {
                 responseCodeUtil.getCode("000"),
                 "Lock status fetched successfully",
                 lockStatus
+        ));
+    }
+
+    public ResponseEntity<ResponseWrapper<List<PesertaLowongan>>> getPesertaLowonganByCriteria(String token, Integer idLowongan, Integer idPeserta, Boolean isRekrutmen) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Fetch data based on the criteria
+        List<PesertaLowongan> pesertaLowonganList = pesertaLowonganRepository.findByLowonganPesertaAndRekrutmen(idLowongan, idPeserta, isRekrutmen);
+
+        if (pesertaLowonganList.isEmpty()) {
+            return ResponseEntity.status(404).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("404"),
+                    "No data found for the given criteria",
+                    null
+            ));
+        }
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                pesertaLowonganList
         ));
     }
 

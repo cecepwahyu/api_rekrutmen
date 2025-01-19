@@ -3,11 +3,9 @@ package com.rekrutmen.rest_api.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
-import org.w3c.dom.Text;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.List;
 
 @Getter
@@ -90,6 +88,12 @@ public class EditProfileRequest {
 
     @JsonProperty("profile_picture")
     private String profilePicture;
+
+    @JsonProperty("tinggi")
+    private Integer tinggi;
+
+    @JsonProperty("berat")
+    private Integer berat;
 
     // Family (Kontak Kerabat) data
     private List<PesertaKontakRequest> kontak;

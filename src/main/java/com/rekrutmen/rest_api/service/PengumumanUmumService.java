@@ -5,6 +5,8 @@ import com.rekrutmen.rest_api.model.PengumumanUmum;
 import com.rekrutmen.rest_api.repository.PengumumanUmumRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +22,8 @@ import java.util.UUID;
 @Service
 public class PengumumanUmumService {
 
+    private static final Logger logger = LoggerFactory.getLogger(PengumumanUmumService.class);
+
     @Autowired
     private PengumumanUmumRepository pengumumanUmumRepository;
 
@@ -28,35 +32,6 @@ public class PengumumanUmumService {
 
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
-
-    public ResponseEntity<ResponseWrapper<List<PengumumanUmum>>> getAllPengumumanUmums(String token) {
-
-        // Validate token
-        if (!tokenUtil.isValidToken(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("299"),
-                    responseCodeUtil.getMessage("299"),
-                    null
-            ));
-        }
-
-        // Validate if token is expired
-        if (tokenUtil.isTokenExpired(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("298"),
-                    responseCodeUtil.getMessage("298"),
-                    null
-            ));
-        }
-
-        // Fetch articles
-        List<PengumumanUmum> pengumumanUmums = pengumumanUmumRepository.findAll();
-        return ResponseEntity.ok(new ResponseWrapper<>(
-                responseCodeUtil.getCode("000"),
-                responseCodeUtil.getMessage("000"),
-                pengumumanUmums
-        ));
-    }
 
     public ResponseEntity<ResponseWrapper<Object>> getPaginatedPengumumanUmums(String token, Integer page) {
         // Validate token
@@ -85,8 +60,8 @@ public class PengumumanUmumService {
         // Create a pageable object with the desired page and size, 6 articles per page
         Pageable pageable = PageRequest.of(page, 6);
 
-        // Fetch articles with pagination
-        Page<PengumumanUmum> pengumumanUmumsPage = pengumumanUmumRepository.findAll(pageable);
+        // Fetch articles with pagination using the new repository method
+        Page<PengumumanUmum> pengumumanUmumsPage = pengumumanUmumRepository.findPublishedAndApproved(pageable);
 
         // Create a response wrapper with pagination info
         Map<String, Object> responseData = new HashMap<>();
@@ -99,44 +74,6 @@ public class PengumumanUmumService {
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
                 responseData
-        ));
-    }
-
-    public ResponseEntity<ResponseWrapper<PengumumanUmum>> getPengumumanUmumDetail(String token, UUID id) {
-
-        // Validate token
-        if (!tokenUtil.isValidToken(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("299"),
-                    responseCodeUtil.getMessage("299"),
-                    null
-            ));
-        }
-
-        // Validate if token is expired
-        if (tokenUtil.isTokenExpired(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("298"),
-                    responseCodeUtil.getMessage("298"),
-                    null
-            ));
-        }
-
-        // Fetch pengumuman umum details
-        PengumumanUmum pengumumanUmum = pengumumanUmumRepository.findById(id).orElse(null);
-
-        if (pengumumanUmum == null) {
-            return ResponseEntity.status(404).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("077"),
-                    responseCodeUtil.getMessage("077"),
-                    null
-            ));
-        }
-
-        return ResponseEntity.ok(new ResponseWrapper<>(
-                responseCodeUtil.getCode("000"),
-                responseCodeUtil.getMessage("000"),
-                pengumumanUmum
         ));
     }
 

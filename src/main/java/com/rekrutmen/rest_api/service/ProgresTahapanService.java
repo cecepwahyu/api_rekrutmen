@@ -2,13 +2,14 @@ package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.ProgresTahapan;
-import com.rekrutmen.rest_api.model.TahapanSeleksi;
 import com.rekrutmen.rest_api.repository.ProgresTahapanRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ProgresTahapanService {
@@ -59,7 +60,7 @@ public class ProgresTahapanService {
         ));
     }
 
-    public ResponseEntity<ResponseWrapper<ProgresTahapan>> getProgresTahapanByIdLowongan(String token, Integer idLowongan) {
+    public ResponseEntity<ResponseWrapper<List<ProgresTahapan>>> getProgresTahapanByIdLowongan(String token, Integer idLowongan) {
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
@@ -79,9 +80,9 @@ public class ProgresTahapanService {
         }
 
         // Fetch progres tahapan by id_tahapan
-        ProgresTahapan progresTahapan = progresTahapanRepository.findByIdLowongan(idLowongan).orElse(null);
+        List<ProgresTahapan> progresTahapanList = progresTahapanRepository.findByIdLowongan(idLowongan);
 
-        if (progresTahapan == null) {
+        if (progresTahapanList == null) {
             return ResponseEntity.status(404).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("077"),
                     responseCodeUtil.getMessage("077"),
@@ -92,7 +93,7 @@ public class ProgresTahapanService {
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
-                progresTahapan
+                progresTahapanList
         ));
     }
 

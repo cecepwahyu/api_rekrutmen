@@ -36,6 +36,15 @@ public class PesertaLowonganHistoryController {
         return vwPesertaLowonganHistoryService.getHistoryByTahun(token, tahunAplikasi);
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<ResponseWrapper<List<VwPesertaLowonganHistory>>> getHistoryByIsRekrutmenAndIdPeserta(
+            @RequestHeader("Authorization") String token,
+            @RequestParam Boolean isRekrutmen,
+            @RequestParam Long idPeserta) {
+        return vwPesertaLowonganHistoryService.getHistoryByIsRekrutmenAndIdPeserta(token, isRekrutmen, idPeserta);
+    }
+
+
     @GetMapping("/peserta/slug/{slug}")
     public ResponseEntity<ResponseWrapper<VwPesertaLowonganHistory>> getHistoryBySlug(
             @RequestHeader("Authorization") String token,

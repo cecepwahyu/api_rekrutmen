@@ -26,16 +26,25 @@ public class LowonganController {
     @Autowired
     private VwLowonganDokumenService vwLowonganDokumenService;
 
-    @GetMapping("/list")
-    public ResponseEntity<ResponseWrapper<List<Lowongan>>> getLowonganList(@RequestHeader("Authorization") String token) {
-        return lowonganService.getLowonganList(token);
-    }
-
     @GetMapping("/paginated")
     public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongans(
             @RequestHeader("Authorization") String token,
             @RequestParam(defaultValue = "0") int page) {
         return lowonganService.getPaginatedLowongans(token, page);
+    }
+
+    @GetMapping("/rekrutmen/paginated")
+    public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongansRekrutmen(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page) {
+        return lowonganService.getPaginatedLowongansRekrutmen(token, page);
+    }
+
+    @GetMapping("/jobdesc/paginated")
+    public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongansJobDesc(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page) {
+        return lowonganService.getPaginatedLowongansJobDesc(token, page);
     }
 
     @GetMapping("/id/{idLowongan}")
@@ -86,13 +95,6 @@ public class LowonganController {
         return pesertaLowonganService.handleSubmitLowongan(token, pesertaLowonganRequest);
     }
 
-    @GetMapping("/dokumen/slug/{slug}")
-    public ResponseEntity<ResponseWrapper<List<Object[]>>> getDokumenBySlug(
-            @RequestHeader("Authorization") String token,
-            @PathVariable String slug) {
-        return vwLowonganDokumenService.getDokumenBySlug(token, slug);
-    }
-
     @PostMapping("/slug/{slug}/applyJobdesc")
     public ResponseEntity<ResponseWrapper<PesertaLowongan>> applyToJobdescBySlug(
             @RequestHeader("Authorization") String token,
@@ -115,5 +117,12 @@ public class LowonganController {
 
         // Submit the application
         return pesertaLowonganService.handleSubmitJobdesc(token, pesertaLowonganRequest);
+    }
+
+    @GetMapping("/dokumen/slug/{slug}")
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getDokumenBySlug(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String slug) {
+        return vwLowonganDokumenService.getDokumenBySlug(token, slug);
     }
 }

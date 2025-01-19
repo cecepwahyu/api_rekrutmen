@@ -59,7 +59,7 @@ public class ArtikelService {
         Pageable pageable = PageRequest.of(page, 6); // 6 articles per page
 
         // Fetch articles with pagination
-        Page<Artikel> artikelsPage = artikelRepository.findAll(pageable);
+        Page<Artikel> artikelsPage = artikelRepository.findPublishedAndApproved(pageable);
 
         // Create a response wrapper with pagination info
         Map<String, Object> responseData = new HashMap<>();
@@ -72,34 +72,6 @@ public class ArtikelService {
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
                 responseData
-        ));
-    }
-
-    public ResponseEntity<ResponseWrapper<List<Artikel>>> getArtikelList(String token) {
-        // Validate token
-        if (!tokenUtil.isValidToken(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("299"),
-                    responseCodeUtil.getMessage("299"),
-                    null
-            ));
-        }
-
-        // Validate if token is expired
-        if (tokenUtil.isTokenExpired(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("298"),
-                    responseCodeUtil.getMessage("298"),
-                    null
-            ));
-        }
-
-        // Fetch all articles without pagination
-        List<Artikel> artikels = artikelRepository.findAll();
-        return ResponseEntity.ok(new ResponseWrapper<>(
-                responseCodeUtil.getCode("000"),
-                responseCodeUtil.getMessage("000"),
-                artikels
         ));
     }
 
@@ -187,13 +159,15 @@ public class ArtikelService {
 
         // Get the file path from the `gambar` column
         String fileName = artikel.getGambar();
-        String filePath = "/home/devftp/data/karir/public/uploads/artikel/" + fileName;
+//        String filePath = "/home/devftp/data/karir/public/uploads/artikel/" + fileName;
+        String filePath = "/home/sysadmin/app/karir/public/uploads/artikel/" + fileName;
 
         // Log the file path
         System.out.println("Resolved file path: " + filePath);
 
         // Fetch the image from the FTP server
-        try (SFTPClient sftpClient = new SFTPClient("192.168.4.79", "devftp", "devftp")) {
+        try (SFTPClient sftpClient = new SFTPClient("192.168.10.45", "root", "root")) {
+        //try (SFTPClient sftpClient = new SFTPClient("192.168.4.79", "devftp", "devftp")) {
             byte[] imageBytes = sftpClient.downloadFile(filePath);
 
             // Return the image as a response

@@ -70,6 +70,37 @@ public class VwPesertaLowonganHistoryService {
         ));
     }
 
+    public ResponseEntity<ResponseWrapper<List<VwPesertaLowonganHistory>>> getHistoryByIsRekrutmenAndIdPeserta(
+            String token, Boolean isRekrutmen, Long idPeserta) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Fetch records by isRekrutmen and idPeserta
+        List<VwPesertaLowonganHistory> historyList =
+                vwPesertaLowonganHistoryRepository.findAllByIsRekrutmenAndIdPeserta(isRekrutmen, idPeserta);
+
+        if (historyList.isEmpty()) {
+            return ResponseEntity.status(404).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("404"),
+                    "Data not found",
+                    null
+            ));
+        }
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                historyList
+        ));
+    }
+
+
     public ResponseEntity<ResponseWrapper<VwPesertaLowonganHistory>> getHistoryBySlug(String token, String slug) {
         // Validate token
         if (!tokenUtil.isValidToken(token)) {

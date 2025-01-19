@@ -43,7 +43,7 @@ public class Lowongan {
     private LocalDate periodeAkhir;
 
     @Column(name = "status", nullable = false, length = 1, columnDefinition = "CHAR DEFAULT '0'")
-    private Character status;
+    private String status;
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;

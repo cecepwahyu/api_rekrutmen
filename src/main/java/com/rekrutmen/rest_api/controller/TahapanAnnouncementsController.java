@@ -1,6 +1,7 @@
 package com.rekrutmen.rest_api.controller;
 
 import com.rekrutmen.rest_api.dto.TahapanAnnouncementRequest;
+import com.rekrutmen.rest_api.model.TahapanAnnouncements;
 import com.rekrutmen.rest_api.service.TahapanAnnouncementsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,8 @@ public class TahapanAnnouncementsController {
     }
 
     @PostMapping("/content")
-    public ResponseEntity<String> getContentByIdLowongan(@RequestBody TahapanAnnouncementRequest request) {
-        String content = service.getContentByIdLowongan(request.getIdLowongan());
+    public ResponseEntity<TahapanAnnouncements> getContentByIdLowongan(@RequestBody TahapanAnnouncementRequest request) {
+        TahapanAnnouncements content = service.getLatestContentByIdLowongan(request.getIdLowongan());
         if (content != null) {
             return ResponseEntity.ok(content);
         } else {

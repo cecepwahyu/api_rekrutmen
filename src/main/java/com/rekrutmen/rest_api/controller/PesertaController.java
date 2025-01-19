@@ -34,6 +34,9 @@ public class PesertaController {
     private PesertaService pesertaService;
 
     @Autowired
+    private PesertaLowonganService pesertaLowonganService;
+
+    @Autowired
     private PesertaPengalamanService pesertaPengalamanService;
 
     @Autowired
@@ -117,6 +120,15 @@ public class PesertaController {
         }
     }
 
+    @GetMapping("/{idPeserta}/jobdesc")
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getPesertaLowonganNotRekrutmen(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta
+    ) {
+        return pesertaService.getPesertaLowonganNotRekrutmen(token, idPeserta);
+    }
+
+
     @GetMapping("/peserta-data/{idPeserta}")
     public ResponseEntity<?> getPesertaData(
             @RequestHeader("Authorization") String token,
@@ -129,6 +141,15 @@ public class PesertaController {
         } else {
             return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
         }
+    }
+
+    @GetMapping("/jobdesc/query")
+    public ResponseEntity<ResponseWrapper<List<PesertaLowongan>>> getPesertaLowonganByCriteria(
+            @RequestHeader("Authorization") String token,
+            @RequestParam Integer idLowongan,
+            @RequestParam Integer idPeserta,
+            @RequestParam Boolean isRekrutmen) {
+        return pesertaLowonganService.getPesertaLowonganByCriteria(token, idLowongan, idPeserta, isRekrutmen);
     }
 
     @PutMapping("/{idPeserta}/update-profile-picture")
@@ -195,6 +216,8 @@ public class PesertaController {
         existingPeserta.setFlgStatus(request.getFlgStatus() != null ? request.getFlgStatus() : existingPeserta.getFlgStatus());
         existingPeserta.setTglStatus(request.getTglStatus() != null ? request.getTglStatus() : existingPeserta.getTglStatus());
         existingPeserta.setUpdatedAt(LocalDateTime.now());
+        existingPeserta.setTinggi(request.getTinggi() != null ? request.getTinggi() : existingPeserta.getTinggi());
+        existingPeserta.setBerat(request.getBerat() != null ? request.getBerat() : existingPeserta.getBerat());
 
         profileService.updateProfile(existingPeserta);
 

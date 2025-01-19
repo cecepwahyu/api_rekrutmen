@@ -1,5 +1,6 @@
 package com.rekrutmen.rest_api.service;
 
+import com.rekrutmen.rest_api.model.TahapanAnnouncements;
 import com.rekrutmen.rest_api.repository.TahapanAnnouncementsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,5 +17,9 @@ public class TahapanAnnouncementsService {
 
     public String getContentByIdLowongan(Integer idLowongan) {
         return repository.findContentByIdLowongan(idLowongan);
+    }
+
+    public TahapanAnnouncements getLatestContentByIdLowongan(Integer idLowongan) {
+        return repository.findLatestContentByIdLowongan(idLowongan);
     }
 }
