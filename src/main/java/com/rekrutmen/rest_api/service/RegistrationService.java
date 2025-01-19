@@ -17,11 +17,20 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Service
 public class RegistrationService {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+
+    private static final int NIK_LENGTH = 16;
+    private static final String EMAIL_REGEX = "^[\\w-\\.+]+@[\\w-]+\\.[a-zA-Z]{2,}$";
+    private static final String PASSWORD_MIN_LENGTH_REGEX = ".{8,}";
+    private static final String PASSWORD_UPPERCASE_REGEX = ".*[A-Z].*";
+    private static final String PASSWORD_LOWERCASE_REGEX = ".*[a-z].*";
+    private static final String PASSWORD_DIGIT_REGEX = ".*\\d.*";
+    private static final String PASSWORD_SPECIAL_CHAR_REGEX = ".*[^a-zA-Z0-9].*";
 
     @Autowired
     private PesertaService pesertaService;
@@ -36,15 +45,36 @@ public class RegistrationService {
     private EmailService emailService;
 
     public ResponseEntity<ResponseWrapper<Object>> handleRegister(RegisterRequest registerRequest) {
-        // Check if username or email is already taken
-//        if (pesertaService.isUsernameTaken(registerRequest.getUsername())) {
-//            logger.warn("Username: {} already registered!", registerRequest.getUsername());
-//            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-//                    responseCodeUtil.getCode("400"),
-//                    responseCodeUtil.getMessage("400"),
-//                    "Username already exist"
-//            ));
-//        }
+
+        // Validate NIK/No Identitas length
+        if (!isValidNIK(registerRequest.getNoIdentitas())) {
+            logger.warn("No Identitas: {} is invalid! Must be 16 characters.", registerRequest.getNoIdentitas());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    "No Identitas must be exactly 16 characters"
+            ));
+        }
+
+        // Validate email format
+        if (!isValidEmail(registerRequest.getEmail())) {
+            logger.warn("Email: {} is invalid! Does not match email format.", registerRequest.getEmail());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    "Email format is invalid"
+            ));
+        }
+
+        // Validate password requirements
+        if (!isValidPassword(registerRequest.getPassword())) {
+            logger.warn("Password does not meet requirements");
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    "Password must have at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character"
+            ));
+        }
 
         if (pesertaService.isEmailTaken(registerRequest.getEmail())) {
             logger.warn("Email: {} already registered!", registerRequest.getEmail());
@@ -110,5 +140,22 @@ public class RegistrationService {
                 responseCodeUtil.getMessage("000"),
                 responseData
         ));
+    }
+
+    private boolean isValidNIK(String nik) {
+        return nik != null && nik.length() == NIK_LENGTH && nik.matches("\\d+");
+    }
+
+    private boolean isValidPassword(String password) {
+        return password != null &&
+                Pattern.matches(PASSWORD_MIN_LENGTH_REGEX, password) &&
+                Pattern.matches(PASSWORD_UPPERCASE_REGEX, password) &&
+                Pattern.matches(PASSWORD_LOWERCASE_REGEX, password) &&
+                Pattern.matches(PASSWORD_DIGIT_REGEX, password) &&
+                Pattern.matches(PASSWORD_SPECIAL_CHAR_REGEX, password);
+    }
+
+    private boolean isValidEmail(String email) {
+        return email != null && Pattern.matches(EMAIL_REGEX, email);
     }
 }
