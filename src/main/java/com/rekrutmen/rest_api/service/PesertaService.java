@@ -249,11 +249,11 @@ public class PesertaService {
             Object[] record = results.get(0);  // Only one record should be returned
             response.put("peserta_id", record[0]);
             response.put("profile_picture", record[1]);
-            response.put("organisasi_id", record[2]);
-            response.put("nama_organisasi", record[3]);
-            response.put("posisi_organisasi", record[4]);
-            response.put("organisasi_periode", record[5]);
-            response.put("organisasi_deskripsi", record[6]);
+            //response.put("organisasi_id", record[2]);
+            //response.put("nama_organisasi", record[3]);
+            //response.put("posisi_organisasi", record[4]);
+            //response.put("organisasi_periode", record[5]);
+            //response.put("organisasi_deskripsi", record[6]);
             response.put("pendidikan_id", record[7]);
             response.put("pendidikan_jenjang", record[8]);
             response.put("nama_institusi", record[9]);
@@ -262,12 +262,12 @@ public class PesertaService {
             response.put("thn_lulus", record[12]);
             response.put("nilai", record[13]);
             response.put("gelar", record[14]);
-            response.put("achievements", record[15]);
-            response.put("pengalaman_id", record[16]);
-            response.put("nama_instansi", record[17]);
-            response.put("posisi_kerja", record[18]);
-            response.put("periode_kerja", record[19]);
-            response.put("pengalaman_deskripsi", record[20]);
+            //response.put("achievements", record[15]);
+            //response.put("pengalaman_id", record[16]);
+            //response.put("nama_instansi", record[17]);
+            //response.put("posisi_kerja", record[18]);
+            //response.put("periode_kerja", record[19]);
+            //response.put("pengalaman_deskripsi", record[20]);
             response.put("kontak_id", record[21]);
             response.put("nama_kontak", record[22]);
             response.put("hub_kontak", record[23]);
