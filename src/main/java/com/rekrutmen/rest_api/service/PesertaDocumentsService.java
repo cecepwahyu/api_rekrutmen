@@ -467,6 +467,43 @@ public class PesertaDocumentsService {
     }
 
     @Transactional
+    public ResponseEntity<ResponseWrapper<Object>> submitOrUpdateDokumenPendukung(
+            Integer idPeserta,
+            String documentData,
+            String fileName,
+            String fileType) {
+
+        Integer jenisDokumenDokumenPendukung = 17;
+
+        // Check if the document already exists
+        Optional<PesertaDocuments> existingDocument = documentsRepository.findByUserIdAndJenisDokumen(idPeserta, jenisDokumenDokumenPendukung);
+
+        if (existingDocument.isPresent()) {
+            // Update existing document
+            documentsRepository.updateDocument(idPeserta, jenisDokumenDokumenPendukung, documentData, fileName, fileType);
+        } else {
+            // Insert new document
+            PesertaDocuments newDocument = new PesertaDocuments();
+            newDocument.setIdUser(idPeserta);
+            newDocument.setIdJenisDokumen(jenisDokumenDokumenPendukung);
+            newDocument.setDocumentData(documentData);
+            newDocument.setFileName(fileName);
+            newDocument.setFileType(fileType);
+            newDocument.setTanggalUpload(LocalDateTime.now());
+            newDocument.setDocumentVersion(1);
+            newDocument.setIsActive(true);
+
+            documentsRepository.save(newDocument);
+        }
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                "000",
+                "Dokumen pendukung submitted successfully",
+                null
+        ));
+    }
+
+    @Transactional
     public ResponseEntity<ResponseWrapper<Object>> deleteDocument(Integer idPeserta, Integer jenisDokumen) {
         // Check if the document exists
         Optional<PesertaDocuments> existingDocument = documentsRepository.findByUserIdAndJenisDokumen(idPeserta, jenisDokumen);

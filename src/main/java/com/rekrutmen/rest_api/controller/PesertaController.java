@@ -358,7 +358,7 @@ public class PesertaController {
         );
     }
 
-    @PutMapping("/{idPeserta}/submit-cv")
+    @PutMapping("/{idPeserta}/submit-curriculum-vitae")
     public ResponseEntity<ResponseWrapper<Object>> submitCv(
             @PathVariable Integer idPeserta,
             @RequestBody @Valid SubmitDocumentRequest request) {
@@ -410,7 +410,7 @@ public class PesertaController {
         );
     }
 
-    @PutMapping("/{idPeserta}/submit-transkrip")
+    @PutMapping("/{idPeserta}/submit-transkrip-nilai")
     public ResponseEntity<ResponseWrapper<Object>> submitTranskrip(
             @PathVariable Integer idPeserta,
             @RequestBody @Valid SubmitDocumentRequest request) {
@@ -423,7 +423,7 @@ public class PesertaController {
         );
     }
 
-    @PutMapping("/{idPeserta}/submit-fotofullbadan")
+    @PutMapping("/{idPeserta}/submit-foto-full-badan")
     public ResponseEntity<ResponseWrapper<Object>> submitFotoFullBadan(
             @PathVariable Integer idPeserta,
             @RequestBody @Valid SubmitDocumentRequest request) {
@@ -442,6 +442,32 @@ public class PesertaController {
             @RequestBody @Valid SubmitDocumentRequest request) {
 
         return pesertaDocumentsService.submitOrUpdatePasFoto(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-foto-3x4")
+    public ResponseEntity<ResponseWrapper<Object>> submitFoto(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdatePasFoto(
+                idPeserta,
+                request.getDocumentData(),
+                request.getFileName(),
+                request.getFileType()
+        );
+    }
+
+    @PutMapping("/{idPeserta}/submit-dokumen-pendukung-lainnya")
+    public ResponseEntity<ResponseWrapper<Object>> submitDokumenPendukung(
+            @PathVariable Integer idPeserta,
+            @RequestBody @Valid SubmitDocumentRequest request) {
+
+        return pesertaDocumentsService.submitOrUpdateDokumenPendukung(
                 idPeserta,
                 request.getDocumentData(),
                 request.getFileName(),
