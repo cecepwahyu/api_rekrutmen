@@ -28,12 +28,12 @@ public class TahapanSeleksiController {
      * @param lowonganId the id of the lowongan.
      * @return ResponseEntity containing the list of tahapan.
      */
-    @GetMapping("/lowongan/id/{lowonganId}/tahapan")
-    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanByLowongan(
-            @RequestHeader("Authorization") String token,
-            @PathVariable Integer lowonganId) {
-        return tahapanSeleksiService.getTahapanByLowonganId(token, lowonganId);
-    }
+//    @GetMapping("/lowongan/id/{lowonganId}/tahapan")
+//    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanByLowongan(
+//            @RequestHeader("Authorization") String token,
+//            @PathVariable Integer lowonganId) {
+//        return tahapanSeleksiService.getTahapanByLowonganId(token, lowonganId);
+//    }
 
     /**
      * Fetches all tahapan for a specific lowongan.
@@ -48,4 +48,18 @@ public class TahapanSeleksiController {
             @PathVariable String slug) {
         return tahapanSeleksiService.getTahapanBySlug(token, slug);
     }
+
+    @GetMapping("/lowongan/id/{lowonganId}/tahapan")
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanByLowonganId(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer lowonganId,
+            @RequestParam(value = "id_peserta", required = false) Integer idPeserta) {
+
+        if (idPeserta != null) {
+            return tahapanSeleksiService.getTahapanByLowonganIdAndPesertaId(token, lowonganId, idPeserta);
+        }
+
+        return tahapanSeleksiService.getTahapanByLowonganId(token, lowonganId);
+    }
+
 }

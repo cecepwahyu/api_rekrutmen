@@ -146,4 +146,43 @@ public class TahapanSeleksiService {
         }
     }
 
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanByLowonganIdAndPesertaId(String token, Integer lowonganId, Integer idPeserta) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        try {
+            // Fetch tahapan filtered by lowongan ID and peserta ID
+            List<Object[]> tahapanList = tahapanSeleksiRepository.findAllTahapanByLowonganIdAndPesertaId(lowonganId, idPeserta);
+
+            if (tahapanList == null || tahapanList.isEmpty()) {
+                return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                        responseCodeUtil.getCode("400"),
+                        "No tahapan found for lowongan ID: " + lowonganId + " and peserta ID: " + idPeserta,
+                        null
+                ));
+            }
+
+            return ResponseEntity.ok(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("000"),
+                    responseCodeUtil.getMessage("000"),
+                    tahapanList
+            ));
+
+        } catch (Exception e) {
+            logger.error("Error fetching tahapan for lowongan ID {} and peserta ID {}: {}", lowonganId, idPeserta, e.getMessage(), e);
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("500"),
+                    "Internal server error while fetching tahapan",
+                    null
+            ));
+        }
+    }
+
+
 }

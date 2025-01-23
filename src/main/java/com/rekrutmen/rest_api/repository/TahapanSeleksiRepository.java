@@ -19,6 +19,9 @@ public interface TahapanSeleksiRepository extends JpaRepository<TahapanSeleksi, 
     @Query(value = "SELECT * FROM vw_lowongan_tahapan WHERE lowongan_id = :lowonganId ORDER BY sort_order", nativeQuery = true)
     List<Object[]> findAllTahapanByLowonganId(@Param("lowonganId") Integer lowonganId);
 
+    @Query(value = "SELECT * FROM vw_lowongan_tahapan WHERE lowongan_id = :lowonganId AND id_peserta = :idPeserta ORDER BY sort_order", nativeQuery = true)
+    List<Object[]> findAllTahapanByLowonganIdAndPesertaId(@Param("lowonganId") Integer lowonganId, @Param("idPeserta") Integer idPeserta);
+
     @Query(value = "SELECT * FROM vw_lowongan_tahapan WHERE slug = :slug ORDER BY sort_order", nativeQuery = true)
     List<Object[]> findAllTahapanBySlug(@Param("slug") String slug);
 }
