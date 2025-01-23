@@ -230,6 +230,7 @@ public class PesertaController {
                 kontak.setTelpKontak(f.getTelpKontak());
                 kontak.setEmailKontak(f.getEmailKontak());
                 kontak.setAlamatKontak(f.getAlamatKontak());
+                kontak.setIsBpddiyRelated(f.getIsBpddiyRelated());
                 return kontak;
             }).collect(Collectors.toList());
             profileService.updateKerabat(idPeserta, contact);

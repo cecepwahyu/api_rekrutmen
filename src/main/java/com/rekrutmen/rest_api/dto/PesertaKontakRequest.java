@@ -22,4 +22,7 @@ public class PesertaKontakRequest {
 
     @JsonProperty("alamat_kontak")
     private String alamatKontak;
+
+    @JsonProperty("is_bpddiy_related")
+    private Boolean isBpddiyRelated;
 }

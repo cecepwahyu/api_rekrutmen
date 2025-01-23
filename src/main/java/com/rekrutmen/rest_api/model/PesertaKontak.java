@@ -32,4 +32,7 @@ public class PesertaKontak {
 
     @Column(name = "alamat_kontak")
     private String alamatKontak;
+
+    @Column(name = "is_bpddiy_related")
+    private Boolean isBpddiyRelated;
 }
