@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 public class LoginService {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginService.class);
-    private static final String EMAIL_REGEX = "^[\\w-\\.+]+@[\\w-]+\\.[a-zA-Z]{2,}$";
+    private static final String EMAIL_REGEX = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
     private static final String PASSWORD_MIN_LENGTH_REGEX = ".{8,}";
     private static final String PASSWORD_UPPERCASE_REGEX = ".*[A-Z].*";
     private static final String PASSWORD_LOWERCASE_REGEX = ".*[a-z].*";
