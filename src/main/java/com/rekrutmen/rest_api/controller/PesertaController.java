@@ -476,6 +476,36 @@ public class PesertaController {
         );
     }
 
+    @PutMapping("/{idPeserta}/submit-document")
+    public ResponseEntity<ResponseWrapper<Object>> submitDocument(
+            @PathVariable Integer idPeserta,
+            @RequestParam Integer idDokumen, // Use id_dokumen from tbl_jenis_dokumen
+            @RequestBody @Valid SubmitDocumentRequest request
+    ) {
+        logger.info("Submitting document for idPeserta: {}, idDokumen: {}", idPeserta, idDokumen);
+
+        try {
+            // Delegate to service
+            ResponseEntity<ResponseWrapper<Object>> response = pesertaDocumentsService.submitOrUpdateDocument(
+                    idPeserta,
+                    idDokumen,
+                    request.getDocumentData(),
+                    request.getFileName(),
+                    request.getFileType()
+            );
+            logger.info("Successfully submitted document for idPeserta: {}, idDokumen: {}", idPeserta, idDokumen);
+            return response;
+
+        } catch (Exception e) {
+            logger.error("Error submitting document for idPeserta: {}, idDokumen: {} - {}", idPeserta, idDokumen, e.getMessage(), e);
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    "500",
+                    "Internal Server Error",
+                    null
+            ));
+        }
+    }
+
     @PutMapping("/pendidikan/{idPeserta}/insert")
     public ResponseEntity<ResponseWrapper<List<PesertaPendidikan>>> insertPesertaPendidikan(
             @RequestHeader("Authorization") String token,
