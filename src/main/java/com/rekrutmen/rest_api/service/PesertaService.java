@@ -342,4 +342,96 @@ public class PesertaService {
         ));
     }
 
+    public ResponseEntity<ResponseWrapper<Map<String, Object>>> getTinggiBerat(String token, Integer idPeserta) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
+
+        Map<String, Object> response = new HashMap<>();
+        if (pesertaOptional.isEmpty()) {
+            response.put("tinggi", null);
+            response.put("berat", null);
+            return ResponseEntity.ok(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("000"),
+                    responseCodeUtil.getMessage("000"),
+                    response
+            ));
+        }
+
+        Peserta peserta = pesertaOptional.get();
+        response.put("tinggi", peserta.getTinggi());
+        response.put("berat", peserta.getBerat());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                response
+        ));
+    }
+
+    @Transactional
+    public ResponseEntity<ResponseWrapper<Object>> updateTinggiBerat(String token, Integer idPeserta, Integer tinggi, Integer berat) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
+
+        if (pesertaOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(new ResponseWrapper<>(
+                    "404",
+                    "Peserta not found",
+                    null
+            ));
+        }
+
+        Peserta peserta = pesertaOptional.get();
+
+        if (tinggi != null) {
+            peserta.setTinggi(tinggi);
+        }
+        if (berat != null) {
+            peserta.setBerat(berat);
+        }
+
+        peserta.setUpdatedAt(LocalDateTime.now());
+        pesertaRepository.save(peserta);
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                "000",
+                "Tinggi and Berat updated successfully",
+                null
+        ));
+    }
+
 }

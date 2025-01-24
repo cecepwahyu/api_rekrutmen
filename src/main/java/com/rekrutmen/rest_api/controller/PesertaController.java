@@ -678,5 +678,21 @@ public class PesertaController {
         return pesertaDocumentsService.deleteDocument(idPeserta, 14); // 14 = Pas Foto
     }
 
+    @GetMapping("/{idPeserta}/tinggi-berat")
+    public ResponseEntity<ResponseWrapper<Map<String, Object>>> getTinggiBerat(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta) {
+        return pesertaService.getTinggiBerat(token, idPeserta);
+    }
+
+    @PutMapping("/{idPeserta}/update-tinggi-berat")
+    public ResponseEntity<ResponseWrapper<Object>> updateTinggiBerat(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta,
+            @RequestBody Map<String, Integer> requestBody) {
+        Integer tinggi = requestBody.get("tinggi");
+        Integer berat = requestBody.get("berat");
+        return pesertaService.updateTinggiBerat(token, idPeserta, tinggi, berat);
+    }
 
 }
