@@ -5,6 +5,7 @@ import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.repository.PesertaRepository;
 import com.rekrutmen.rest_api.util.JwtUtil;
+import com.rekrutmen.rest_api.util.MaskingUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +43,14 @@ public class LoginService {
     }
 
     public ResponseEntity<ResponseWrapper<Object>> handleLogin(LoginRequest loginRequest) {
-        logger.info("Request Data: {email: {}, password: {}}", loginRequest.getEmail(), loginRequest.getPassword());
+        logger.info("Request Data: {email: {}, password: {}}",
+                loginRequest.getEmail(),
+                MaskingUtil.maskPassword(loginRequest.getPassword()));
 
         // Validate email format
         if (!isValidEmail(loginRequest.getEmail())) {
-            logger.warn("Invalid email format: {}", loginRequest.getEmail());
+            logger.warn("Response Data: {responseCode: {}, responseMessage: {}, data:{\"Invalid email format: {}\"}",
+                    responseCodeUtil.getCode("400"), responseCodeUtil.getMessage("400"), loginRequest.getEmail());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -56,7 +60,8 @@ public class LoginService {
 
         // Validate password requirements
         if (!isValidPassword(loginRequest.getPassword())) {
-            logger.warn("Password does not meet requirements");
+            logger.warn("Response Data: {responseCode: {}, responseMessage: {}, data:{\"Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a digit, and a special character\"}",
+                    responseCodeUtil.getCode("400"), responseCodeUtil.getMessage("400"));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -68,7 +73,6 @@ public class LoginService {
 
         if (optionalUser.isPresent()) {
             Peserta existingUser = optionalUser.get();
-            logger.info("User found for email: {}", loginRequest.getEmail());
 
             if (passwordEncoder.matches(loginRequest.getPassword(), existingUser.getPassword())) {
                 // Add idPeserta to token claims
@@ -101,7 +105,8 @@ public class LoginService {
                         responseData
                 ));
             } else {
-                logger.warn("Invalid password for email: {}", loginRequest.getEmail());
+                logger.warn("Response Data: {responseCode: {}, responseMessage: {}, data:{\"Invalid password for email: {}\"}",
+                        responseCodeUtil.getCode("000"), responseCodeUtil.getMessage("000"), loginRequest.getEmail());
                 return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                         responseCodeUtil.getCode("400"),
                         responseCodeUtil.getMessage("400"),
@@ -109,7 +114,8 @@ public class LoginService {
                 ));
             }
         } else {
-            logger.warn("No user found for email: {}", loginRequest.getEmail());
+            logger.warn("Response Data: {responseCode: {}, responseMessage: {}, data:{\"No user found for email: {}\"}",
+                    responseCodeUtil.getCode("000"), responseCodeUtil.getMessage("000"), loginRequest.getEmail());
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("401"),
                     responseCodeUtil.getMessage("401"),
