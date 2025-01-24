@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProgresTahapanService {
@@ -19,11 +20,11 @@ public class ProgresTahapanService {
 
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
+
     @Autowired
     private ProgresTahapanRepository progresTahapanRepository;
 
     public ResponseEntity<ResponseWrapper<ProgresTahapan>> getProgresTahapanDetail(String token, Integer id) {
-
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
@@ -79,10 +80,16 @@ public class ProgresTahapanService {
             ));
         }
 
-        // Fetch progres tahapan by id_tahapan
-        List<ProgresTahapan> progresTahapanList = progresTahapanRepository.findByIdLowongan(idLowongan);
+        // Fetch progres tahapan by idLowongan and remove duplicates
+        List<ProgresTahapan> progresTahapanList = progresTahapanRepository.findByIdLowongan(idLowongan).stream()
+                .distinct() // Remove exact duplicates
+                .collect(Collectors.groupingBy(ProgresTahapan::getCurrentSortOrder)) // Group by currentSortOrder
+                .values()
+                .stream()
+                .map(list -> list.get(0)) // Get the first entry in each group
+                .collect(Collectors.toList());
 
-        if (progresTahapanList == null) {
+        if (progresTahapanList.isEmpty()) {
             return ResponseEntity.status(404).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("077"),
                     responseCodeUtil.getMessage("077"),
@@ -96,5 +103,4 @@ public class ProgresTahapanService {
                 progresTahapanList
         ));
     }
-
 }

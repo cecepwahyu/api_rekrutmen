@@ -184,5 +184,43 @@ public class TahapanSeleksiService {
         }
     }
 
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getPesertaProgress(String token, Integer lowonganId, String pesertaId) {
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        try {
+            // Fetch progress from the repository
+            List<Object[]> progressList = tahapanSeleksiRepository.getPesertaProgress(lowonganId, pesertaId);
+
+            if (progressList == null || progressList.isEmpty()) {
+                return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                        responseCodeUtil.getCode("400"),
+                        "No progress found for lowongan ID: " + lowonganId + " and peserta ID: " + pesertaId,
+                        null
+                ));
+            }
+
+            return ResponseEntity.ok(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("000"),
+                    responseCodeUtil.getMessage("000"),
+                    progressList
+            ));
+
+        } catch (Exception e) {
+            logger.error("Error fetching progress for lowongan ID {} and peserta ID {}: {}", lowonganId, pesertaId, e.getMessage(), e);
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("500"),
+                    "Internal server error while fetching progress",
+                    null
+            ));
+        }
+    }
+
 
 }

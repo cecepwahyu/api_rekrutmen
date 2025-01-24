@@ -62,4 +62,12 @@ public class TahapanSeleksiController {
         return tahapanSeleksiService.getTahapanByLowonganId(token, lowonganId);
     }
 
+    @GetMapping("/lowongan/{lowonganId}/peserta/{pesertaId}/progress")
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getPesertaProgress(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer lowonganId,
+            @PathVariable String pesertaId) {
+        return tahapanSeleksiService.getPesertaProgress(token, lowonganId, pesertaId);
+    }
+
 }
