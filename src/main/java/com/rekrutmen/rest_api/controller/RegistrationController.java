@@ -4,6 +4,7 @@ import com.rekrutmen.rest_api.dto.RegisterRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.service.AuthService;
 import com.rekrutmen.rest_api.service.RegistrationService;
+import com.rekrutmen.rest_api.util.MaskingUtil;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,7 @@ public class RegistrationController {
 
     @PostMapping
     public ResponseEntity<ResponseWrapper<Object>> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        logger.info("Request Data = {Name: {}, Username: {}, No Identitas: {}, Email: {}, Password: {}}", registerRequest.getNama(), registerRequest.getNoIdentitas(), registerRequest.getEmail(), registerRequest.getPassword());
+        logger.info("Request Data = {Name: {}, No Identitas: {}, Email: {}, Password: {}}", registerRequest.getNama(), registerRequest.getNoIdentitas(), registerRequest.getEmail(), MaskingUtil.maskPassword(registerRequest.getPassword()));
         return registrationService.handleRegister(registerRequest);
     }
 }

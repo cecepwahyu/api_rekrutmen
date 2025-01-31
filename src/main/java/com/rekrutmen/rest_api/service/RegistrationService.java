@@ -116,7 +116,7 @@ public class RegistrationService {
         emailService.sendOtpEmaiVerification(newUser.getEmail(), otpCode);
 
         logger.info(
-                "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"nama\": \"{}\", \"username\": \"{}\", \"no_identitas\": \"{}\", \"email\": \"{}\", \"password\": \"{}\", \"OTP\": \"{}\"}}",
+                "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"nama\": \"{}\", \"no_identitas\": \"{}\", \"email\": \"{}\", \"password\": \"{}\", \"OTP\": \"{}\"}}",
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
                 registerRequest.getNama(),
