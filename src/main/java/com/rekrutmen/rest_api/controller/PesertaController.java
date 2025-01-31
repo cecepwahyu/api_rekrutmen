@@ -695,4 +695,32 @@ public class PesertaController {
         return pesertaService.updateTinggiBerat(token, idPeserta, tinggi, berat);
     }
 
+    @PutMapping("/{idPeserta}/set-age-limit")
+    public ResponseEntity<ResponseWrapper<Object>> setAgeLimit(
+            @PathVariable Integer idPeserta) {
+
+        boolean updated = pesertaService.setAgeLimit(idPeserta);
+
+        if (updated) {
+            return ResponseEntity.ok(new ResponseWrapper<>(
+                    "000",
+                    "Age limit successfully set to true",
+                    null
+            ));
+        } else {
+            return ResponseEntity.status(404).body(new ResponseWrapper<>(
+                    "404",
+                    "Peserta not found",
+                    null
+            ));
+        }
+    }
+
+    @GetMapping("/{idPeserta}/check-age-limit")
+    public ResponseEntity<ResponseWrapper<Map<String, Object>>> checkAgeLimit(
+            @PathVariable Integer idPeserta) {
+        return pesertaService.checkAgeLimit(idPeserta);
+    }
+
+
 }

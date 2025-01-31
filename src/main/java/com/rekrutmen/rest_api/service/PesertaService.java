@@ -34,18 +34,6 @@ public class PesertaService {
         this.pesertaRepository = pesertaRepository;
     }
 
-    public List<Peserta> getAllUsers() {
-        return pesertaRepository.findAll();
-    }
-
-    public void updateUser(Peserta peserta) {
-        pesertaRepository.save(peserta);
-    }
-
-    public Optional<Peserta> getUserByEmail(String email) {
-        return pesertaRepository.findByEmail(email);
-    }
-
     public Optional<Peserta> getProfileByIdPeserta(Integer idPeserta) {
         return pesertaRepository.findByIdPeserta(idPeserta);
     }
@@ -84,7 +72,7 @@ public class PesertaService {
     }
 
     public Peserta saveUser(Peserta peserta) {
-        return pesertaRepository.save(peserta);  // Use JpaRepository's save method
+        return pesertaRepository.save(peserta);
     }
 
     public ResponseEntity<ResponseWrapper<Peserta>> getPesertaDetail(String token, Integer idPeserta) {
@@ -246,14 +234,9 @@ public class PesertaService {
 
         Map<String, Object> response = new HashMap<>();
         if (!results.isEmpty()) {
-            Object[] record = results.get(0);  // Only one record should be returned
+            Object[] record = results.get(0);
             response.put("peserta_id", record[0]);
             response.put("profile_picture", record[1]);
-            //response.put("organisasi_id", record[2]);
-            //response.put("nama_organisasi", record[3]);
-            //response.put("posisi_organisasi", record[4]);
-            //response.put("organisasi_periode", record[5]);
-            //response.put("organisasi_deskripsi", record[6]);
             response.put("pendidikan_id", record[7]);
             response.put("pendidikan_jenjang", record[8]);
             response.put("nama_institusi", record[9]);
@@ -262,12 +245,6 @@ public class PesertaService {
             response.put("thn_lulus", record[12]);
             response.put("nilai", record[13]);
             response.put("gelar", record[14]);
-            //response.put("achievements", record[15]);
-            //response.put("pengalaman_id", record[16]);
-            //response.put("nama_instansi", record[17]);
-            //response.put("posisi_kerja", record[18]);
-            //response.put("periode_kerja", record[19]);
-            //response.put("pengalaman_deskripsi", record[20]);
             response.put("kontak_id", record[21]);
             response.put("nama_kontak", record[22]);
             response.put("hub_kontak", record[23]);
@@ -286,7 +263,7 @@ public class PesertaService {
 
         if (pesertaOptional.isEmpty()) {
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
-                    "077",
+                    responseCodeUtil.getCode("400"),
                     "Peserta not found",
                     null
             ));
@@ -300,7 +277,7 @@ public class PesertaService {
         responseData.put("base64_image", base64Image);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
-                "000",
+                responseCodeUtil.getCode("000"),
                 "Profile picture updated successfully",
                 responseData
         ));
@@ -312,8 +289,8 @@ public class PesertaService {
         Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
 
         if (pesertaOptional.isEmpty()) {
-            return ResponseEntity.status(404).body(new ResponseWrapper<>(
-                    "404",
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
                     "Peserta not found",
                     null
             ));
@@ -324,7 +301,7 @@ public class PesertaService {
         // Check if is_final is already true
         if (Boolean.TRUE.equals(peserta.getIsFinal())) {
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     "Peserta is_final is already true",
                     null
             ));
@@ -336,7 +313,7 @@ public class PesertaService {
         pesertaRepository.save(peserta);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
-                "000",
+                responseCodeUtil.getCode("000"),
                 "Peserta is_final updated successfully",
                 null
         ));
@@ -408,8 +385,8 @@ public class PesertaService {
         Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
 
         if (pesertaOptional.isEmpty()) {
-            return ResponseEntity.status(404).body(new ResponseWrapper<>(
-                    "404",
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    "400",
                     "Peserta not found",
                     null
             ));
@@ -428,10 +405,44 @@ public class PesertaService {
         pesertaRepository.save(peserta);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
-                "000",
+                responseCodeUtil.getCode("000"),
                 "Tinggi and Berat updated successfully",
                 null
         ));
     }
+
+    @Transactional
+    public boolean setAgeLimit(Integer idPeserta) {
+        Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
+        if (pesertaOptional.isPresent()) {
+            pesertaRepository.updateAgeLimit(idPeserta);
+            return true;
+        }
+        return false;
+    }
+
+    public ResponseEntity<ResponseWrapper<Map<String, Object>>> checkAgeLimit(Integer idPeserta) {
+        Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
+
+        Map<String, Object> response = new HashMap<>();
+        if (pesertaOptional.isEmpty()) {
+            response.put("age_limit", null);
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    "Peserta not found",
+                    response
+            ));
+        }
+
+        Peserta peserta = pesertaOptional.get();
+        response.put("age_limit", peserta.getAgeLimit());
+
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                response
+        ));
+    }
+
 
 }

@@ -77,5 +77,9 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
     """, nativeQuery = true)
     List<Object[]> findPesertaDetails(@Param("idPeserta") Integer idPeserta);
 
+    @Modifying
+    @Query("UPDATE Peserta p SET p.ageLimit = true WHERE p.idPeserta = :idPeserta")
+    void updateAgeLimit(@Param("idPeserta") Integer idPeserta);
+
 }
 
