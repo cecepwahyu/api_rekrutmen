@@ -140,4 +140,8 @@ public class Peserta {
 
     @Column(name = "is_final")
     private Boolean isFinal;
+
+    @Column(name = "age_limit")
+    private Boolean ageLimit;
+
 }
