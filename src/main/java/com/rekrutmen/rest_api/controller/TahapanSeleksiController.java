@@ -16,25 +16,6 @@ public class TahapanSeleksiController {
     @Autowired
     private TahapanSeleksiService tahapanSeleksiService;
 
-    @GetMapping("/list")
-    public ResponseEntity<ResponseWrapper<List<TahapanSeleksi>>> getTahapanSeleksi(@RequestHeader("Authorization") String token) {
-        return tahapanSeleksiService.getTahapanSeleksi(token);
-    }
-
-    /**
-     * Fetches all tahapan for a specific lowongan.
-     *
-     * @param token      the authorization token.
-     * @param lowonganId the id of the lowongan.
-     * @return ResponseEntity containing the list of tahapan.
-     */
-//    @GetMapping("/lowongan/id/{lowonganId}/tahapan")
-//    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanByLowongan(
-//            @RequestHeader("Authorization") String token,
-//            @PathVariable Integer lowonganId) {
-//        return tahapanSeleksiService.getTahapanByLowonganId(token, lowonganId);
-//    }
-
     /**
      * Fetches all tahapan for a specific lowongan.
      *
