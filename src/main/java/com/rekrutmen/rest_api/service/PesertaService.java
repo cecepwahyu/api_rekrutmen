@@ -133,7 +133,7 @@ public class PesertaService {
         }
 
         // Fetch peserta details by ID Peserta
-        Optional<PesertaInfoRequest> pesertaOptional = pesertaRepository.findPesertaInfoByIdPeserta(idPeserta);
+        List<PesertaInfoRequest> pesertaOptional = pesertaRepository.findPesertaInfoByIdPeserta(idPeserta);
 
         if (pesertaOptional.isEmpty()) {
             return ResponseEntity.status(200).body(new ResponseWrapper<>(
@@ -143,7 +143,7 @@ public class PesertaService {
             ));
         }
 
-        PesertaInfoRequest peserta = pesertaOptional.get();
+        PesertaInfoRequest peserta = pesertaOptional.get(0);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),

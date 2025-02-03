@@ -25,12 +25,16 @@ public interface PesertaRepository extends JpaRepository<Peserta, Long> {
     boolean existsByNoIdentitas(String noIdentitas);
 
     // Get Peserta Info
-    @Query("SELECT new com.rekrutmen.rest_api.dto.PesertaInfoRequest(p.nama, p.email, p.noIdentitas, CAST(pl.id AS string), l.judulLowongan, p.profilePicture, CAST(l.idLowongan AS string)) " +
+    @Query("SELECT new com.rekrutmen.rest_api.dto.PesertaInfoRequest(" +
+            "p.nama, p.email, p.noIdentitas, " +
+            "CAST(pl.id AS string), l.judulLowongan, " +
+            "p.profilePicture, CAST(l.idLowongan AS string), pl.tanggalAplikasi) " +
             "FROM Peserta p " +
             "JOIN PesertaLowongan pl ON p.idPeserta = pl.idPeserta " +
             "JOIN Lowongan l ON pl.idLowongan = l.idLowongan " +
-            "WHERE p.idPeserta = :idPeserta AND pl.isRekrutmen = TRUE")
-    Optional<PesertaInfoRequest> findPesertaInfoByIdPeserta(@Param("idPeserta") Integer idPeserta);
+            "WHERE p.idPeserta = :idPeserta AND pl.isRekrutmen = TRUE " +
+            "ORDER BY pl.tanggalAplikasi DESC")
+    List<PesertaInfoRequest> findPesertaInfoByIdPeserta(@Param("idPeserta") Integer idPeserta);
 
     // Get Peserta Job Desc
     @Query(value = """
