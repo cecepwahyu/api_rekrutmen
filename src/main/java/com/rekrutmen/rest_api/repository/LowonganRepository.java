@@ -19,8 +19,8 @@ public interface LowonganRepository extends JpaRepository<Lowongan, Integer> {
     @Query("SELECT l FROM Lowongan l WHERE l.status IN ('1', '4') AND l.flgApprove = true")
     Page<Lowongan> findByStatusAndFlgApprove(Pageable pageable);
 
-    // Query for status = '1'
-    @Query("SELECT l FROM Lowongan l WHERE l.status = '1' AND l.flgApprove = true ORDER BY l.createdAt DESC")
+    // Query for status = '1' || '3'
+    @Query("SELECT l FROM Lowongan l WHERE l.status IN ('1', '3') AND l.flgApprove = true ORDER BY l.createdAt DESC")
     Page<Lowongan> findApprovedLowonganRekrutmen(Pageable pageable);
 
     // Query for status = '4'
