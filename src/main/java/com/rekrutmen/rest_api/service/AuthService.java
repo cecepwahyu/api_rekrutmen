@@ -22,11 +22,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class AuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+    private static final String PASSWORD_MIN_LENGTH_REGEX = ".{8,}";
+    private static final String PASSWORD_UPPERCASE_REGEX = ".*[A-Z].*";
+    private static final String PASSWORD_LOWERCASE_REGEX = ".*[a-z].*";
+    private static final String PASSWORD_DIGIT_REGEX = ".*\\d.*";
+    private static final String PASSWORD_SPECIAL_CHAR_REGEX = ".*[^a-zA-Z0-9].*";
 
     @Autowired
     private ProfileService profileService;
@@ -42,6 +48,14 @@ public class AuthService {
 
     @Autowired
     private PesertaRepository pesertaRepository;
+
+    private boolean isValidPassword(String password) {
+        return Pattern.matches(PASSWORD_MIN_LENGTH_REGEX, password) &&
+                Pattern.matches(PASSWORD_UPPERCASE_REGEX, password) &&
+                Pattern.matches(PASSWORD_LOWERCASE_REGEX, password) &&
+                Pattern.matches(PASSWORD_DIGIT_REGEX, password) &&
+                Pattern.matches(PASSWORD_SPECIAL_CHAR_REGEX, password);
+    }
 
     public ResponseEntity<ResponseWrapper<Object>> handleResetPassword(ResetPasswordRequest resetPasswordRequest) {
         Optional<Peserta> pesertaOptional = profileService.validateEmailAndNoIdentitas(
@@ -69,7 +83,6 @@ public class AuthService {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("email", resetPasswordRequest.getEmail());
         responseData.put("no_identitas", resetPasswordRequest.getNoIdentitas());
-        responseData.put("Your OTP code is", otpCode);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
@@ -119,7 +132,6 @@ public class AuthService {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("email", resendOtpRequest.getEmail());
         responseData.put("no_identitas", resendOtpRequest.getNoIdentitas());
-        responseData.put("Your OTP code is", otpCode);
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
@@ -240,6 +252,15 @@ public class AuthService {
             ));
         }
 
+        if (!isValidPassword(updatePasswordRequest.getNewPassword())) {
+            logger.warn("New password does not meet security requirements");
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    "Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a digit, and a special character",
+                    null
+            ));
+        }
+
         Optional<Peserta> pesertaOptional = pesertaRepository.findByEmail(updatePasswordRequest.getEmail());
         if (pesertaOptional.isEmpty()) {
             logger.warn("No user found with email: {}", updatePasswordRequest.getEmail());
@@ -271,6 +292,15 @@ public class AuthService {
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     "New password and confirm password do not match",
+                    null
+            ));
+        }
+
+        if (!isValidPassword(changePasswordRequest.getNewPassword())) {
+            logger.warn("New password does not meet security requirements for email: {}", changePasswordRequest.getEmail());
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    "Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a digit, and a special character",
                     null
             ));
         }
