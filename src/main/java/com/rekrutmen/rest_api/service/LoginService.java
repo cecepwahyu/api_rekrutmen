@@ -34,8 +34,8 @@ public class LoginService {
 
     // Login Limit Data
     private static final int MAX_ATTEMPTS = 3;
-    private static final long ATTEMPT_WINDOW_MS = 1 * 60 * 1000; // 2 minutes
-    private static final long LOCKOUT_DURATION_MS = 1 * 60 * 1000; // 5 minutes
+    private static final long ATTEMPT_WINDOW_MS = 2 * 60 * 1000; // 2 minutes
+    private static final long LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
     private final PesertaRepository pesertaRepository;
     private final ResponseCodeUtil responseCodeUtil;
