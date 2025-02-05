@@ -15,15 +15,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 @Service
 public class LoginService {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginService.class);
+
+    // Email & Password REGEX
     private static final String EMAIL_REGEX = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
     private static final String PASSWORD_MIN_LENGTH_REGEX = ".{8,}";
     private static final String PASSWORD_UPPERCASE_REGEX = ".*[A-Z].*";
@@ -31,9 +32,17 @@ public class LoginService {
     private static final String PASSWORD_DIGIT_REGEX = ".*\\d.*";
     private static final String PASSWORD_SPECIAL_CHAR_REGEX = ".*[^a-zA-Z0-9].*";
 
+    // Login Limit Data
+    private static final int MAX_ATTEMPTS = 3;
+    private static final long ATTEMPT_WINDOW_MS = 1 * 60 * 1000; // 2 minutes
+    private static final long LOCKOUT_DURATION_MS = 1 * 60 * 1000; // 5 minutes
+
     private final PesertaRepository pesertaRepository;
     private final ResponseCodeUtil responseCodeUtil;
     private final PasswordEncoder passwordEncoder;
+
+    private final Map<String, List<Long>> loginAttempts = new ConcurrentHashMap<>();
+    private final Map<String, Long> lockedAccounts = new ConcurrentHashMap<>();
 
     @Autowired
     public LoginService(PesertaRepository pesertaRepository, ResponseCodeUtil responseCodeUtil, PasswordEncoder passwordEncoder) {
@@ -68,6 +77,21 @@ public class LoginService {
                     "Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a digit, and a special character"
             ));
         }
+
+        String email = loginRequest.getEmail();
+        long currentTime = System.currentTimeMillis();
+
+        if (isAccountLocked(email)) {
+            long timeLeft = (lockedAccounts.get(email) - currentTime) / 1000;
+            return ResponseEntity.status(403).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Too many failed login attempts. Try again in " + timeLeft + " seconds.")
+            ));
+        }
+
+
+        trackLoginAttempt(email, currentTime);
 
         Optional<Peserta> optionalUser = pesertaRepository.findByEmail(loginRequest.getEmail());
 
@@ -135,5 +159,21 @@ public class LoginService {
                 Pattern.matches(PASSWORD_DIGIT_REGEX, password) &&
                 Pattern.matches(PASSWORD_SPECIAL_CHAR_REGEX, password);
     }
+
+    private boolean isAccountLocked(String email) {
+        return lockedAccounts.containsKey(email) && lockedAccounts.get(email) > System.currentTimeMillis();
+    }
+
+    private void trackLoginAttempt(String email, long currentTime) {
+        loginAttempts.putIfAbsent(email, new ArrayList<>());
+        List<Long> attempts = loginAttempts.get(email);
+        attempts.add(currentTime);
+        attempts.removeIf(timestamp -> timestamp < currentTime - ATTEMPT_WINDOW_MS);
+        if (attempts.size() >= MAX_ATTEMPTS) {
+            lockedAccounts.put(email, currentTime + LOCKOUT_DURATION_MS);
+            loginAttempts.remove(email);
+        }
+    }
+
 }
 

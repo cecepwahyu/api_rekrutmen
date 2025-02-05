@@ -100,7 +100,6 @@ public class RegistrationService {
         // Create and save new user
         Peserta newUser = new Peserta();
         newUser.setNama(registerRequest.getNama());
-        //newUser.setUsername(registerRequest.getUsername());
         newUser.setPassword(encryptedPassword);
         newUser.setEmail(registerRequest.getEmail());
         newUser.setNoIdentitas(registerRequest.getNoIdentitas());
@@ -120,7 +119,6 @@ public class RegistrationService {
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
                 registerRequest.getNama(),
-                //registerRequest.getUsername(),
                 registerRequest.getNoIdentitas(),
                 registerRequest.getEmail(),
                 MaskingUtil.maskPassword(registerRequest.getPassword()),
@@ -129,11 +127,9 @@ public class RegistrationService {
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("nama", registerRequest.getNama());
-        //responseData.put("username", registerRequest.getUsername());
-        responseData.put("no_identitas", registerRequest.getNoIdentitas());
+        responseData.put("no_identitas", MaskingUtil.maskPassword(registerRequest.getNoIdentitas()));
         responseData.put("email", registerRequest.getEmail());
-        responseData.put("password", registerRequest.getPassword());
-        responseData.put("otp", otpCode);
+        responseData.put("password", MaskingUtil.maskPassword(registerRequest.getPassword()));
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),

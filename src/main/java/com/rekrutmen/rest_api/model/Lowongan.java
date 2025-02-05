@@ -57,7 +57,7 @@ public class Lowongan {
     @Column(name = "updated_by", nullable = false)
     private Integer updatedBy;
 
-    @Column(name = "kode_lowongan", columnDefinition = "TEXT")
+    @Column(name = "kode_lowongan")
     private String kodeLowongan;
 
     @Column(name = "flg_approve")
