@@ -178,7 +178,7 @@ public class PesertaController {
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     "400",
                     responseCodeUtil.getMessage("400"),
-                    "Telp already exists"
+                    "Nomor Telepon sudah terdaftar"
             ));
         }
 
