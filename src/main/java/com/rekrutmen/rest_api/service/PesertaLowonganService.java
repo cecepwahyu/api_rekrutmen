@@ -2,9 +2,10 @@ package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.PesertaLowonganRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
+import com.rekrutmen.rest_api.model.LogPesertaLowongan;
 import com.rekrutmen.rest_api.model.LowonganPesertaDocuments;
-import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.model.PesertaLowongan;
+import com.rekrutmen.rest_api.repository.LogPesertaLowonganRepository;
 import com.rekrutmen.rest_api.repository.LowonganPesertaDocumentsRepository;
 import com.rekrutmen.rest_api.repository.PesertaLowonganRepository;
 import com.rekrutmen.rest_api.repository.PesertaRepository;
@@ -35,6 +36,9 @@ public class PesertaLowonganService {
 
     @Autowired
     private PesertaRepository pesertaRepository;
+
+    @Autowired
+    private LogPesertaLowonganRepository logPesertaLowonganRepository;
 
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
@@ -248,6 +252,32 @@ public class PesertaLowonganService {
                 responseCodeUtil.getMessage("000"),
                 pesertaLowonganList
         ));
+    }
+
+    // Insert peserta max age
+    @Transactional
+    public ResponseEntity<ResponseWrapper<LogPesertaLowongan>> logPesertaLowonganMaxAge(Integer idPeserta, Integer idLowongan) {
+        try {
+            LogPesertaLowongan log = new LogPesertaLowongan();
+            log.setIdPeserta(idPeserta);
+            log.setIdLowongan(idLowongan);
+            log.setCreatedAt(LocalDateTime.now());
+
+            // Save log entry
+            LogPesertaLowongan savedLog = logPesertaLowonganRepository.save(log);
+
+            return ResponseEntity.ok(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("000"),
+                    responseCodeUtil.getMessage("000"),
+                    savedLog
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("500"),
+                    "Error inserting log record: " + e.getMessage(),
+                    null
+            ));
+        }
     }
 
 }

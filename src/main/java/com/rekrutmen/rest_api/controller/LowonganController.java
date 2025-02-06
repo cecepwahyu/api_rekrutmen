@@ -2,6 +2,7 @@ package com.rekrutmen.rest_api.controller;
 
 import com.rekrutmen.rest_api.dto.PesertaLowonganRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
+import com.rekrutmen.rest_api.model.LogPesertaLowongan;
 import com.rekrutmen.rest_api.model.Lowongan;
 import com.rekrutmen.rest_api.model.PesertaLowongan;
 import com.rekrutmen.rest_api.service.LowonganService;
@@ -125,4 +126,12 @@ public class LowonganController {
             @PathVariable String slug) {
         return vwLowonganDokumenService.getDokumenBySlug(token, slug);
     }
+
+    @PostMapping("/log/max-age")
+    public ResponseEntity<ResponseWrapper<LogPesertaLowongan>> logPesertaLowonganMaxAge(
+            @RequestParam Integer idPeserta,
+            @RequestParam Integer idLowongan) {
+        return pesertaLowonganService.logPesertaLowonganMaxAge(idPeserta, idLowongan);
+    }
+
 }
