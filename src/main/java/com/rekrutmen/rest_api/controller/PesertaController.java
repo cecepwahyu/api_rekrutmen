@@ -171,12 +171,23 @@ public class PesertaController {
         if (optionalPeserta.isEmpty()) {
          }
 
+        // Validate input fields
+        if (!isValidInput(request.getNama()) || !isValidInput(request.getNoIdentitas()) ||
+                !isValidInput(request.getTempatLahir()) || !isValidInput(request.getTelp()) ||
+                !isValidInput(String.valueOf(request.getPendidikanTerakhir())) || !isValidInput(String.valueOf(request.getStatusKawin()))) {
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    "Invalid input! Only alphabets, numbers, '@', and '.' are allowed."
+            ));
+        }
+
         // Checking duplicate telp number
         logger.info("Checking telp duplication for idPeserta: {}, telp: {}", idPeserta, request.getTelp());
         if (pesertaService.isTelpTaken(request.getTelp(), idPeserta)) {
             logger.warn("Telp: {} already exists!", request.getTelp());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
                     "Nomor Telepon sudah terdaftar"
             ));
@@ -722,5 +733,11 @@ public class PesertaController {
         return pesertaService.checkAgeLimit(idPeserta);
     }
 
-
+    /**
+     * Validates input: Only allows alphabets, numbers, '@', and '.'.
+     */
+    private boolean isValidInput(String input) {
+        if (input == null || input.isEmpty()) return true; // Allow empty fields
+        return input.matches("^[a-zA-Z0-9@. ]+$");
+    }
 }
