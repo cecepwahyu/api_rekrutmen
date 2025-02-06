@@ -5,6 +5,7 @@ import com.rekrutmen.rest_api.dto.*;
 import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.repository.PesertaRepository;
 import com.rekrutmen.rest_api.util.JwtUtil;
+import com.rekrutmen.rest_api.util.MaskingUtil;
 import com.rekrutmen.rest_api.util.OtpUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import io.jsonwebtoken.Claims;
@@ -18,10 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 @Service
@@ -33,6 +32,10 @@ public class AuthService {
     private static final String PASSWORD_LOWERCASE_REGEX = ".*[a-z].*";
     private static final String PASSWORD_DIGIT_REGEX = ".*\\d.*";
     private static final String PASSWORD_SPECIAL_CHAR_REGEX = ".*[^a-zA-Z0-9].*";
+
+    private static final int MAX_ATTEMPTS = 3;
+    private static final long LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+    private static final long ATTEMPT_RESET_DURATION_MS = 5 * 60 * 1000; // Reset attempts every 5 minutes
 
     @Autowired
     private ProfileService profileService;
@@ -49,6 +52,11 @@ public class AuthService {
     @Autowired
     private PesertaRepository pesertaRepository;
 
+    private final Map<String, List<Long>> correctAttempts = new ConcurrentHashMap<>();
+    private final Map<String, List<Long>> allAttempts = new ConcurrentHashMap<>();
+    private final Map<String, List<Long>> incorrectAttempts = new ConcurrentHashMap<>();
+    private final Map<String, Long> lockedAccounts = new ConcurrentHashMap<>();
+
     private boolean isValidPassword(String password) {
         return Pattern.matches(PASSWORD_MIN_LENGTH_REGEX, password) &&
                 Pattern.matches(PASSWORD_UPPERCASE_REGEX, password) &&
@@ -58,14 +66,37 @@ public class AuthService {
     }
 
     public ResponseEntity<ResponseWrapper<Object>> handleResetPassword(ResetPasswordRequest resetPasswordRequest) {
-        Optional<Peserta> pesertaOptional = profileService.validateEmailAndNoIdentitas(
-                resetPasswordRequest.getEmail(),
-                resetPasswordRequest.getNoIdentitas()
-        );
-        logger.info("Request Data = {Email: {}, No Identitas: {}}", resetPasswordRequest.getEmail(), resetPasswordRequest.getNoIdentitas());
+        String email = resetPasswordRequest.getEmail();
+        String noIdentitas = resetPasswordRequest.getNoIdentitas();
+        long currentTime = System.currentTimeMillis();
+
+        // Check if the account is locked
+        if (isAccountLocked(email)) {
+            return ResponseEntity.status(403).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Too many reset attempts. Please wait 5 minutes before trying again.")
+            ));
+        }
+
+        // Track total attempts (both success & failure)
+        trackAttempt(email, currentTime);
+
+        // If the user reaches the max attempts, lock the account
+        if (hasExceededAttemptLimit(email)) {
+            lockedAccounts.put(email, currentTime + LOCKOUT_DURATION_MS);
+            return ResponseEntity.status(403).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Too many reset attempts. Please wait 5 minutes before trying again.")
+            ));
+        }
+
+        Optional<Peserta> pesertaOptional = profileService.validateEmailAndNoIdentitas(email, noIdentitas);
+        logger.info("Request Data = {Email: {}, No Identitas: {}}", email, MaskingUtil.maskPassword(noIdentitas));
 
         if (pesertaOptional.isEmpty()) {
-            logger.warn("Email {} or No Identitas {} invalid!", resetPasswordRequest.getEmail(), resetPasswordRequest.getNoIdentitas());
+            logger.warn("Invalid Email {} or No Identitas {}", email, MaskingUtil.maskPassword(noIdentitas));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -78,11 +109,11 @@ public class AuthService {
         LocalDateTime updatedAt = LocalDateTime.now();
         logger.info("OTP generated: {}", otpCode);
         profileService.updateOtp(peserta.getIdPeserta().intValue(), otpCode, updatedAt);
-        emailService.sendOtpEmail(resetPasswordRequest.getEmail(), otpCode);
+        emailService.sendOtpEmail(email, otpCode);
 
         Map<String, Object> responseData = new HashMap<>();
-        responseData.put("email", resetPasswordRequest.getEmail());
-        responseData.put("no_identitas", resetPasswordRequest.getNoIdentitas());
+        responseData.put("email", email);
+        responseData.put("no_identitas", MaskingUtil.maskPassword(noIdentitas));
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
@@ -384,5 +415,63 @@ public class AuthService {
         }
     }
 
+    private boolean isAccountLocked(String email) {
+        return lockedAccounts.containsKey(email) && lockedAccounts.get(email) > System.currentTimeMillis();
+    }
+
+    /**
+     * Tracks all login/reset attempts (successful and failed)
+     */
+    private void trackAttempt(String email, long currentTime) {
+        allAttempts.putIfAbsent(email, new ArrayList<>());
+
+        List<Long> attempts = allAttempts.get(email);
+        attempts.add(currentTime);
+
+        // Remove attempts older than the reset duration (5 minutes)
+        attempts.removeIf(timestamp -> timestamp < currentTime - ATTEMPT_RESET_DURATION_MS);
+
+        // If attempts reach MAX_ATTEMPTS, lock the account
+        if (attempts.size() >= MAX_ATTEMPTS) {
+            lockedAccounts.put(email, currentTime + LOCKOUT_DURATION_MS);
+            allAttempts.remove(email); // Clear all attempts after lockout
+        }
+    }
+
+    private boolean hasExceededLimit(String email, boolean isCorrect) {
+        Map<String, List<Long>> attemptMap = isCorrect ? correctAttempts : incorrectAttempts;
+        return attemptMap.containsKey(email) && attemptMap.get(email).size() >= MAX_ATTEMPTS;
+    }
+
+    private boolean hasExceededIncorrectLimit(String email) {
+        return incorrectAttempts.containsKey(email) && incorrectAttempts.get(email).size() >= 3;
+    }
+
+    private void resetIncorrectAttempts(String email) {
+        incorrectAttempts.remove(email);
+    }
+
+    private void trackIncorrectAttempt(String email, long currentTime) {
+        incorrectAttempts.putIfAbsent(email, new ArrayList<>());
+
+        List<Long> attempts = incorrectAttempts.get(email);
+        attempts.add(currentTime);
+
+        // Remove attempts older than 5 minutes
+        attempts.removeIf(timestamp -> timestamp < currentTime - LOCKOUT_DURATION_MS);
+
+        // If incorrect attempts reach 3, lock the account
+        if (attempts.size() >= 3) {
+            lockedAccounts.put(email, currentTime + LOCKOUT_DURATION_MS);
+            incorrectAttempts.remove(email); // Clear the incorrect attempts
+        }
+    }
+
+    /**
+     * Checks if the user has exceeded the total attempt limit
+     */
+    private boolean hasExceededAttemptLimit(String email) {
+        return allAttempts.containsKey(email) && allAttempts.get(email).size() >= MAX_ATTEMPTS;
+    }
 
 }
