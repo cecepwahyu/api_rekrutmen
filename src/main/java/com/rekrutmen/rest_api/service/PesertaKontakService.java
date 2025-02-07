@@ -49,6 +49,17 @@ public class PesertaKontakService {
             ));
         }
 
+        // Extract id_peserta from token
+        Integer idPesertaFromToken = tokenUtil.extractPesertaId(token);
+
+        if (idPesertaFromToken == null || !idPesertaFromToken.equals(idPeserta.intValue())) {
+            return ResponseEntity.status(403).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("403"),
+                    "Unauthorized access. Peserta ID does not match the token.",
+                    null
+            ));
+        }
+
         // Fetch peserta details by ID Peserta
         List<PesertaKontak> pesertaKontak = pesertaKontakRepository.findByIdPeserta(idPeserta);
 

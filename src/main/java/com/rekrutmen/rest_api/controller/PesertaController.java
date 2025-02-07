@@ -4,6 +4,7 @@ import com.rekrutmen.rest_api.dto.*;
 import com.rekrutmen.rest_api.model.*;
 import com.rekrutmen.rest_api.service.*;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import com.rekrutmen.rest_api.util.TokenUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -50,6 +51,9 @@ public class PesertaController {
 
     @Autowired
     private PesertaDocumentsService pesertaDocumentsService;
+
+    @Autowired
+    private TokenUtil tokenUtil;
 
     @GetMapping("/{idPeserta}")
     public ResponseEntity<ResponseWrapper<Peserta>> getPesertaDetail(
@@ -162,10 +166,23 @@ public class PesertaController {
 
     @PutMapping("/{idPeserta}/edit")
     public ResponseEntity<ResponseWrapper<Object>> editProfile(
+            @RequestHeader("Authorization") String token,
             @PathVariable Integer idPeserta,
             @RequestBody EditProfileRequest request,
             HttpServletRequest httpRequest
     ) {
+        // Extract id_peserta from token
+        Integer idPesertaFromToken = tokenUtil.extractPesertaId(token);
+
+        // Validate Peserta ID
+        if (idPesertaFromToken == null || !idPesertaFromToken.equals(idPeserta)) {
+            return ResponseEntity.status(403).body(new ResponseWrapper<>(
+                    "403",
+                    "Unauthorized access. Peserta ID does not match the token.",
+                    null
+            ));
+        }
+
         // Retrieve the existing profile
         Optional<Peserta> optionalPeserta = pesertaService.getProfileByIdPeserta(idPeserta);
         if (optionalPeserta.isEmpty()) {

@@ -194,6 +194,27 @@ public class TahapanSeleksiService {
             ));
         }
 
+        // Extract id_peserta from the token
+        Integer idPesertaFromToken = tokenUtil.extractPesertaId(token);
+        if (idPesertaFromToken == null) {
+            return ResponseEntity.status(403).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("403"),
+                    "Unauthorized: Invalid token or peserta not found.",
+                    null
+            ));
+        }
+
+        // Verify if the pesertaId exists in peserta_lowongan and matches id_peserta from token
+        boolean isAuthorized = tahapanSeleksiRepository.existsPesertaInLowongan(lowonganId, pesertaId, idPesertaFromToken);
+
+        if (!isAuthorized) {
+            return ResponseEntity.status(403).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("403"),
+                    "Unauthorized access. Peserta ID does not match the token.",
+                    null
+            ));
+        }
+
         try {
             // Fetch progress from the repository
             List<Object[]> progressList = tahapanSeleksiRepository.getPesertaProgress(lowonganId, pesertaId);

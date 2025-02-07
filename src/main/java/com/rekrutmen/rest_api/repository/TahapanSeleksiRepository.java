@@ -27,4 +27,8 @@ public interface TahapanSeleksiRepository extends JpaRepository<TahapanSeleksi, 
 
     @Query(value = "SELECT * FROM get_peserta_progress(:lowonganId, :pesertaId)", nativeQuery = true)
     List<Object[]> getPesertaProgress(@Param("lowonganId") Integer lowonganId, @Param("pesertaId") String pesertaId);
+
+    @Query(value = "SELECT COUNT(*) > 0 FROM peserta_lowongan WHERE id_lowongan = :lowonganId AND id = :pesertaId AND id_peserta = :idPeserta", nativeQuery = true)
+    boolean existsPesertaInLowongan(@Param("lowonganId") Integer lowonganId, @Param("pesertaId") String pesertaId, @Param("idPeserta") Integer idPeserta);
+
 }

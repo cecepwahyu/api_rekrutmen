@@ -81,6 +81,17 @@ public class VwPesertaLowonganHistoryService {
             ));
         }
 
+        // Extract id_peserta from token
+        Integer idPesertaFromToken = tokenUtil.extractPesertaId(token);
+
+        if (idPesertaFromToken == null || !idPesertaFromToken.equals(idPeserta.intValue())) {
+            return ResponseEntity.status(403).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("403"),
+                    "Unauthorized access. Peserta ID does not match the token.",
+                    null
+            ));
+        }
+
         // Fetch records by isRekrutmen and idPeserta
         List<VwPesertaLowonganHistory> historyList =
                 vwPesertaLowonganHistoryRepository.findAllByIsRekrutmenAndIdPeserta(isRekrutmen, idPeserta);

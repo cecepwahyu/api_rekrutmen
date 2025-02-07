@@ -38,10 +38,6 @@ public class PesertaService {
         return pesertaRepository.findByIdPeserta(idPeserta);
     }
 
-//    public boolean isUsernameTaken(String username) {
-//        return pesertaRepository.existsByUsername(username);
-//    }
-
     public boolean isEmailTaken(String email) {
         return pesertaRepository.existsByEmail(email);
     }
@@ -90,6 +86,17 @@ public class PesertaService {
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Extract id_peserta from token
+        Integer idPesertaFromToken = tokenUtil.extractPesertaId(token);
+
+        if (idPesertaFromToken == null || !idPesertaFromToken.equals(idPeserta.intValue())) {
+            return ResponseEntity.status(403).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("403"),
+                    "Unauthorized access. Peserta ID does not match the token.",
                     null
             ));
         }

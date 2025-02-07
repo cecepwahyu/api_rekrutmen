@@ -56,6 +56,33 @@ public class TokenUtil {
     }
 
     /**
+     * Extracts Peserta ID from the token stored in the database.
+     *
+     * @param token the authorization token
+     * @return the pesertaId if found, otherwise null
+     */
+    public Integer extractPesertaId(String token) {
+        if (token == null || !token.startsWith("Bearer ") || token.length() <= 7) {
+            System.out.println("Invalid or empty token received.");
+            return null;
+        }
+
+        String actualToken = token.replace("Bearer ", "").trim();
+        Optional<Peserta> peserta = pesertaRepository.findByToken(actualToken);
+
+        if (peserta.isPresent()) {
+            Peserta foundPeserta = peserta.get();
+            System.out.println("✅ Found Peserta: " + foundPeserta.getIdPeserta());
+            return foundPeserta.getIdPeserta(); // Correctly return id_peserta
+        } else {
+            System.out.println("No Peserta found for token: " + actualToken);
+        }
+
+        return null;
+    }
+
+
+    /**
      * Checks if the token is expired based on the last updated time.
      *
      * @param tokenUpdatedAt the timestamp of the token's last update
