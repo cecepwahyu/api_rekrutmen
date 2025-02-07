@@ -3,6 +3,7 @@ package com.rekrutmen.rest_api.controller;
 import com.rekrutmen.rest_api.dto.LoginRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.service.LoginService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,10 @@ public class LoginController {
     private LoginService loginService;
 
     @PostMapping
-    public ResponseEntity<ResponseWrapper<Object>> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return loginService.handleLogin(loginRequest);
+    public ResponseEntity<ResponseWrapper<Object>> login(
+            @Valid @RequestBody LoginRequest loginRequest,
+            HttpServletRequest request  // Pass HttpServletRequest
+    ) {
+        return loginService.handleLogin(loginRequest, request);
     }
 }

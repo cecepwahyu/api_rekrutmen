@@ -5,8 +5,10 @@ import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.repository.PesertaRepository;
 import com.rekrutmen.rest_api.util.JwtUtil;
+import com.rekrutmen.rest_api.util.LoggerUtil;
 import com.rekrutmen.rest_api.util.MaskingUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,10 +53,28 @@ public class LoginService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public ResponseEntity<ResponseWrapper<Object>> handleLogin(LoginRequest loginRequest) {
-        logger.info("Request Data: {email: {}, password: {}}",
-                loginRequest.getEmail(),
-                MaskingUtil.maskPassword(loginRequest.getPassword()));
+    @Autowired
+    private LogService logService;
+
+    public ResponseEntity<ResponseWrapper<Object>> handleLogin(LoginRequest loginRequest, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        // Insert log into database
+        logService.log(
+                "AUTH", // Type
+                jobId, // Job ID
+                ip, // IP Address
+                "S", // Signal (Send)
+                "1", // Device (Client)
+                "LoginService", // Process Name
+                "User attempting to log in: " + loginRequest.getEmail(), // Message
+                loginRequest.getEmail(), // Username
+                1 // Sequence
+        );
+
+        logger.info("job_id: {}, ip: {}, signal: {}, data: {email: {}, password: {}}",
+                jobId, ip, "S", loginRequest.getEmail(), MaskingUtil.maskPassword(loginRequest.getPassword()));
 
         // Validate email format
         if (!isValidEmail(loginRequest.getEmail())) {
@@ -119,9 +139,17 @@ public class LoginService {
                 responseData.put("email", loginRequest.getEmail());
                 responseData.put("isActive", existingUser.getIsActive());
 
-                logger.info("Response Data: {responseCode: {}, responseMessage: {}, data:{{email: {}, token: {}, idPeserta: {}, isActive: {}}}}",
-                        responseCodeUtil.getCode("000"), responseCodeUtil.getMessage("000"),
-                        loginRequest.getEmail(), token, existingUser.getIdPeserta(), existingUser.getIsActive());
+                logger.info("job_id: {}, ip: {}, signal: {}, data: {responseCode: {}, responseMessage: {}, data: {email: {}, token: {}, idPeserta: {}, isActive: {}}}",
+                        LoggerUtil.getJobId(),
+                        LoggerUtil.getUserIp(request),
+                        "R",
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        loginRequest.getEmail(),
+                        token,
+                        existingUser.getIdPeserta(),
+                        existingUser.getIsActive()
+                );
 
                 return ResponseEntity.ok(new ResponseWrapper<>(
                         responseCodeUtil.getCode("000"),
