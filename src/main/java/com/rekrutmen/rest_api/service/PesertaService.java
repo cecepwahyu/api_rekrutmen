@@ -216,6 +216,18 @@ public class PesertaService {
             ));
         }
 
+        // Extract id_peserta from token
+        Integer idPesertaFromToken = tokenUtil.extractPesertaId(token);
+
+        // Validate Peserta ID
+        if (idPesertaFromToken == null || !idPesertaFromToken.equals(idPeserta)) {
+            return ResponseEntity.status(403).body(new ResponseWrapper<>(
+                    "403",
+                    "Unauthorized access. Peserta ID does not match the token.",
+                    null
+            ));
+        }
+
         // Fetch peserta details by ID Peserta
         Optional<Object[]> pesertaOptional = pesertaRepository.findPesertaDataByIdPesertaRaw(idPeserta);
 
