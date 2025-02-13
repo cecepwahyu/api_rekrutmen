@@ -56,30 +56,37 @@ public class LoginService {
     @Autowired
     private LogService logService;
 
-    public ResponseEntity<ResponseWrapper<Object>> handleLogin(LoginRequest loginRequest, HttpServletRequest request) {
+    public ResponseEntity<ResponseWrapper<Object>> handleLogin(String processName, LoginRequest loginRequest, HttpServletRequest request) {
         String jobId = LoggerUtil.getJobId();
         String ip = LoggerUtil.getUserIp(request);
 
+        String jsonRequestPayload = LoggerUtil.convertObjectToJson(loginRequest);
+
         // Insert log into database
         logService.log(
-                "AUTH", // Type
                 jobId, // Job ID
                 ip, // IP Address
                 "S", // Signal (Send)
                 "1", // Device (Client)
-                "LoginService", // Process Name
-                "User attempting to log in: " + loginRequest.getEmail(), // Message
+                processName, // Process Name
+                jsonRequestPayload, // Message
                 loginRequest.getEmail(), // Username
                 1 // Sequence
         );
 
-        logger.info("job_id: {}, ip: {}, signal: {}, data: {email: {}, password: {}}",
-                jobId, ip, "S", loginRequest.getEmail(), MaskingUtil.maskPassword(loginRequest.getPassword()));
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                LoggerUtil.convertObjectToMap(loginRequest)
+        ));
 
         // Validate email format
         if (!isValidEmail(loginRequest.getEmail())) {
-            logger.warn("Response Data: {responseCode: {}, responseMessage: {}, data:{\"Invalid email format: {}\"}",
-                    responseCodeUtil.getCode("400"), responseCodeUtil.getMessage("400"), loginRequest.getEmail());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Invalid email format", "email", loginRequest.getEmail())
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -89,8 +96,12 @@ public class LoginService {
 
         // Validate password requirements
         if (!isValidPassword(loginRequest.getPassword())) {
-            logger.warn("Response Data: {responseCode: {}, responseMessage: {}, data:{\"Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a digit, and a special character\"}",
-                    responseCodeUtil.getCode("400"), responseCodeUtil.getMessage("400"));
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a digit, and a special character")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -103,6 +114,14 @@ public class LoginService {
 
         if (isAccountLocked(email)) {
             long timeLeft = (lockedAccounts.get(email) - currentTime) / 1000;
+
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Too many failed login attempts. Try again in " + timeLeft + " seconds.")
+            ));
+
             return ResponseEntity.status(403).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("403"),
                     responseCodeUtil.getMessage("403"),
@@ -139,17 +158,12 @@ public class LoginService {
                 responseData.put("email", loginRequest.getEmail());
                 responseData.put("isActive", existingUser.getIsActive());
 
-                logger.info("job_id: {}, ip: {}, signal: {}, data: {responseCode: {}, responseMessage: {}, data: {email: {}, token: {}, idPeserta: {}, isActive: {}}}",
-                        LoggerUtil.getJobId(),
-                        LoggerUtil.getUserIp(request),
-                        "R",
+                logger.info(LoggerUtil.formatLog(
+                        jobId, ip, "R", processName,
                         responseCodeUtil.getCode("000"),
                         responseCodeUtil.getMessage("000"),
-                        loginRequest.getEmail(),
-                        token,
-                        existingUser.getIdPeserta(),
-                        existingUser.getIsActive()
-                );
+                        responseData
+                ));
 
                 return ResponseEntity.ok(new ResponseWrapper<>(
                         responseCodeUtil.getCode("000"),
@@ -157,8 +171,12 @@ public class LoginService {
                         responseData
                 ));
             } else {
-                logger.warn("Response Data: {responseCode: {}, responseMessage: {}, data:{\"Invalid password for email: {}\"}",
-                        responseCodeUtil.getCode("000"), responseCodeUtil.getMessage("000"), loginRequest.getEmail());
+                logger.warn(LoggerUtil.formatLog(
+                        jobId, ip, "R", processName,
+                        responseCodeUtil.getCode("400"),
+                        responseCodeUtil.getMessage("400"),
+                        Map.of("message", "Invalid password", "email", loginRequest.getEmail())
+                ));
                 return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                         responseCodeUtil.getCode("400"),
                         responseCodeUtil.getMessage("400"),
@@ -166,8 +184,12 @@ public class LoginService {
                 ));
             }
         } else {
-            logger.warn("Response Data: {responseCode: {}, responseMessage: {}, data:{\"No user found for email: {}\"}",
-                    responseCodeUtil.getCode("000"), responseCodeUtil.getMessage("000"), loginRequest.getEmail());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("401"),
+                    responseCodeUtil.getMessage("401"),
+                    Map.of("message", "No user found", "email", loginRequest.getEmail())
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("401"),
                     responseCodeUtil.getMessage("401"),

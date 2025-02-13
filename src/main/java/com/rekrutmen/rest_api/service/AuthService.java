@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rekrutmen.rest_api.dto.*;
 import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.repository.PesertaRepository;
-import com.rekrutmen.rest_api.util.JwtUtil;
-import com.rekrutmen.rest_api.util.MaskingUtil;
-import com.rekrutmen.rest_api.util.OtpUtil;
-import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import com.rekrutmen.rest_api.util.*;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,13 +63,28 @@ public class AuthService {
                 Pattern.matches(PASSWORD_SPECIAL_CHAR_REGEX, password);
     }
 
-    public ResponseEntity<ResponseWrapper<Object>> handleResetPassword(ResetPasswordRequest resetPasswordRequest) {
+    public ResponseEntity<ResponseWrapper<Object>> handleResetPassword(String processName, ResetPasswordRequest resetPasswordRequest, HttpServletRequest request) {
+
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
         String email = resetPasswordRequest.getEmail();
         String noIdentitas = resetPasswordRequest.getNoIdentitas();
         long currentTime = System.currentTimeMillis();
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                LoggerUtil.convertObjectToMap(resetPasswordRequest)
+        ));
+
         // Check if the account is locked
         if (isAccountLocked(email)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Too many reset attempts. Please wait 5 minutes before trying again.")
+            ));
             return ResponseEntity.status(403).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("403"),
                     responseCodeUtil.getMessage("403"),
@@ -85,6 +98,12 @@ public class AuthService {
         // If the user reaches the max attempts, lock the account
         if (hasExceededAttemptLimit(email)) {
             lockedAccounts.put(email, currentTime + LOCKOUT_DURATION_MS);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Too many reset attempts. Please wait 5 minutes before trying again.")
+            ));
             return ResponseEntity.status(403).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("403"),
                     responseCodeUtil.getMessage("403"),
@@ -93,10 +112,14 @@ public class AuthService {
         }
 
         Optional<Peserta> pesertaOptional = profileService.validateEmailAndNoIdentitas(email, noIdentitas);
-        logger.info("Request Data = {Email: {}, No Identitas: {}}", email, MaskingUtil.maskPassword(noIdentitas));
 
         if (pesertaOptional.isEmpty()) {
-            logger.warn("Invalid Email {} or No Identitas {}", email, MaskingUtil.maskPassword(noIdentitas));
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Invalid email or No Identitas")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -107,7 +130,6 @@ public class AuthService {
         Peserta peserta = pesertaOptional.get();
         String otpCode = OtpUtil.generateOtp();
         LocalDateTime updatedAt = LocalDateTime.now();
-        logger.info("OTP generated: {}", otpCode);
         profileService.updateOtp(peserta.getIdPeserta().intValue(), otpCode, updatedAt);
         emailService.sendOtpEmail(email, otpCode);
 
@@ -115,6 +137,12 @@ public class AuthService {
         responseData.put("email", email);
         responseData.put("no_identitas", MaskingUtil.maskPassword(noIdentitas));
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -122,15 +150,26 @@ public class AuthService {
         ));
     }
 
-    public ResponseEntity<ResponseWrapper<Object>> handleResendOtp(ResendOtpRequest resendOtpRequest) {
+    public ResponseEntity<ResponseWrapper<Object>> handleResendOtp(String processName, ResendOtpRequest resendOtpRequest, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
         Optional<Peserta> pesertaOptional = profileService.validateEmailAndNoIdentitas(
                 resendOtpRequest.getEmail(),
                 resendOtpRequest.getNoIdentitas()
         );
-        logger.info("Request Data = {Email: {}, No Identitas: {}}", resendOtpRequest.getEmail(), resendOtpRequest.getNoIdentitas());
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                LoggerUtil.convertObjectToMap(resendOtpRequest)
+        ));
 
         if (pesertaOptional.isEmpty()) {
-            logger.warn("Email {} or No Identitas {} invalid!", resendOtpRequest.getEmail(), resendOtpRequest.getNoIdentitas());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Invalid email or No Identitas")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -145,7 +184,12 @@ public class AuthService {
         LocalDateTime now = LocalDateTime.now();
         if (lastOtpUpdatedAt != null && Duration.between(lastOtpUpdatedAt, now).getSeconds() < 30) {
             long secondsRemaining = 30 - Duration.between(lastOtpUpdatedAt, now).getSeconds();
-            logger.warn("OTP resend request blocked for {}. Please wait {} seconds.", resendOtpRequest.getEmail(), secondsRemaining);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("429"),
+                    "OTP resend request blocked. Please wait " + secondsRemaining + " seconds.",
+                    Map.of("email", resendOtpRequest.getEmail(), "secondsRemaining", secondsRemaining)
+            ));
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("429"),
                     "Please wait " + secondsRemaining + " seconds before resending OTP.",
@@ -156,7 +200,6 @@ public class AuthService {
         // Generate and send OTP
         String otpCode = OtpUtil.generateOtp();
         LocalDateTime updatedAt = LocalDateTime.now();
-        logger.info("OTP generated: {}", otpCode);
         profileService.updateOtp(peserta.getIdPeserta().intValue(), otpCode, updatedAt);
         emailService.sendOtpEmail(resendOtpRequest.getEmail(), otpCode);
 
@@ -164,6 +207,12 @@ public class AuthService {
         responseData.put("email", resendOtpRequest.getEmail());
         responseData.put("no_identitas", resendOtpRequest.getNoIdentitas());
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -171,13 +220,23 @@ public class AuthService {
         ));
     }
 
+    public ResponseEntity<ResponseWrapper<Object>> handleOtpVerification(String processName, OtpVerificationRequest otpVerificationRequest, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
 
-    public ResponseEntity<ResponseWrapper<Object>> handleOtpVerification(OtpVerificationRequest otpVerificationRequest) {
         Optional<Peserta> pesertaOptional = profileService.validateOtp(otpVerificationRequest.getOtp());
-        logger.info("Request Data = {OTP code: {}}", otpVerificationRequest.getOtp());
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                LoggerUtil.convertObjectToMap(otpVerificationRequest)
+        ));
 
         if (pesertaOptional.isEmpty()) {
-            logger.warn("OTP code: {} invalid!", otpVerificationRequest.getOtp());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Invalid OTP code")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -189,6 +248,12 @@ public class AuthService {
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("OTP is valid!", otpVerificationRequest.getOtp());
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -196,12 +261,23 @@ public class AuthService {
         ));
     }
 
-    public ResponseEntity<ResponseWrapper<Object>> handleAccountVerification(AccountVerificationRequest accountVerificationRequest) {
+    public ResponseEntity<ResponseWrapper<Object>> handleAccountVerification(String processName, AccountVerificationRequest accountVerificationRequest, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
         Optional<Peserta> pesertaOptional = profileService.validateOtp(accountVerificationRequest.getOtp());
-        logger.info("Request Data = {OTP code: {}}", accountVerificationRequest.getOtp());
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                LoggerUtil.convertObjectToMap(accountVerificationRequest)
+        ));
 
         if (pesertaOptional.isEmpty()) {
-            logger.warn("OTP code: {} invalid!", accountVerificationRequest.getOtp());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Invalid OTP code")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -216,11 +292,15 @@ public class AuthService {
         peserta.setOtp(null);
         pesertaRepository.save(peserta);
 
-        logger.info("Account verified successfully for Peserta ID: {}", peserta.getIdPeserta());
-
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("OTP is valid!", accountVerificationRequest.getOtp());
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -228,11 +308,26 @@ public class AuthService {
         ));
     }
 
-    public ResponseEntity<ResponseWrapper<Object>> handleGetIdPeserta(String authHeader) {
+    public ResponseEntity<ResponseWrapper<Object>> handleGetIdPeserta(String processName, String authHeader, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("message", "No request body provided")
+        ));
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            logger.warn("Invalid Authorization Header");
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("401"),
+                    responseCodeUtil.getMessage("401"),
+                    Map.of("message", "Invalid Authorization Header")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "401", "Invalid Authorization Header", null
+                    responseCodeUtil.getCode("401"),
+                    "Invalid Authorization Header",
+                    null
             ));
         }
 
@@ -241,8 +336,6 @@ public class AuthService {
         try {
             // Decode the token for additional details
             Map<String, String> decodedToken = JwtUtil.decodeToken(token);
-            logger.info("Decoded Token Details = {header: {}, payload: {}, signature: {}}",
-                    decodedToken.get("header"), decodedToken.get("payload"), decodedToken.get("signature"));
 
             // Parse payload JSON to retrieve idPeserta and email
             String payload = decodedToken.get("payload");
@@ -253,29 +346,61 @@ public class AuthService {
             String email = payloadData.get("email") != null ? payloadData.get("email").toString() : null;
 
             if (idPeserta == null || email == null) {
-                logger.warn("ID Peserta or Email not found in token");
+                logger.warn(LoggerUtil.formatLog(
+                        jobId, ip, "R", processName,
+                        responseCodeUtil.getCode("400"),
+                        responseCodeUtil.getMessage("400"),
+                        Map.of("message", "ID Peserta or Email not found in token")
+                ));
                 return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                        "400", "ID Peserta or Email not found in token", null
+                        responseCodeUtil.getCode("400"),
+                        "ID Peserta or Email not found in token",
+                        null
                 ));
             }
 
-            // Log the extracted information
-            logger.info("Extracted Data from Token = {idPeserta: {}, email: {}}", idPeserta, email);
-
+            logger.info(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("000"),
+                    responseCodeUtil.getMessage("000"),
+                    Map.of("idPeserta", idPeserta, "email", email, "message", "Id Peserta found in token")
+            ));
             return ResponseEntity.ok(new ResponseWrapper<>(
-                    "000", "Success", Map.of("idPeserta", idPeserta, "email", email)
+                    responseCodeUtil.getCode("000"),
+                    responseCodeUtil.getMessage("000"),
+                    Map.of("idPeserta", idPeserta, "email", email)
             ));
         } catch (Exception e) {
-            logger.error("Error extracting data from token: {}", e.getMessage(), e);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("401"),
+                    responseCodeUtil.getMessage("401"),
+                    Map.of("message", "Invalid or expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    "401", "Invalid or expired token", null
+                    responseCodeUtil.getCode("401"),
+                    "Invalid or expired token",
+                    null
             ));
         }
     }
 
-    public ResponseEntity<ResponseWrapper<Object>> handleUpdatePassword(UpdatePasswordRequest updatePasswordRequest) {
+    public ResponseEntity<ResponseWrapper<Object>> handleUpdatePassword(String processName, UpdatePasswordRequest updatePasswordRequest, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                LoggerUtil.convertObjectToMap(updatePasswordRequest)
+        ));
+
         if (!updatePasswordRequest.getNewPassword().equals(updatePasswordRequest.getConfirmPassword())) {
-            logger.warn("New password and confirm password do not match");
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "New password and confirm password do not match")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     "Passwords do not match",
@@ -284,7 +409,12 @@ public class AuthService {
         }
 
         if (!isValidPassword(updatePasswordRequest.getNewPassword())) {
-            logger.warn("New password does not meet security requirements");
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a digit, and a special character")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     "Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a digit, and a special character",
@@ -294,9 +424,14 @@ public class AuthService {
 
         Optional<Peserta> pesertaOptional = pesertaRepository.findByEmail(updatePasswordRequest.getEmail());
         if (pesertaOptional.isEmpty()) {
-            logger.warn("No user found with email: {}", updatePasswordRequest.getEmail());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "User not found")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("404"),
+                    responseCodeUtil.getCode("400"),
                     "User not found",
                     null
             ));
@@ -308,8 +443,12 @@ public class AuthService {
         peserta.setUpdatedAt(LocalDateTime.now());
         pesertaRepository.save(peserta);
 
-        logger.info("Password updated successfully for email: {}", updatePasswordRequest.getEmail());
-
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                Map.of("message", "Password updated successfully")
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 "Password updated successfully",
@@ -317,9 +456,22 @@ public class AuthService {
         ));
     }
 
-    public ResponseEntity<ResponseWrapper<Object>> handleChangePassword(ChangePasswordRequest changePasswordRequest) {
+    public ResponseEntity<ResponseWrapper<Object>> handleChangePassword(String processName, ChangePasswordRequest changePasswordRequest, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                LoggerUtil.convertObjectToMap(changePasswordRequest)
+        ));
+
         if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
-            logger.warn("New password and confirm password do not match for email: {}", changePasswordRequest.getEmail());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "New password and confirm password do not match")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     "New password and confirm password do not match",
@@ -328,7 +480,12 @@ public class AuthService {
         }
 
         if (!isValidPassword(changePasswordRequest.getNewPassword())) {
-            logger.warn("New password does not meet security requirements for email: {}", changePasswordRequest.getEmail());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a digit, and a special character")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     "Password must be at least 8 characters, contain an uppercase letter, a lowercase letter, a digit, and a special character",
@@ -338,9 +495,14 @@ public class AuthService {
 
         Optional<Peserta> pesertaOptional = pesertaRepository.findByEmail(changePasswordRequest.getEmail());
         if (pesertaOptional.isEmpty()) {
-            logger.warn("No user found with email: {}", changePasswordRequest.getEmail());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "User not found")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("404"),
+                    responseCodeUtil.getCode("400"),
                     "User not found",
                     null
             ));
@@ -349,7 +511,12 @@ public class AuthService {
         Peserta peserta = pesertaOptional.get();
 
         if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), peserta.getPassword())) {
-            logger.warn("Current password does not match for email: {}", changePasswordRequest.getEmail());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Current password is incorrect")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     "Current password is incorrect",
@@ -362,8 +529,12 @@ public class AuthService {
         peserta.setUpdatedAt(LocalDateTime.now());
         pesertaRepository.save(peserta);
 
-        logger.info("Password changed successfully for email: {}", changePasswordRequest.getEmail());
-
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                Map.of("message", "Password changed successfully")
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 "Password changed successfully",
@@ -371,11 +542,26 @@ public class AuthService {
         ));
     }
 
-    public ResponseEntity<ResponseWrapper<Object>> validateToken(String authHeader) {
+    public ResponseEntity<ResponseWrapper<Object>> validateToken(String processName, String authHeader, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("message", "No request body provided")
+        ));
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            logger.warn("Invalid Authorization Header");
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("401"),
+                    responseCodeUtil.getMessage("401"),
+                    Map.of("message", "Invalid Authorization Header")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
-                    "401", "Invalid Authorization Header", null
+                    responseCodeUtil.getCode("401"),
+                    "Invalid Authorization Header",
+                    null
             ));
         }
 
@@ -384,9 +570,16 @@ public class AuthService {
         try {
             // Validate the token and check expiration
             if (!JwtUtil.isTokenValid(token)) {
-                logger.warn("Token is expired or invalid");
+                logger.warn(LoggerUtil.formatLog(
+                        jobId, ip, "R", processName,
+                        responseCodeUtil.getCode("401"),
+                        responseCodeUtil.getMessage("401"),
+                        Map.of("message", "Token is expired or invalid")
+                ));
                 return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                        "401", "Token is expired or invalid", null
+                        responseCodeUtil.getCode("401"),
+                        "Token is expired or invalid",
+                        null
                 ));
             }
 
@@ -402,15 +595,28 @@ public class AuthService {
             responseData.put("subject", subject);
             responseData.put("expiration", expiration);
 
-            logger.info("Token is valid for subject: {}", subject);
-
+            logger.info(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("000"),
+                    responseCodeUtil.getMessage("000"),
+                    Map.of("message", "Token is valid")
+            ));
             return ResponseEntity.ok(new ResponseWrapper<>(
-                    "000", "Token is valid", responseData
+                    responseCodeUtil.getCode("000"),
+                    "Token is valid",
+                    responseData
             ));
         } catch (Exception e) {
-            logger.error("Token validation failed: {}", e.getMessage(), e);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("401"),
+                    responseCodeUtil.getMessage("401"),
+                    Map.of("message", "Invalid or expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    "401", "Invalid or expired token", null
+                    responseCodeUtil.getCode("401"),
+                    "Invalid or expired token",
+                    null
             ));
         }
     }
@@ -445,26 +651,6 @@ public class AuthService {
 
     private boolean hasExceededIncorrectLimit(String email) {
         return incorrectAttempts.containsKey(email) && incorrectAttempts.get(email).size() >= 3;
-    }
-
-    private void resetIncorrectAttempts(String email) {
-        incorrectAttempts.remove(email);
-    }
-
-    private void trackIncorrectAttempt(String email, long currentTime) {
-        incorrectAttempts.putIfAbsent(email, new ArrayList<>());
-
-        List<Long> attempts = incorrectAttempts.get(email);
-        attempts.add(currentTime);
-
-        // Remove attempts older than 5 minutes
-        attempts.removeIf(timestamp -> timestamp < currentTime - LOCKOUT_DURATION_MS);
-
-        // If incorrect attempts reach 3, lock the account
-        if (attempts.size() >= 3) {
-            lockedAccounts.put(email, currentTime + LOCKOUT_DURATION_MS);
-            incorrectAttempts.remove(email); // Clear the incorrect attempts
-        }
     }
 
     /**

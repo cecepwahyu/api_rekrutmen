@@ -8,6 +8,7 @@ import com.rekrutmen.rest_api.model.PesertaLowongan;
 import com.rekrutmen.rest_api.service.LowonganService;
 import com.rekrutmen.rest_api.service.PesertaLowonganService;
 import com.rekrutmen.rest_api.service.VwLowonganDokumenService;
+import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,9 @@ public class LowonganController {
 
     @Autowired
     private VwLowonganDokumenService vwLowonganDokumenService;
+
+    @Autowired
+    private ResponseCodeUtil responseCodeUtil;
 
     @GetMapping("/paginated")
     public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongans(
@@ -82,7 +86,7 @@ public class LowonganController {
 
         if (lowonganResponse.getStatusCode().isError() || lowonganResponse.getBody() == null) {
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     "Lowongan not found",
                     null
             ));
@@ -106,7 +110,7 @@ public class LowonganController {
 
         if (lowonganResponse.getStatusCode().isError() || lowonganResponse.getBody() == null) {
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     "Lowongan not found",
                     null
             ));

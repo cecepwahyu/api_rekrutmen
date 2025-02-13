@@ -72,8 +72,7 @@ public class TokenUtil {
 
         if (peserta.isPresent()) {
             Peserta foundPeserta = peserta.get();
-            System.out.println("✅ Found Peserta: " + foundPeserta.getIdPeserta());
-            return foundPeserta.getIdPeserta(); // Correctly return id_peserta
+            return foundPeserta.getIdPeserta();
         } else {
             System.out.println("No Peserta found for token: " + actualToken);
         }

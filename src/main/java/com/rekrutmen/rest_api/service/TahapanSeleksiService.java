@@ -1,7 +1,6 @@
 package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
-import com.rekrutmen.rest_api.model.TahapanSeleksi;
 import com.rekrutmen.rest_api.repository.TahapanSeleksiRepository;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
@@ -26,34 +25,6 @@ public class TahapanSeleksiService {
 
     @Autowired
     private TahapanSeleksiRepository tahapanSeleksiRepository;
-
-    public ResponseEntity<ResponseWrapper<List<TahapanSeleksi>>> getTahapanSeleksi(String token) {
-        // Validate token
-        if (!tokenUtil.isValidToken(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("299"),
-                    responseCodeUtil.getMessage("299"),
-                    null
-            ));
-        }
-
-        // Validate if token is expired
-        if (tokenUtil.isTokenExpired(token)) {
-            return ResponseEntity.status(401).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("298"),
-                    responseCodeUtil.getMessage("298"),
-                    null
-            ));
-        }
-
-        // Fetch lowongan list ordered by idTahapan
-        List<TahapanSeleksi> tahapanSeleksis = tahapanSeleksiRepository.findAllOrderedByIdTahapan();
-        return ResponseEntity.ok(new ResponseWrapper<>(
-                responseCodeUtil.getCode("000"),
-                responseCodeUtil.getMessage("000"),
-                tahapanSeleksis
-        ));
-    }
 
     /**
      * Fetches tahapan for a given lowongan ID.
@@ -178,7 +149,7 @@ public class TahapanSeleksiService {
             logger.error("Error fetching tahapan for lowongan ID {} and peserta ID {}: {}", lowonganId, idPeserta, e.getMessage(), e);
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("500"),
-                    "Internal server error while fetching tahapan",
+                    responseCodeUtil.getMessage("500"),
                     null
             ));
         }

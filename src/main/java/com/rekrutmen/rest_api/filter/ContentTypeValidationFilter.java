@@ -30,11 +30,6 @@ public class ContentTypeValidationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Log request method and Content-Type
-        logger.info("Request Method: " + request.getMethod());
-        logger.info("Content-Type: " + request.getHeader("Content-Type"));
-        logger.info("Accept: " + request.getHeader("Accept"));
-
         // Validate Content-Type
         if (!MediaType.APPLICATION_JSON_VALUE.equalsIgnoreCase(request.getHeader("Content-Type"))) {
             logger.warn("Invalid Content-Type. Expected application/json");

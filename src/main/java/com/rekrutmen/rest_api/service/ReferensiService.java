@@ -46,13 +46,13 @@ public class ReferensiService {
 
         if (!referensiList.isEmpty()) {
             return ResponseEntity.ok(new ResponseWrapper<>(
-                    "000",
-                    "Success",
+                    responseCodeUtil.getCode("000"),
+                    responseCodeUtil.getMessage("000"),
                     referensiList
             ));
         } else {
             return ResponseEntity.status(404).body(new ResponseWrapper<>(
-                    "404",
+                    responseCodeUtil.getCode("404"),
                     "No references found for the specified group",
                     null
             ));

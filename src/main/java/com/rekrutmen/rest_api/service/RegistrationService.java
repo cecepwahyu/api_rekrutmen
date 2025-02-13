@@ -4,9 +4,11 @@ import com.rekrutmen.rest_api.controller.LoginController;
 import com.rekrutmen.rest_api.dto.RegisterRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Peserta;
+import com.rekrutmen.rest_api.util.LoggerUtil;
 import com.rekrutmen.rest_api.util.MaskingUtil;
 import com.rekrutmen.rest_api.util.OtpUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,11 +45,26 @@ public class RegistrationService {
     @Autowired
     private EmailService emailService;
 
-    public ResponseEntity<ResponseWrapper<Object>> handleRegister(RegisterRequest registerRequest) {
+    public ResponseEntity<ResponseWrapper<Object>> handleRegister(String processName, RegisterRequest registerRequest, HttpServletRequest request) {
+
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        // Log request
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                LoggerUtil.convertObjectToMap(registerRequest)
+        ));
 
         // Validate NIK/No Identitas length
         if (!isValidNIK(registerRequest.getNoIdentitas())) {
-            logger.warn("No Identitas: {} is invalid! Must be 16 characters.", registerRequest.getNoIdentitas());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "No Identitas must be exactly 16 characters", "no_identitas", registerRequest.getNoIdentitas())
+            ));
+
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -57,7 +74,13 @@ public class RegistrationService {
 
         // Validate email format
         if (!isValidEmail(registerRequest.getEmail())) {
-            logger.warn("Email: {} is invalid! Does not match email format.", registerRequest.getEmail());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Invalid email format", "email", registerRequest.getEmail())
+            ));
+
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -67,7 +90,13 @@ public class RegistrationService {
 
         // Validate password requirements
         if (!isValidPassword(registerRequest.getPassword())) {
-            logger.warn("Password does not meet requirements");
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Password must have at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character")
+            ));
+
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -76,7 +105,13 @@ public class RegistrationService {
         }
 
         if (pesertaService.isEmailTaken(registerRequest.getEmail())) {
-            logger.warn("Email: {} already registered!", registerRequest.getEmail());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Email already registered", "email", registerRequest.getEmail())
+            ));
+
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -85,7 +120,13 @@ public class RegistrationService {
         }
 
         if (pesertaService.isNoIdentitasExist(registerRequest.getNoIdentitas())) {
-            logger.warn("No Identitas: {} already registered!", registerRequest.getNoIdentitas());
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "No Identitas/NIK already registered", "no_identitas", registerRequest.getNoIdentitas())
+            ));
+
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -113,22 +154,19 @@ public class RegistrationService {
         // Send verification email
         emailService.sendOtpEmaiVerification(newUser.getEmail(), otpCode);
 
-        logger.info(
-                "Response Data = {\"responseCode\": \"{}\", \"responseMessage\": \"{}\", \"data\": {\"nama\": \"{}\", \"no_identitas\": \"{}\", \"email\": \"{}\", \"password\": \"{}\", \"OTP\": \"{}\"}}",
-                responseCodeUtil.getCode("000"),
-                responseCodeUtil.getMessage("000"),
-                registerRequest.getNama(),
-                registerRequest.getNoIdentitas(),
-                registerRequest.getEmail(),
-                MaskingUtil.maskPassword(registerRequest.getPassword()),
-                otpCode
-        );
-
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("nama", registerRequest.getNama());
         responseData.put("no_identitas", MaskingUtil.maskPassword(registerRequest.getNoIdentitas()));
         responseData.put("email", registerRequest.getEmail());
         responseData.put("password", MaskingUtil.maskPassword(registerRequest.getPassword()));
+
+        // Log response
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
 
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),

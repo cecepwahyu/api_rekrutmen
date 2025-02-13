@@ -14,9 +14,6 @@ public class LogWs {
     @Column(name = "log_time", nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime logTime;
 
-    @Column(name = "type", length = 20)
-    private String type;
-
     @Column(name = "job_id", length = 20)
     private String jobId;
 
@@ -44,9 +41,8 @@ public class LogWs {
     // Constructors
     public LogWs() {}
 
-    public LogWs(String type, String jobId, String ip, String signal, String device,
+    public LogWs(String jobId, String ip, String signal, String device,
                  String processName, String message, String username, Integer sequence) {
-        this.type = type;
         this.jobId = jobId;
         this.ip = ip;
         this.signal = signal;
@@ -63,9 +59,6 @@ public class LogWs {
 
     public LocalDateTime getLogTime() { return logTime; }
     public void setLogTime(LocalDateTime logTime) { this.logTime = logTime; }
-
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
 
     public String getJobId() { return jobId; }
     public void setJobId(String jobId) { this.jobId = jobId; }

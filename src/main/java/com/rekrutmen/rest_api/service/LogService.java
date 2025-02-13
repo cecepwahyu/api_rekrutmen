@@ -15,9 +15,9 @@ public class LogService {
         this.logWsRepository = logWsRepository;
     }
 
-    public void log(String type, String jobId, String ip, String signal, String device,
+    public void log(String jobId, String ip, String signal, String device,
                     String processName, String message, String username, Integer sequence) {
-        LogWs logWs = new LogWs(type, jobId, ip, signal, device, processName, message, username, sequence);
+        LogWs logWs = new LogWs(jobId, ip, signal, device, processName, message, username, sequence);
         logWsRepository.save(logWs);
     }
 }

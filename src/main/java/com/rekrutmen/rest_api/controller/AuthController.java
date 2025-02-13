@@ -2,6 +2,7 @@ package com.rekrutmen.rest_api.controller;
 
 import com.rekrutmen.rest_api.dto.*;
 import com.rekrutmen.rest_api.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,51 +20,75 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ResponseWrapper<Object>> resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
-        logger.info("Request Data = {no_identitas: {}, email: {}}", resetPasswordRequest.getNoIdentitas(), resetPasswordRequest.getEmail());
-        return authService.handleResetPassword(resetPasswordRequest);
+    public ResponseEntity<ResponseWrapper<Object>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest resetPasswordRequest,
+            HttpServletRequest request
+    ) {
+        String processName = "RESET_PASSWORD";
+        return authService.handleResetPassword(processName, resetPasswordRequest, request);
     }
 
     @PostMapping("/resend-otp")
-    public ResponseEntity<ResponseWrapper<Object>> resendOtp(@Valid @RequestBody ResendOtpRequest resendOtpRequest) {
-        logger.info("Request Data = {no_identitas: {}, email: {}}", resendOtpRequest.getNoIdentitas(), resendOtpRequest.getEmail());
-        return authService.handleResendOtp(resendOtpRequest);
+    public ResponseEntity<ResponseWrapper<Object>> resendOtp(
+            @Valid @RequestBody ResendOtpRequest resendOtpRequest,
+            HttpServletRequest request
+    ) {
+        String processName = "RESEND_OTP";
+        return authService.handleResendOtp(processName, resendOtpRequest, request);
     }
 
     @PostMapping("/otp-verification")
-    public ResponseEntity<ResponseWrapper<Object>> otpVerification(@Valid @RequestBody OtpVerificationRequest otpVerificationRequest) {
-        logger.info("Request Data = {otp: {}}", otpVerificationRequest.getOtp());
-        return authService.handleOtpVerification(otpVerificationRequest);
+    public ResponseEntity<ResponseWrapper<Object>> otpVerification(
+            @Valid @RequestBody OtpVerificationRequest otpVerificationRequest,
+            HttpServletRequest request
+    ) {
+        String processName = "OTP_VERIFICATION";
+        return authService.handleOtpVerification(processName, otpVerificationRequest, request);
     }
 
     @PostMapping("/account-verification")
-    public ResponseEntity<ResponseWrapper<Object>> accountVerification(@Valid @RequestBody AccountVerificationRequest accountVerificationRequest) {
-        logger.info("Request Data = {otp: {}}", accountVerificationRequest.getOtp());
-        return authService.handleAccountVerification(accountVerificationRequest);
+    public ResponseEntity<ResponseWrapper<Object>> accountVerification(
+            @Valid @RequestBody AccountVerificationRequest accountVerificationRequest,
+            HttpServletRequest request
+    ) {
+        String processName = "ACCOUNT_VERIFICATION";
+        return authService.handleAccountVerification(processName, accountVerificationRequest, request);
     }
 
     @PostMapping("/get-id-peserta")
-    public ResponseEntity<ResponseWrapper<Object>> getIdPeserta(@RequestHeader("Authorization") String authHeader) {
-        logger.info("Received request to get ID Peserta");
-        return authService.handleGetIdPeserta(authHeader);
+    public ResponseEntity<ResponseWrapper<Object>> getIdPeserta(
+            @RequestHeader("Authorization") String authHeader,
+            HttpServletRequest request
+    ) {
+        String processName = "GET_ID_PESERTA";
+        return authService.handleGetIdPeserta(processName, authHeader, request);
     }
 
     @PutMapping("/update-password")
-    public ResponseEntity<ResponseWrapper<Object>> updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
-        logger.info("Received request to update password for email: {}", updatePasswordRequest.getEmail());
-        return authService.handleUpdatePassword(updatePasswordRequest);
+    public ResponseEntity<ResponseWrapper<Object>> updatePassword(
+            @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest,
+            HttpServletRequest request
+    ) {
+        String processName = "UPDATE_PASSWORD";
+        return authService.handleUpdatePassword(processName, updatePasswordRequest, request);
     }
 
     @PutMapping("/change-password")
-    public ResponseEntity<ResponseWrapper<Object>> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
-        logger.info("Received request to change password for email: {}", changePasswordRequest.getEmail());
-        return authService.handleChangePassword(changePasswordRequest);
+    public ResponseEntity<ResponseWrapper<Object>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest changePasswordRequest,
+            HttpServletRequest request
+    ) {
+        String processName = "CHANGE_PASSWORD";
+        return authService.handleChangePassword(processName, changePasswordRequest, request);
     }
 
     @PostMapping("/validate-token")
-    public ResponseEntity<ResponseWrapper<Object>> validateToken(@RequestHeader("Authorization") String authHeader) {
-        logger.info("Validating token");
-        return authService.validateToken(authHeader);
+    public ResponseEntity<ResponseWrapper<Object>> validateToken(
+            @RequestHeader("Authorization") String authHeader,
+            HttpServletRequest request
+    ) {
+        String processName = "VALIDATE_TOKEN";
+        return authService.validateToken(processName, authHeader, request);
     }
 
 

@@ -14,5 +14,6 @@
   "400": "Bad Request",
   "401": "Username or password is incorrect",
   "403": "Forbidden",
-  "429": "Too Many Requests"
+  "429": "Too Many Requests",
+  "500": "Internal Server Error"
 }

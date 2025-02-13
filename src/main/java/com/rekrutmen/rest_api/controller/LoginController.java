@@ -19,8 +19,9 @@ public class LoginController {
     @PostMapping
     public ResponseEntity<ResponseWrapper<Object>> login(
             @Valid @RequestBody LoginRequest loginRequest,
-            HttpServletRequest request  // Pass HttpServletRequest
+            HttpServletRequest request
     ) {
-        return loginService.handleLogin(loginRequest, request);
+        String processName = "LOGIN";
+        return loginService.handleLogin(processName, loginRequest, request);
     }
 }

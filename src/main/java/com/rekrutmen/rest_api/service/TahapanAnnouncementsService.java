@@ -15,10 +15,6 @@ public class TahapanAnnouncementsService {
         this.repository = repository;
     }
 
-    public String getContentByIdLowongan(Integer idLowongan) {
-        return repository.findContentByIdLowongan(idLowongan);
-    }
-
     public TahapanAnnouncements getLatestContentByIdLowongan(Integer idLowongan) {
         return repository.findLatestContentByIdLowongan(idLowongan);
     }
