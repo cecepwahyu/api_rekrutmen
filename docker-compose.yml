@@ -16,6 +16,8 @@ services:
     volumes:
       - '/home/devftp/data/api-rekrutmen/config:/APIREKRUTMEN/config'
       - '/home/devftp/data/api-rekrutmen/logs:/APIREKRUTMEN/logs'
+    environment:
+      - TZ=Asia/Jakarta
 
 
 networks:
