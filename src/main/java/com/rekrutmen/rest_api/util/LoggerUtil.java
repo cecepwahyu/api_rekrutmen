@@ -79,7 +79,7 @@ public class LoggerUtil {
             try (FileWriter writer = new FileWriter(filePath, true)) {
                 writer.write(logMessage + System.lineSeparator());
             }
-            uploadLogToSFTP(filePath);
+            //uploadLogToSFTP(filePath);
         } catch (IOException e) {
             System.err.println("Failed to write log: " + e.getMessage());
         }
