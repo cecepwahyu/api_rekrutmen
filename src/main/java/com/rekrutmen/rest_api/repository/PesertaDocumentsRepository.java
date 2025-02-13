@@ -23,14 +23,7 @@ public interface PesertaDocumentsRepository extends JpaRepository<PesertaDocumen
             @Param("fileName") String fileName,
             @Param("fileType") String fileType);
 
-    @Query(value = "SELECT nama_dokumen, deskripsi FROM vw_lowongan_dokumen WHERE slug = :slug", nativeQuery = true)
-    String findDokumenLowonganBySlug(@Param("slug") String slug);
-
     @Query("SELECT d.idDocument FROM PesertaDocuments d WHERE d.idUser = :idUser")
     List<Integer> findIdDocumentsByUserId(@Param("idUser") Integer idUser);
-
-    @Modifying
-    @Query("DELETE FROM PesertaDocuments d WHERE d.idUser = :idUser AND d.idJenisDokumen = :idJenisDokumen")
-    void deleteByUserIdAndJenisDokumen(@Param("idUser") Integer idUser, @Param("idJenisDokumen") Integer idJenisDokumen);
 
 }

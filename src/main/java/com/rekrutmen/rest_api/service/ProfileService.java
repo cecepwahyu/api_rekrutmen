@@ -108,12 +108,4 @@ public class ProfileService {
         });
     }
 
-    //    public Optional<LocalDateTime> getLastOtpTimestamp(Long idPeserta) {
-//        return pesertaRepository.findLastOtpTimestampByPesertaId(idPeserta);
-//    }
-//
-//    public void updateLastOtpTimestamp(Long pesertaId, LocalDateTime timestamp) {
-//        pesertaRepository.updateLastOtpTimestamp(pesertaId, timestamp);
-//    }
-
 }
