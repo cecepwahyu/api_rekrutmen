@@ -222,7 +222,7 @@ public class PesertaService {
         // Validate Peserta ID
         if (idPesertaFromToken == null || !idPesertaFromToken.equals(idPeserta)) {
             return ResponseEntity.status(403).body(new ResponseWrapper<>(
-                    "403",
+                    responseCodeUtil.getCode("403"),
                     "Unauthorized access. Peserta ID does not match the token.",
                     null
             ));
@@ -405,7 +405,7 @@ public class PesertaService {
 
         if (pesertaOptional.isEmpty()) {
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
-                    "400",
+                    responseCodeUtil.getCode("400"),
                     "Peserta not found",
                     null
             ));

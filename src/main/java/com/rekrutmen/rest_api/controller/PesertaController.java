@@ -102,8 +102,8 @@ public class PesertaController {
             ));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
-                    "500",
-                    "Internal Server Error",
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
                     null
             ));
         }
@@ -322,188 +322,6 @@ public class PesertaController {
         return ResponseEntity.ok(idDocuments);
     }
 
-    @PutMapping("/{idPeserta}/submit-ktp")
-    public ResponseEntity<ResponseWrapper<Object>> submitKtp(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateKtp(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-skck")
-    public ResponseEntity<ResponseWrapper<Object>> submitSkck(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateSkck(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-toefl")
-    public ResponseEntity<ResponseWrapper<Object>> submitToefl(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateToefl(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-kartu-keluarga")
-    public ResponseEntity<ResponseWrapper<Object>> submitKartuKeluarga(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateKartuKeluarga(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-surat-keterangan-sehat")
-    public ResponseEntity<ResponseWrapper<Object>> submitSuratSehat(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateSuratSehat(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-curriculum-vitae")
-    public ResponseEntity<ResponseWrapper<Object>> submitCv(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateCv(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-surat-lamaran")
-    public ResponseEntity<ResponseWrapper<Object>> submitSuratLamaran(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateSuratLamaran(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-surat-pernyataan")
-    public ResponseEntity<ResponseWrapper<Object>> submitSuratPernyataan(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateSuratPernyataan(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-ijazah")
-    public ResponseEntity<ResponseWrapper<Object>> submitIjazah(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateIjazah(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-transkrip-nilai")
-    public ResponseEntity<ResponseWrapper<Object>> submitTranskrip(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateTranskrip(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-foto-full-badan")
-    public ResponseEntity<ResponseWrapper<Object>> submitFotoFullBadan(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateFotoFullBadan(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-pasfoto")
-    public ResponseEntity<ResponseWrapper<Object>> submitPasFoto(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdatePasFoto(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-foto-3x4")
-    public ResponseEntity<ResponseWrapper<Object>> submitFoto(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdatePasFoto(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
-    @PutMapping("/{idPeserta}/submit-dokumen-pendukung-lainnya")
-    public ResponseEntity<ResponseWrapper<Object>> submitDokumenPendukung(
-            @PathVariable Integer idPeserta,
-            @RequestBody @Valid SubmitDocumentRequest request) {
-
-        return pesertaDocumentsService.submitOrUpdateDokumenPendukung(
-                idPeserta,
-                request.getDocumentData(),
-                request.getFileName(),
-                request.getFileType()
-        );
-    }
-
     @PutMapping("/{idPeserta}/submit-document")
     public ResponseEntity<ResponseWrapper<Object>> submitDocument(
             @PathVariable Integer idPeserta,
@@ -527,8 +345,8 @@ public class PesertaController {
         } catch (Exception e) {
             logger.error("Error submitting document for idPeserta: {}, idDokumen: {} - {}", idPeserta, idDokumen, e.getMessage(), e);
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
-                    "500",
-                    "Internal Server Error",
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
                     null
             ));
         }
@@ -553,8 +371,8 @@ public class PesertaController {
         } catch (Exception e) {
             logger.error("Error inserting PesertaPendidikan for idPeserta: {} - {}", idPeserta, e.getMessage(), e);
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
-                    "500",
-                    "Internal Server Error",
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
                     null
             ));
         }
@@ -579,8 +397,8 @@ public class PesertaController {
         } catch (Exception e) {
             logger.error("Error inserting PesertaPengalaman for idPeserta: {} - {}", idPeserta, e.getMessage(), e);
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
-                    "500",
-                    "Internal Server Error",
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
                     null
             ));
         }
@@ -605,8 +423,8 @@ public class PesertaController {
         } catch (Exception e) {
             logger.error("Error inserting PesertaOrganisasi for idPeserta: {} - {}", idPeserta, e.getMessage(), e);
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
-                    "500",
-                    "Internal Server Error",
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
                     null
             ));
         }
@@ -631,8 +449,8 @@ public class PesertaController {
         } catch (Exception e) {
             logger.error("Error inserting PesertaKontak for idPeserta: {} - {}", idPeserta, e.getMessage(), e);
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
-                    "500",
-                    "Internal Server Error",
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
                     null
             ));
         }
@@ -644,66 +462,6 @@ public class PesertaController {
             @RequestHeader("Authorization") String token
     ) {
         return pesertaService.updateIsFinal(idPeserta);
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-ktp")
-    public ResponseEntity<ResponseWrapper<Object>> deleteKtp(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 1); // 1 = KTP
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-skck")
-    public ResponseEntity<ResponseWrapper<Object>> deleteSkck(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 2); // 2 = SKCK
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-toefl")
-    public ResponseEntity<ResponseWrapper<Object>> deleteToefl(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 3); // 3 = TOEFL
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-kartu-keluarga")
-    public ResponseEntity<ResponseWrapper<Object>> deleteKartuKeluarga(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 4); // 4 = Kartu Keluarga
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-surat-keterangan-sehat")
-    public ResponseEntity<ResponseWrapper<Object>> deleteSuratSehat(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 7); // 7 = Surat Keterangan Sehat
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-cv")
-    public ResponseEntity<ResponseWrapper<Object>> deleteCv(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 8); // 8 = CV
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-surat-lamaran")
-    public ResponseEntity<ResponseWrapper<Object>> deleteSuratLamaran(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 9); // 9 = Surat Lamaran
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-surat-pernyataan")
-    public ResponseEntity<ResponseWrapper<Object>> deleteSuratPernyataan(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 10); // 10 = Surat Pernyataan
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-ijazah")
-    public ResponseEntity<ResponseWrapper<Object>> deleteIjazah(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 11); // 11 = Ijazah
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-transkrip")
-    public ResponseEntity<ResponseWrapper<Object>> deleteTranskrip(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 12); // 12 = Transkrip Nilai
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-fotofullbadan")
-    public ResponseEntity<ResponseWrapper<Object>> deleteFotoFullBadan(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 13); // 13 = Foto Full Badan
-    }
-
-    @DeleteMapping("/{idPeserta}/delete-pasfoto")
-    public ResponseEntity<ResponseWrapper<Object>> deletePasFoto(@PathVariable Integer idPeserta) {
-        return pesertaDocumentsService.deleteDocument(idPeserta, 14); // 14 = Pas Foto
     }
 
     @GetMapping("/{idPeserta}/tinggi-berat")
