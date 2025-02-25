@@ -8,6 +8,7 @@
   "094": "Duplicate Transmission",
   "096": "System Malfunction",
   "099": "Invalid token",
+  "200": "Approve",
   "270": "Invalid request payload",
   "298": "Token expired",
   "299": "Token is invalid",
