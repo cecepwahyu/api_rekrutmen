@@ -317,12 +317,41 @@ public class PesertaLowonganService {
         ));
     }
 
-    public ResponseEntity<ResponseWrapper<List<PesertaLowongan>>> getPesertaLowonganByCriteria(String token, Integer idLowongan, Integer idPeserta, Boolean isRekrutmen) {
+    public ResponseEntity<ResponseWrapper<List<PesertaLowongan>>> getPesertaLowonganByCriteria(String processName, String token, Integer idLowongan, Integer idPeserta, Boolean isRekrutmen, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
                     null
             ));
         }
@@ -331,13 +360,27 @@ public class PesertaLowonganService {
         List<PesertaLowongan> pesertaLowonganList = pesertaLowonganRepository.findByLowonganPesertaAndRekrutmen(idLowongan, idPeserta, isRekrutmen);
 
         if (pesertaLowonganList.isEmpty()) {
-            return ResponseEntity.status(404).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("404"),
-                    "No data found for the given criteria",
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Data not found")
+            ));
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
                     null
             ));
         }
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        pesertaLowonganList
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),

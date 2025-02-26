@@ -277,9 +277,23 @@ public class PesertaService {
     }
 
 
-    public ResponseEntity<ResponseWrapper<Object[]>> getPesertaData(String token, Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<Object[]>> getPesertaData(String processName, String token, Integer idPeserta, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -289,6 +303,12 @@ public class PesertaService {
 
         // Validate if token is expired
         if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
@@ -301,6 +321,12 @@ public class PesertaService {
 
         // Validate Peserta ID
         if (idPesertaFromToken == null || !idPesertaFromToken.equals(idPeserta)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Unauthorized access. Peserta ID does not match the token.")
+            ));
             return ResponseEntity.status(403).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("403"),
                     "Unauthorized access. Peserta ID does not match the token.",
@@ -312,6 +338,12 @@ public class PesertaService {
         Optional<Object[]> pesertaOptional = pesertaRepository.findPesertaDataByIdPesertaRaw(idPeserta);
 
         if (pesertaOptional.isEmpty()) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "No peserta data found")
+            ));
             return ResponseEntity.status(200).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("077"),
                     responseCodeUtil.getMessage("077"),
@@ -321,6 +353,14 @@ public class PesertaService {
 
         Object[] peserta = pesertaOptional.get();
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        peserta
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -373,10 +413,54 @@ public class PesertaService {
 
 
     @Transactional
-    public ResponseEntity<ResponseWrapper<Object>> updateProfilePicture(Integer idPeserta, String base64Image) {
+    public ResponseEntity<ResponseWrapper<Object>> updateProfilePicture(String processName, String token, Integer idPeserta, String base64Image, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
         Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
 
         if (pesertaOptional.isEmpty()) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Peserta not found")
+            ));
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     "Peserta not found",
@@ -391,6 +475,14 @@ public class PesertaService {
         Map<String, String> responseData = new HashMap<>();
         responseData.put("base64_image", base64Image);
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        responseData
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 "Profile picture updated successfully",

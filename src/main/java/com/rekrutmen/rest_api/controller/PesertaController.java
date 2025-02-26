@@ -152,9 +152,11 @@ public class PesertaController {
     @GetMapping("/peserta-data/{idPeserta}")
     public ResponseEntity<?> getPesertaData(
             @RequestHeader("Authorization") String token,
-            @PathVariable Integer idPeserta
+            @PathVariable Integer idPeserta,
+            HttpServletRequest request
     ) {
-        ResponseEntity<ResponseWrapper<Object[]>> response = pesertaService.getPesertaData(token, idPeserta);
+        String processName = "GET_PESERTA_DATA";
+        ResponseEntity<ResponseWrapper<Object[]>> response = pesertaService.getPesertaData(processName, token, idPeserta, request);
 
         if (response.getBody() != null && response.getStatusCode().is2xxSuccessful()) {
             return ResponseEntity.ok(response.getBody());
@@ -168,16 +170,21 @@ public class PesertaController {
             @RequestHeader("Authorization") String token,
             @RequestParam Integer idLowongan,
             @RequestParam Integer idPeserta,
-            @RequestParam Boolean isRekrutmen) {
-        return pesertaLowonganService.getPesertaLowonganByCriteria(token, idLowongan, idPeserta, isRekrutmen);
+            @RequestParam Boolean isRekrutmen,
+            HttpServletRequest request) {
+        String processName = "GET_PESERTA_LOWONGAN";
+        return pesertaLowonganService.getPesertaLowonganByCriteria(processName, token, idLowongan, idPeserta, isRekrutmen, request);
     }
 
     @PutMapping("/{idPeserta}/update-profile-picture")
     public ResponseEntity<ResponseWrapper<Object>> updateProfilePicture(
+            @RequestHeader("Authorization") String token,
             @PathVariable Integer idPeserta,
-            @RequestBody @Valid UpdateProfilePictureRequest request
+            @RequestBody @Valid UpdateProfilePictureRequest request,
+            HttpServletRequest httpRequest
     ) {
-        return pesertaService.updateProfilePicture(idPeserta, request.getBase64Image());
+        String processName = "UPDATE_PROFILE_PICTURE";
+        return pesertaService.updateProfilePicture(processName, token, idPeserta, request.getBase64Image(), httpRequest);
     }
 
     @PutMapping("/{idPeserta}/edit")
@@ -402,26 +409,38 @@ public class PesertaController {
 
     @PutMapping("/{idPeserta}/submit-document")
     public ResponseEntity<ResponseWrapper<Object>> submitDocument(
+            @RequestHeader("Authorization") String token,
             @PathVariable Integer idPeserta,
             @RequestParam Integer idDokumen,
-            @RequestBody @Valid SubmitDocumentRequest request
+            @RequestBody @Valid SubmitDocumentRequest request,
+            HttpServletRequest httpRequest
     ) {
-        logger.info("Submitting document for idPeserta: {}, idDokumen: {}", idPeserta, idDokumen);
+        String processName = "SUBMIT_DOCUMENT";
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(httpRequest);
 
         try {
             // Delegate to service
             ResponseEntity<ResponseWrapper<Object>> response = pesertaDocumentsService.submitOrUpdateDocument(
+                    processName,
+                    token,
                     idPeserta,
                     idDokumen,
                     request.getDocumentData(),
                     request.getFileName(),
-                    request.getFileType()
+                    request.getFileType(),
+                    String.valueOf(request),
+                    httpRequest
             );
-            logger.info("Successfully submitted document for idPeserta: {}, idDokumen: {}", idPeserta, idDokumen);
             return response;
 
         } catch (Exception e) {
-            logger.error("Error submitting document for idPeserta: {}, idDokumen: {} - {}", idPeserta, idDokumen, e.getMessage(), e);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
+                    Map.of("message", "Internal server error while fetching progress")
+            ));
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("500"),
                     responseCodeUtil.getMessage("500"),
