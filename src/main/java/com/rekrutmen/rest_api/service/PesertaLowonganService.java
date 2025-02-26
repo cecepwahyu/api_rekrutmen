@@ -9,8 +9,10 @@ import com.rekrutmen.rest_api.repository.LogPesertaLowonganRepository;
 import com.rekrutmen.rest_api.repository.LowonganPesertaDocumentsRepository;
 import com.rekrutmen.rest_api.repository.PesertaLowonganRepository;
 import com.rekrutmen.rest_api.repository.PesertaRepository;
+import com.rekrutmen.rest_api.util.LoggerUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,10 +49,18 @@ public class PesertaLowonganService {
     private TokenUtil tokenUtil;
 
     @Transactional
-    public ResponseEntity<ResponseWrapper<PesertaLowongan>> handleSubmitLowongan(String token, PesertaLowonganRequest pesertaLowonganRequest) {
+    public ResponseEntity<ResponseWrapper<PesertaLowongan>> handleSubmitLowongan(String processName, String token, PesertaLowonganRequest pesertaLowonganRequest, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
 
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -60,6 +70,12 @@ public class PesertaLowonganService {
 
         // Validate if token is expired
         if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
@@ -70,9 +86,13 @@ public class PesertaLowonganService {
         // Update is_final field in Peserta
         try {
             pesertaRepository.setPesertaIsFinal(pesertaLowonganRequest.getIdPeserta(), LocalDateTime.now());
-            logger.info("Peserta is_final updated to true for idPeserta: {}", pesertaLowonganRequest.getIdPeserta());
         } catch (Exception e) {
-            logger.error("Error updating is_final for idPeserta: {}", pesertaLowonganRequest.getIdPeserta(), e);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
+                    Map.of("message", "Internal server error while updating is_final")
+            ));
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("500"),
                     "Internal server error while updating is_final",
@@ -102,9 +122,6 @@ public class PesertaLowonganService {
             lowonganPesertaDocumentsRepository.save(lowonganPesertaDocument);
         }
 
-        // Log the operation
-        logger.info("PesertaLowongan successfully submitted: {}", savedPesertaLowongan);
-
         // Create response data
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("id", savedPesertaLowongan.getId());
@@ -112,6 +129,14 @@ public class PesertaLowonganService {
         responseData.put("idPeserta", savedPesertaLowongan.getIdPeserta());
         responseData.put("status", savedPesertaLowongan.getStatus());
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        savedPesertaLowongan
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -120,10 +145,18 @@ public class PesertaLowonganService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseWrapper<PesertaLowongan>> handleSubmitJobdesc(String token, PesertaLowonganRequest pesertaLowonganRequest) {
+    public ResponseEntity<ResponseWrapper<PesertaLowongan>> handleSubmitJobdesc(String processName, String token, PesertaLowonganRequest pesertaLowonganRequest, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
 
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -133,6 +166,12 @@ public class PesertaLowonganService {
 
         // Validate if token is expired
         if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
@@ -143,9 +182,13 @@ public class PesertaLowonganService {
         // Update is_final field in Peserta
         try {
             pesertaRepository.setPesertaIsFinal(pesertaLowonganRequest.getIdPeserta(), LocalDateTime.now());
-            logger.info("Peserta is_final updated to true for idPeserta: {}", pesertaLowonganRequest.getIdPeserta());
         } catch (Exception e) {
-            logger.error("Error updating is_final for idPeserta: {}", pesertaLowonganRequest.getIdPeserta(), e);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
+                    Map.of("message", "Internal server error while updating is_final")
+            ));
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("500"),
                     "Internal server error while updating is_final",
@@ -164,9 +207,6 @@ public class PesertaLowonganService {
 
         PesertaLowongan savedPesertaLowongan = pesertaLowonganRepository.save(pesertaLowongan);
 
-        // Log the operation
-        logger.info("PesertaLowongan successfully submitted: {}", savedPesertaLowongan);
-
         // Create response data
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("id", savedPesertaLowongan.getId());
@@ -174,6 +214,14 @@ public class PesertaLowonganService {
         responseData.put("idPeserta", savedPesertaLowongan.getIdPeserta());
         responseData.put("status", savedPesertaLowongan.getStatus());
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        savedPesertaLowongan
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -189,12 +237,36 @@ public class PesertaLowonganService {
      * @param idPeserta the idPeserta to check
      * @return the lock status response
      */
-    public ResponseEntity<ResponseWrapper<String>> checkLockStatus(String token, Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<String>> checkLockStatus(String processName, String token, Integer idPeserta, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
                     null
             ));
         }
@@ -204,14 +276,25 @@ public class PesertaLowonganService {
         try {
             lockStatus = pesertaLowonganRepository.findLockStatusByIdPeserta(idPeserta);
             if (lockStatus == null) {
-                return ResponseEntity.status(404).body(new ResponseWrapper<>(
-                        responseCodeUtil.getCode("404"),
+                logger.warn(LoggerUtil.formatLog(
+                        jobId, ip, "R", processName,
+                        responseCodeUtil.getCode("077"),
+                        responseCodeUtil.getMessage("077"),
+                        Map.of("message", "Data not found")
+                ));
+                return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                        responseCodeUtil.getCode("077"),
                         "Lock status not found for idPeserta: " + idPeserta,
                         null
                 ));
             }
         } catch (Exception e) {
-            logger.error("Error fetching lock status for idPeserta {}: {}", idPeserta, e.getMessage(), e);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
+                    Map.of("message", "Data not found")
+            ));
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("500"),
                     "Internal server error while fetching lock status",
@@ -219,6 +302,14 @@ public class PesertaLowonganService {
             ));
         }
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        lockStatus
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 "Lock status fetched successfully",
@@ -256,7 +347,45 @@ public class PesertaLowonganService {
 
     // Insert peserta max age
     @Transactional
-    public ResponseEntity<ResponseWrapper<LogPesertaLowongan>> logPesertaLowonganMaxAge(Integer idPeserta, Integer idLowongan) {
+    public ResponseEntity<ResponseWrapper<LogPesertaLowongan>> logPesertaLowonganMaxAge(String processName, String token, Integer idPeserta, Integer idLowongan, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token, "idPeserta", idPeserta, "idLowongan", idLowongan)
+        ));
+
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
         try {
             LogPesertaLowongan log = new LogPesertaLowongan();
             log.setIdPeserta(idPeserta);
@@ -266,12 +395,26 @@ public class PesertaLowonganService {
             // Save log entry
             LogPesertaLowongan savedLog = logPesertaLowonganRepository.save(log);
 
+            logger.info(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    new ResponseWrapper<>(
+                            responseCodeUtil.getCode("000"),
+                            responseCodeUtil.getMessage("000"),
+                            savedLog
+                    )
+            ));
             return ResponseEntity.ok(new ResponseWrapper<>(
                     responseCodeUtil.getCode("000"),
                     responseCodeUtil.getMessage("000"),
                     savedLog
             ));
         } catch (Exception e) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
+                    Map.of("message", "Error inserting log record")
+            ));
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("500"),
                     "Error inserting log record: " + e.getMessage(),

@@ -3,6 +3,7 @@ package com.rekrutmen.rest_api.controller;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.ProgresTahapan;
 import com.rekrutmen.rest_api.service.ProgresTahapanService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +41,9 @@ public class ProgresTahapanController {
     @GetMapping("/tahapan/{idLowongan}")
     public ResponseEntity<ResponseWrapper<List<ProgresTahapan>>> getProgresTahapanByIdTahapan(
             @RequestHeader("Authorization") String token,
-            @PathVariable Integer idLowongan) {
-        return progresTahapanService.getProgresTahapanByIdLowongan(token, idLowongan);
+            @PathVariable Integer idLowongan,
+            HttpServletRequest request) {
+        String processName = "PROGRESS_DETAIL";
+        return progresTahapanService.getProgresTahapanByIdLowongan(processName, token, idLowongan, request);
     }
 }

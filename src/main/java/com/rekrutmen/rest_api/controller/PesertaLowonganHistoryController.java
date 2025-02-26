@@ -3,6 +3,7 @@ package com.rekrutmen.rest_api.controller;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.VwPesertaLowonganHistory;
 import com.rekrutmen.rest_api.service.VwPesertaLowonganHistoryService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,8 +41,10 @@ public class PesertaLowonganHistoryController {
     public ResponseEntity<ResponseWrapper<List<VwPesertaLowonganHistory>>> getHistoryByIsRekrutmenAndIdPeserta(
             @RequestHeader("Authorization") String token,
             @RequestParam Boolean isRekrutmen,
-            @RequestParam Long idPeserta) {
-        return vwPesertaLowonganHistoryService.getHistoryByIsRekrutmenAndIdPeserta(token, isRekrutmen, idPeserta);
+            @RequestParam Long idPeserta,
+            HttpServletRequest request) {
+        String processName = "RIWAYAT_LAMARAN";
+        return vwPesertaLowonganHistoryService.getHistoryByIsRekrutmenAndIdPeserta(processName, token, isRekrutmen, idPeserta, request);
     }
 
 

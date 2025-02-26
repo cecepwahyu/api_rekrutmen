@@ -3,9 +3,13 @@ package com.rekrutmen.rest_api.service;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Artikel;
 import com.rekrutmen.rest_api.repository.ArtikelRepository;
+import com.rekrutmen.rest_api.util.LoggerUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.SFTPClient;
 import com.rekrutmen.rest_api.util.TokenUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +26,8 @@ import java.util.UUID;
 @Service
 public class ArtikelService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ArtikelService.class);
+
     @Autowired
     private ArtikelRepository artikelRepository;
 
@@ -31,9 +37,23 @@ public class ArtikelService {
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
 
-    public ResponseEntity<ResponseWrapper<Object>> getPaginatedArticles(String token, Integer page) {
+    public ResponseEntity<ResponseWrapper<Object>> getPaginatedArticles(String processName, String token, Integer page, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token, "page", page)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -43,6 +63,12 @@ public class ArtikelService {
 
         // Validate if token is expired
         if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
@@ -61,6 +87,20 @@ public class ArtikelService {
         // Fetch articles with pagination
         Page<Artikel> artikelsPage = artikelRepository.findPublishedAndApproved(pageable);
 
+        if (artikelsPage.isEmpty() || artikelsPage.getContent().isEmpty()) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Artikel not found")
+            ));
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    null
+            ));
+        }
+
         // Create a response wrapper with pagination info
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("content", artikelsPage.getContent()); // The articles for the requested page
@@ -68,6 +108,14 @@ public class ArtikelService {
         responseData.put("totalItems", artikelsPage.getTotalElements());
         responseData.put("totalPages", artikelsPage.getTotalPages());
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        responseData
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -76,9 +124,23 @@ public class ArtikelService {
     }
 
     //Get artikel by ID
-    public ResponseEntity<ResponseWrapper<Artikel>> getArtikelDetail(String token, UUID id) {
+    public ResponseEntity<ResponseWrapper<Artikel>> getArtikelDetail(String processName, String token, UUID id, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -88,6 +150,12 @@ public class ArtikelService {
 
         // Validate if token is expired
         if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
@@ -99,6 +167,12 @@ public class ArtikelService {
         Artikel artikel = artikelRepository.findById(id).orElse(null);
 
         if (artikel == null) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Article not found")
+            ));
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("077"),
                     responseCodeUtil.getMessage("077"),
@@ -106,6 +180,14 @@ public class ArtikelService {
             ));
         }
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        artikel
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -114,9 +196,23 @@ public class ArtikelService {
     }
 
     //Get artikel by Slug
-    public ResponseEntity<ResponseWrapper<Artikel>> getArtikelDetailSlug(String token, String slug) {
+    public ResponseEntity<ResponseWrapper<Artikel>> getArtikelDetailSlug(String processName, String token, String slug, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -126,6 +222,12 @@ public class ArtikelService {
 
         // Validate if token is expired
         if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
@@ -137,6 +239,12 @@ public class ArtikelService {
         Artikel artikel = artikelRepository.findBySlug(slug).orElse(null);
 
         if (artikel == null) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Article not found")
+            ));
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("077"),
                     responseCodeUtil.getMessage("077"),
@@ -144,6 +252,14 @@ public class ArtikelService {
             ));
         }
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        artikel
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),

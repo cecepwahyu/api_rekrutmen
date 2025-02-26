@@ -3,6 +3,8 @@ package com.rekrutmen.rest_api.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.*;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -14,9 +16,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Component
 public class LoggerUtil {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static ObjectMapper objectMapper;
+
+    @Autowired
+    public LoggerUtil(ObjectMapper objectMapper) {
+        LoggerUtil.objectMapper = objectMapper;
+    }
+    //private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, AtomicInteger> sequenceMap = new ConcurrentHashMap<>();
     private static final String LOG_DIRECTORY = System.getProperty("user.dir") + "/logs/";
 
@@ -134,13 +143,13 @@ public class LoggerUtil {
      * @param jobId  Unique job ID
      * @param ip     User's IP address
      * @param signal Log signal type ("S" for send, "R" for response)
-     * @param data   Request payload
+     * @param response   Request payload
      * @return Formatted log string
      */
-    public static String formatLog(String jobId, String ip, String signal, String processName, Map<String, Object> data) {
+    public static String formatLog(String jobId, String ip, String signal, String processName, Object response) {
         try {
             int sequence = getSequence(jobId);
-            String jsonData = objectMapper.writeValueAsString(data);
+            String jsonData = objectMapper.writeValueAsString(response);
             String logMessage = String.format(
                     "sequence:%-5d job_id:%-20s ip:%-20s signal:%-2s processName:%-20s data:%s",
                     sequence, jobId, ip, signal, processName, jsonData
@@ -149,8 +158,8 @@ public class LoggerUtil {
             return logMessage;
         } catch (Exception e) {
             return String.format(
-                    "sequence:%-5d job_id:%-20s ip:%-20s signal:%-2s processName:%-20s data:{ \"error\": \"Failed to generate log JSON\" }",
-                    getSequence(jobId), jobId, ip, signal, processName
+                    "sequence:%-5d job_id:%-20s ip:%-20s signal:%-2s processName:%-20s data:{ \"error\": \"Failed to generate log JSON: %s\" }",
+                    getSequence(jobId), jobId, ip, signal, processName, e.getMessage()
             );
         }
     }

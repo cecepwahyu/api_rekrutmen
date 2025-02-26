@@ -2,8 +2,10 @@ package com.rekrutmen.rest_api.service;
 
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.repository.TahapanSeleksiRepository;
+import com.rekrutmen.rest_api.util.LoggerUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TahapanSeleksiService {
@@ -33,12 +36,41 @@ public class TahapanSeleksiService {
      * @param lowonganId the ID of the lowongan
      * @return ResponseEntity with the list of tahapan or an appropriate error message
      */
-    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanByLowonganId(String token, Integer lowonganId) {
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanByLowonganId(String processName, String token, Integer lowonganId, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
                     null
             ));
         }
@@ -48,13 +80,27 @@ public class TahapanSeleksiService {
             List<Object[]> tahapanList = tahapanSeleksiRepository.findAllTahapanByLowonganId(lowonganId);
 
             if (tahapanList == null || tahapanList.isEmpty()) {
+                logger.warn(LoggerUtil.formatLog(
+                        jobId, ip, "R", processName,
+                        responseCodeUtil.getCode("077"),
+                        responseCodeUtil.getMessage("077"),
+                        Map.of("message", "Artikel not found")
+                ));
                 return ResponseEntity.status(400).body(new ResponseWrapper<>(
-                        responseCodeUtil.getCode("400"),
-                        "No tahapan found for lowongan ID: " + lowonganId,
+                        responseCodeUtil.getCode("077"),
+                        responseCodeUtil.getCode("077"),
                         null
                 ));
             }
 
+            logger.info(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    new ResponseWrapper<>(
+                            responseCodeUtil.getCode("000"),
+                            responseCodeUtil.getMessage("000"),
+                            tahapanList
+                    )
+            ));
             return ResponseEntity.ok(new ResponseWrapper<>(
                     responseCodeUtil.getCode("000"),
                     responseCodeUtil.getMessage("000"),
@@ -62,7 +108,12 @@ public class TahapanSeleksiService {
             ));
 
         } catch (Exception e) {
-            logger.error("Error fetching tahapan for lowongan ID {}: {}", lowonganId, e.getMessage(), e);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
+                    Map.of("message", "Internal server error while fetching tahapan")
+            ));
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("500"),
                     "Internal server error while fetching tahapan",
@@ -79,12 +130,41 @@ public class TahapanSeleksiService {
      * @param slug the slug of the lowongan
      * @return ResponseEntity with the list of tahapan or an appropriate error message
      */
-    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanBySlug(String token, String slug) {
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanBySlug(String processName, String token, String slug, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
                     null
             ));
         }
@@ -94,6 +174,12 @@ public class TahapanSeleksiService {
             List<Object[]> tahapanList = tahapanSeleksiRepository.findAllTahapanBySlug(slug);
 
             if (tahapanList == null || tahapanList.isEmpty()) {
+                logger.warn(LoggerUtil.formatLog(
+                        jobId, ip, "R", processName,
+                        responseCodeUtil.getCode("077"),
+                        responseCodeUtil.getMessage("077"),
+                        Map.of("message", "Artikel not found")
+                ));
                 return ResponseEntity.status(400).body(new ResponseWrapper<>(
                         responseCodeUtil.getCode("400"),
                         "No tahapan found for Slug: " + slug,
@@ -101,6 +187,14 @@ public class TahapanSeleksiService {
                 ));
             }
 
+            logger.info(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    new ResponseWrapper<>(
+                            responseCodeUtil.getCode("000"),
+                            responseCodeUtil.getMessage("000"),
+                            tahapanList
+                    )
+            ));
             return ResponseEntity.ok(new ResponseWrapper<>(
                     responseCodeUtil.getCode("000"),
                     responseCodeUtil.getMessage("000"),
@@ -108,7 +202,12 @@ public class TahapanSeleksiService {
             ));
 
         } catch (Exception e) {
-            logger.error("Error fetching tahapan for Slug {}: {}", slug, e.getMessage(), e);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
+                    Map.of("message", "Internal server error while fetching tahapan")
+            ));
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("500"),
                     "Internal server error while fetching tahapan",
@@ -117,12 +216,41 @@ public class TahapanSeleksiService {
         }
     }
 
-    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanByLowonganIdAndPesertaId(String token, Integer lowonganId, Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getTahapanByLowonganIdAndPesertaId(String processName, String token, Integer lowonganId, Integer idPeserta, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
                     null
             ));
         }
@@ -132,6 +260,12 @@ public class TahapanSeleksiService {
             List<Object[]> tahapanList = tahapanSeleksiRepository.findAllTahapanByLowonganIdAndPesertaId(lowonganId, idPeserta);
 
             if (tahapanList == null || tahapanList.isEmpty()) {
+                logger.warn(LoggerUtil.formatLog(
+                        jobId, ip, "R", processName,
+                        responseCodeUtil.getCode("077"),
+                        responseCodeUtil.getMessage("077"),
+                        Map.of("message", "No tahapan found")
+                ));
                 return ResponseEntity.status(400).body(new ResponseWrapper<>(
                         responseCodeUtil.getCode("400"),
                         "No tahapan found for lowongan ID: " + lowonganId + " and peserta ID: " + idPeserta,
@@ -139,6 +273,14 @@ public class TahapanSeleksiService {
                 ));
             }
 
+            logger.info(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    new ResponseWrapper<>(
+                            responseCodeUtil.getCode("000"),
+                            responseCodeUtil.getMessage("000"),
+                            tahapanList
+                    )
+            ));
             return ResponseEntity.ok(new ResponseWrapper<>(
                     responseCodeUtil.getCode("000"),
                     responseCodeUtil.getMessage("000"),
@@ -146,7 +288,12 @@ public class TahapanSeleksiService {
             ));
 
         } catch (Exception e) {
-            logger.error("Error fetching tahapan for lowongan ID {} and peserta ID {}: {}", lowonganId, idPeserta, e.getMessage(), e);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
+                    Map.of("message", "Internal server error while fetching progress")
+            ));
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("500"),
                     responseCodeUtil.getMessage("500"),
@@ -155,9 +302,23 @@ public class TahapanSeleksiService {
         }
     }
 
-    public ResponseEntity<ResponseWrapper<List<Object[]>>> getPesertaProgress(String token, Integer lowonganId, String pesertaId) {
+    public ResponseEntity<ResponseWrapper<List<Object[]>>> getPesertaProgress(String processName, String token, Integer lowonganId, String pesertaId, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -165,9 +326,30 @@ public class TahapanSeleksiService {
             ));
         }
 
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
         // Extract id_peserta from the token
         Integer idPesertaFromToken = tokenUtil.extractPesertaId(token);
         if (idPesertaFromToken == null) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Unauthorized: Invalid token or peserta not found.")
+            ));
             return ResponseEntity.status(403).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("403"),
                     "Unauthorized: Invalid token or peserta not found.",
@@ -179,6 +361,12 @@ public class TahapanSeleksiService {
         boolean isAuthorized = tahapanSeleksiRepository.existsPesertaInLowongan(lowonganId, pesertaId, idPesertaFromToken);
 
         if (!isAuthorized) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Unauthorized access. Peserta ID does not match the token.")
+            ));
             return ResponseEntity.status(403).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("403"),
                     "Unauthorized access. Peserta ID does not match the token.",
@@ -191,6 +379,12 @@ public class TahapanSeleksiService {
             List<Object[]> progressList = tahapanSeleksiRepository.getPesertaProgress(lowonganId, pesertaId);
 
             if (progressList == null || progressList.isEmpty()) {
+                logger.warn(LoggerUtil.formatLog(
+                        jobId, ip, "R", processName,
+                        responseCodeUtil.getCode("400"),
+                        responseCodeUtil.getMessage("400"),
+                        Map.of("message", "No progress found for lowongan ID: " + lowonganId + " and peserta ID: " + pesertaId)
+                ));
                 return ResponseEntity.status(400).body(new ResponseWrapper<>(
                         responseCodeUtil.getCode("400"),
                         "No progress found for lowongan ID: " + lowonganId + " and peserta ID: " + pesertaId,
@@ -198,6 +392,14 @@ public class TahapanSeleksiService {
                 ));
             }
 
+            logger.info(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    new ResponseWrapper<>(
+                            responseCodeUtil.getCode("000"),
+                            responseCodeUtil.getMessage("000"),
+                            progressList
+                    )
+            ));
             return ResponseEntity.ok(new ResponseWrapper<>(
                     responseCodeUtil.getCode("000"),
                     responseCodeUtil.getMessage("000"),
@@ -205,7 +407,12 @@ public class TahapanSeleksiService {
             ));
 
         } catch (Exception e) {
-            logger.error("Error fetching progress for lowongan ID {} and peserta ID {}: {}", lowonganId, pesertaId, e.getMessage(), e);
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("500"),
+                    responseCodeUtil.getMessage("500"),
+                    Map.of("message", "Internal server error while fetching progress")
+            ));
             return ResponseEntity.status(500).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("500"),
                     "Internal server error while fetching progress",

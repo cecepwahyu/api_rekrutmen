@@ -4,8 +4,10 @@ import com.rekrutmen.rest_api.dto.PesertaPendidikanRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.PesertaPendidikan;
 import com.rekrutmen.rest_api.repository.PesertaPendidikanRepository;
+import com.rekrutmen.rest_api.util.LoggerUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PesertaPendidikanService {
@@ -29,10 +32,23 @@ public class PesertaPendidikanService {
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
 
-    public ResponseEntity<ResponseWrapper<List<PesertaPendidikan>>> getPesertaPendidikanDetail(String token, Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<List<PesertaPendidikan>>> getPesertaPendidikanDetail(String processName, String token, Integer idPeserta, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
 
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -42,6 +58,12 @@ public class PesertaPendidikanService {
 
         // Validate if token is expired
         if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
@@ -53,6 +75,12 @@ public class PesertaPendidikanService {
         Integer idPesertaFromToken = tokenUtil.extractPesertaId(token);
 
         if (idPesertaFromToken == null || !idPesertaFromToken.equals(idPeserta.intValue())) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Unauthorized access. Peserta ID does not match the token.")
+            ));
             return ResponseEntity.status(403).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("403"),
                     "Unauthorized access. Peserta ID does not match the token.",
@@ -64,6 +92,12 @@ public class PesertaPendidikanService {
         List<PesertaPendidikan> pesertaPendidikan = pesertaPendidikanRepository.findByIdPeserta(idPeserta);
 
         if (pesertaPendidikan == null) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Peserta not found")
+            ));
             return ResponseEntity.status(200).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("077"),
                     responseCodeUtil.getMessage("077"),
@@ -71,8 +105,14 @@ public class PesertaPendidikanService {
             ));
         }
 
-        logger.info("Response Data = {}", pesertaPendidikan);
-
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        pesertaPendidikan
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),

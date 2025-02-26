@@ -4,9 +4,13 @@ import com.rekrutmen.rest_api.dto.PesertaInfoRequest;
 import com.rekrutmen.rest_api.dto.ResponseWrapper;
 import com.rekrutmen.rest_api.model.Peserta;
 import com.rekrutmen.rest_api.repository.PesertaRepository;
+import com.rekrutmen.rest_api.util.LoggerUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,6 +23,8 @@ import java.util.Optional;
 
 @Service
 public class PesertaService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PesertaService.class);
 
     @Autowired
     private PesertaRepository pesertaRepository;
@@ -71,9 +77,23 @@ public class PesertaService {
         return pesertaRepository.save(peserta);
     }
 
-    public ResponseEntity<ResponseWrapper<Peserta>> getPesertaDetail(String token, Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<Peserta>> getPesertaDetail(String processName, String token, Integer idPeserta, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -83,6 +103,12 @@ public class PesertaService {
 
         // Validate if token is expired
         if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
@@ -94,6 +120,12 @@ public class PesertaService {
         Integer idPesertaFromToken = tokenUtil.extractPesertaId(token);
 
         if (idPesertaFromToken == null || !idPesertaFromToken.equals(idPeserta.intValue())) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Unauthorized access. Peserta ID does not match the token.")
+            ));
             return ResponseEntity.status(403).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("403"),
                     "Unauthorized access. Peserta ID does not match the token.",
@@ -105,6 +137,12 @@ public class PesertaService {
         Peserta peserta = pesertaRepository.findByIdPeserta(idPeserta).orElse(null);
 
         if (peserta == null) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Peserta not found")
+            ));
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("077"),
                     responseCodeUtil.getMessage("077"),
@@ -112,6 +150,14 @@ public class PesertaService {
             ));
         }
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        peserta
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -120,9 +166,23 @@ public class PesertaService {
     }
 
 
-    public ResponseEntity<ResponseWrapper<PesertaInfoRequest>> getPesertaInfo(String token, Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<PesertaInfoRequest>> getPesertaInfo(String processName, String token, Integer idPeserta, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -132,6 +192,12 @@ public class PesertaService {
 
         // Validate if token is expired
         if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
@@ -143,6 +209,12 @@ public class PesertaService {
         List<PesertaInfoRequest> pesertaOptional = pesertaRepository.findPesertaInfoByIdPeserta(idPeserta);
 
         if (pesertaOptional.isEmpty()) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Data peserta not found")
+            ));
             return ResponseEntity.status(200).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("077"),
                     responseCodeUtil.getMessage("077"),
@@ -152,6 +224,14 @@ public class PesertaService {
 
         PesertaInfoRequest peserta = pesertaOptional.get(0);
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        peserta
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -248,7 +328,15 @@ public class PesertaService {
         ));
     }
 
-    public Map<String, Object> getPesertaDetails(Integer idPeserta) {
+    public Map<String, Object> getPesertaDetails(String processName, String token, Integer idPeserta, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         List<Object[]> results = pesertaRepository.findPesertaDetails(idPeserta);
 
         Map<String, Object> response = new HashMap<>();
@@ -272,6 +360,14 @@ public class PesertaService {
             response.put("alamat_kontak", record[26]);
         }
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        response
+                )
+        ));
         return response;
     }
 
@@ -303,11 +399,55 @@ public class PesertaService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseWrapper<Object>> updateIsFinal(Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<Object>> updateIsFinal(String processName, String token, Integer idPeserta, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
         // Fetch the peserta by ID
         Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
 
         if (pesertaOptional.isEmpty()) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Peserta not found")
+            ));
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     "Peserta not found",
@@ -319,6 +459,12 @@ public class PesertaService {
 
         // Check if is_final is already true
         if (Boolean.TRUE.equals(peserta.getIsFinal())) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Peserta is_final is already true")
+            ));
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     "Peserta is_final is already true",
@@ -331,6 +477,14 @@ public class PesertaService {
         peserta.setUpdatedAt(LocalDateTime.now());
         pesertaRepository.save(peserta);
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        "Peserta is_final updated successfully",
+                        Map.of("message", "Peserta is_final updated successfully")
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 "Peserta is_final updated successfully",
@@ -338,9 +492,23 @@ public class PesertaService {
         ));
     }
 
-    public ResponseEntity<ResponseWrapper<Map<String, Object>>> getTinggiBerat(String token, Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<Map<String, Object>>> getTinggiBerat(String processName, String token, Integer idPeserta, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -350,6 +518,12 @@ public class PesertaService {
 
         // Validate if token is expired
         if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
@@ -358,6 +532,20 @@ public class PesertaService {
         }
 
         Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
+
+        if (pesertaOptional.isEmpty()) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Peserta not found")
+            ));
+            return ResponseEntity.status(400).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Peserta not found")
+            ));
+        }
 
         Map<String, Object> response = new HashMap<>();
         if (pesertaOptional.isEmpty()) {
@@ -374,6 +562,14 @@ public class PesertaService {
         response.put("tinggi", peserta.getTinggi());
         response.put("berat", peserta.getBerat());
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        response
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),
@@ -382,9 +578,23 @@ public class PesertaService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseWrapper<Object>> updateTinggiBerat(String token, Integer idPeserta, Integer tinggi, Integer berat) {
+    public ResponseEntity<ResponseWrapper<Object>> updateTinggiBerat(String processName, String token, Integer idPeserta, Integer tinggi, Integer berat, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         // Validate token
         if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("299"),
                     responseCodeUtil.getMessage("299"),
@@ -394,6 +604,12 @@ public class PesertaService {
 
         // Validate if token is expired
         if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
             return ResponseEntity.status(401).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("298"),
                     responseCodeUtil.getMessage("298"),
@@ -404,6 +620,12 @@ public class PesertaService {
         Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
 
         if (pesertaOptional.isEmpty()) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Peserta not found")
+            ));
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     "Peserta not found",
@@ -423,6 +645,14 @@ public class PesertaService {
         peserta.setUpdatedAt(LocalDateTime.now());
         pesertaRepository.save(peserta);
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        Map.of("message", "Tinggi and Berat updated successfully")
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 "Tinggi and Berat updated successfully",
@@ -431,7 +661,15 @@ public class PesertaService {
     }
 
     @Transactional
-    public boolean setAgeLimit(Integer idPeserta) {
+    public boolean setAgeLimit(String processName, String token, Integer idPeserta, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
         Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
         if (pesertaOptional.isPresent()) {
             pesertaRepository.updateAgeLimit(idPeserta);
@@ -440,11 +678,43 @@ public class PesertaService {
         return false;
     }
 
-    public ResponseEntity<ResponseWrapper<Map<String, Object>>> checkAgeLimit(Integer idPeserta) {
+    public ResponseEntity<ResponseWrapper<Map<String, Object>>> checkAgeLimit(String processName, String token, Integer idPeserta, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
         Optional<Peserta> pesertaOptional = pesertaRepository.findByIdPeserta(idPeserta);
 
         Map<String, Object> response = new HashMap<>();
         if (pesertaOptional.isEmpty()) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("077"),
+                    responseCodeUtil.getMessage("077"),
+                    Map.of("message", "Peserta not found")
+            ));
             response.put("age_limit", null);
             return ResponseEntity.status(400).body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
@@ -456,6 +726,14 @@ public class PesertaService {
         Peserta peserta = pesertaOptional.get();
         response.put("age_limit", peserta.getAgeLimit());
 
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        response
+                )
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 responseCodeUtil.getCode("000"),
                 responseCodeUtil.getMessage("000"),

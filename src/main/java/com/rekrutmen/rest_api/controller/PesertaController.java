@@ -3,6 +3,7 @@ package com.rekrutmen.rest_api.controller;
 import com.rekrutmen.rest_api.dto.*;
 import com.rekrutmen.rest_api.model.*;
 import com.rekrutmen.rest_api.service.*;
+import com.rekrutmen.rest_api.util.LoggerUtil;
 import com.rekrutmen.rest_api.util.ResponseCodeUtil;
 import com.rekrutmen.rest_api.util.TokenUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,43 +59,56 @@ public class PesertaController {
     @GetMapping("/{idPeserta}")
     public ResponseEntity<ResponseWrapper<Peserta>> getPesertaDetail(
             @RequestHeader("Authorization") String token,
-            @PathVariable Integer idPeserta) {
-        return pesertaService.getPesertaDetail(token, idPeserta);
+            @PathVariable Integer idPeserta,
+            HttpServletRequest request) {
+        String processName = "GET_PESERTA_DETAIL";
+        return pesertaService.getPesertaDetail(processName, token, idPeserta, request);
     }
 
     @GetMapping("/pengalaman/{idPeserta}")
     public ResponseEntity<ResponseWrapper<List<PesertaPengalaman>>> getPesertaPengalamanDetail(
             @RequestHeader("Authorization") String token,
-            @PathVariable Integer idPeserta) {
-        return pesertaPengalamanService.getPesertaPengalamanDetail(token, idPeserta);
+            @PathVariable Integer idPeserta,
+            HttpServletRequest request) {
+        String processName = "GET_PESERTA_PENGALAMAN";
+        return pesertaPengalamanService.getPesertaPengalamanDetail(processName, token, idPeserta, request);
     }
 
     @GetMapping("/pendidikan/{idPeserta}")
     public ResponseEntity<ResponseWrapper<List<PesertaPendidikan>>> getPesertaPendidikanDetail(
             @RequestHeader("Authorization") String token,
-            @PathVariable Integer idPeserta) {
-        return pesertaPendidikanService.getPesertaPendidikanDetail(token, idPeserta);
+            @PathVariable Integer idPeserta,
+            HttpServletRequest request) {
+        String processName = "GET_PESERTA_PENDIDIKAN";
+        return pesertaPendidikanService.getPesertaPendidikanDetail(processName, token, idPeserta, request);
     }
 
     @GetMapping("/organisasi/{idPeserta}")
     public ResponseEntity<ResponseWrapper<List<PesertaOrganisasi>>> getPesertaOrganisasiDetail(
             @RequestHeader("Authorization") String token,
-            @PathVariable Integer idPeserta) {
-        return pesertaOrganisasiService.getPesertaOrganisasiDetail(token, idPeserta);
+            @PathVariable Integer idPeserta,
+            HttpServletRequest request) {
+        String processName = "GET_PESERTA_ORGANISASI";
+        return pesertaOrganisasiService.getPesertaOrganisasiDetail(processName, token, idPeserta, request);
     }
 
     @GetMapping("/kontak/{idPeserta}")
     public ResponseEntity<ResponseWrapper<List<PesertaKontak>>> getPesertaKontakDetail(
             @RequestHeader("Authorization") String token,
-            @PathVariable Integer idPeserta) {
-        return pesertaKontakService.getPesertaKontakDetail(token, idPeserta);
+            @PathVariable Integer idPeserta,
+            HttpServletRequest request) {
+        String processName = "GET_PESERTA_KONTAK";
+        return pesertaKontakService.getPesertaKontakDetail(processName, token, idPeserta, request);
     }
 
     @GetMapping("/{idPeserta}/details")
     public ResponseEntity<ResponseWrapper<Map<String, Object>>> getPesertaDetails(
-            @PathVariable Integer idPeserta) {
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta,
+            HttpServletRequest request) {
+        String processName = "GET_PESERTA_DETAIL";
         try {
-            Map<String, Object> pesertaDetails = pesertaService.getPesertaDetails(idPeserta);
+            Map<String, Object> pesertaDetails = pesertaService.getPesertaDetails(processName, token, idPeserta, request);
             return ResponseEntity.ok(new ResponseWrapper<>(
                     "000",
                     "Data fetched successfully",
@@ -113,9 +127,11 @@ public class PesertaController {
     @GetMapping("/peserta-info/{idPeserta}")
     public ResponseEntity<?> getPesertaInfo(
             @RequestHeader("Authorization") String token,
-            @PathVariable Integer idPeserta
+            @PathVariable Integer idPeserta,
+            HttpServletRequest request
     ) {
-        ResponseEntity<ResponseWrapper<PesertaInfoRequest>> response = pesertaService.getPesertaInfo(token, idPeserta);
+        String processName = "GET_PESERTA_INFO";
+        ResponseEntity<ResponseWrapper<PesertaInfoRequest>> response = pesertaService.getPesertaInfo(processName, token, idPeserta, request);
 
         if (response.getBody() != null && response.getStatusCode().is2xxSuccessful()) {
             return ResponseEntity.ok(response.getBody());
@@ -171,11 +187,56 @@ public class PesertaController {
             @RequestBody EditProfileRequest request,
             HttpServletRequest httpRequest
     ) {
+        String processName = "EDIT_PROFILE";
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(httpRequest);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                LoggerUtil.convertObjectToMap(request)
+        ));
+
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
         // Extract id_peserta from token
         Integer idPesertaFromToken = tokenUtil.extractPesertaId(token);
 
         // Validate Peserta ID
         if (idPesertaFromToken == null || !idPesertaFromToken.equals(idPeserta)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("403"),
+                    responseCodeUtil.getMessage("403"),
+                    Map.of("message", "Unauthorized access. Peserta ID does not match the token.")
+            ));
             return ResponseEntity.status(403).body(new ResponseWrapper<>(
                     "403",
                     "Unauthorized access. Peserta ID does not match the token.",
@@ -192,6 +253,12 @@ public class PesertaController {
         if (!isValidInput(request.getNama()) || !isValidInput(request.getNoIdentitas()) ||
                 !isValidInput(request.getTempatLahir()) || !isValidInput(request.getTelp()) ||
                 !isValidInput(String.valueOf(request.getPendidikanTerakhir())) || !isValidInput(String.valueOf(request.getStatusKawin()))) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Invalid input! Only alphabets, numbers, '@', and '.' are allowed.")
+            ));
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
                     responseCodeUtil.getMessage("400"),
@@ -200,8 +267,13 @@ public class PesertaController {
         }
 
         // Checking duplicate telp number
-        logger.info("Checking telp duplication for idPeserta: {}, telp: {}", idPeserta, request.getTelp());
         if (pesertaService.isTelpTaken(request.getTelp(), idPeserta)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Telp: " + request.getTelp() + "already exists!")
+            ));
             logger.warn("Telp: {} already exists!", request.getTelp());
             return ResponseEntity.badRequest().body(new ResponseWrapper<>(
                     responseCodeUtil.getCode("400"),
@@ -309,6 +381,12 @@ public class PesertaController {
             profileService.updatePengalamanKerja(idPeserta, work);
         }
 
+        logger.warn(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                Map.of("message", "Profile updated successfully")
+        ));
         return ResponseEntity.ok(new ResponseWrapper<>(
                 "000",
                 responseCodeUtil.getMessage("000"),
@@ -325,7 +403,7 @@ public class PesertaController {
     @PutMapping("/{idPeserta}/submit-document")
     public ResponseEntity<ResponseWrapper<Object>> submitDocument(
             @PathVariable Integer idPeserta,
-            @RequestParam Integer idDokumen, // Use id_dokumen from tbl_jenis_dokumen
+            @RequestParam Integer idDokumen,
             @RequestBody @Valid SubmitDocumentRequest request
     ) {
         logger.info("Submitting document for idPeserta: {}, idDokumen: {}", idPeserta, idDokumen);
@@ -459,33 +537,41 @@ public class PesertaController {
     @PutMapping("/{idPeserta}/set-is-final")
     public ResponseEntity<ResponseWrapper<Object>> setIsFinal(
             @PathVariable Integer idPeserta,
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            HttpServletRequest request
     ) {
-        return pesertaService.updateIsFinal(idPeserta);
+        String processName = "SET_IS_FINAL";
+        return pesertaService.updateIsFinal(processName, token, idPeserta, request);
     }
 
     @GetMapping("/{idPeserta}/tinggi-berat")
     public ResponseEntity<ResponseWrapper<Map<String, Object>>> getTinggiBerat(
             @RequestHeader("Authorization") String token,
-            @PathVariable Integer idPeserta) {
-        return pesertaService.getTinggiBerat(token, idPeserta);
+            @PathVariable Integer idPeserta,
+            HttpServletRequest request) {
+        String processName = "GET_TINGGI_BERAT_BADAN";
+        return pesertaService.getTinggiBerat(processName, token, idPeserta, request);
     }
 
     @PutMapping("/{idPeserta}/update-tinggi-berat")
     public ResponseEntity<ResponseWrapper<Object>> updateTinggiBerat(
             @RequestHeader("Authorization") String token,
             @PathVariable Integer idPeserta,
-            @RequestBody Map<String, Integer> requestBody) {
+            @RequestBody Map<String, Integer> requestBody,
+            HttpServletRequest request) {
+        String processName = "UPDATE_TINGGI_BERAT_BADAN";
         Integer tinggi = requestBody.get("tinggi");
         Integer berat = requestBody.get("berat");
-        return pesertaService.updateTinggiBerat(token, idPeserta, tinggi, berat);
+        return pesertaService.updateTinggiBerat(processName, token, idPeserta, tinggi, berat, request);
     }
 
     @PutMapping("/{idPeserta}/set-age-limit")
     public ResponseEntity<ResponseWrapper<Object>> setAgeLimit(
-            @PathVariable Integer idPeserta) {
-
-        boolean updated = pesertaService.setAgeLimit(idPeserta);
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta,
+            HttpServletRequest request) {
+        String processName = "SET_AGE_LIMIT";
+        boolean updated = pesertaService.setAgeLimit(processName, token, idPeserta, request);
 
         if (updated) {
             return ResponseEntity.ok(new ResponseWrapper<>(
@@ -504,8 +590,11 @@ public class PesertaController {
 
     @GetMapping("/{idPeserta}/check-age-limit")
     public ResponseEntity<ResponseWrapper<Map<String, Object>>> checkAgeLimit(
-            @PathVariable Integer idPeserta) {
-        return pesertaService.checkAgeLimit(idPeserta);
+            @RequestHeader("Authorization") String token,
+            @PathVariable Integer idPeserta,
+            HttpServletRequest request) {
+        String processName = "CHECK_AGE_LIMIT";
+        return pesertaService.checkAgeLimit(processName, token, idPeserta, request);
     }
 
     /**
