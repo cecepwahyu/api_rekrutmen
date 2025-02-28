@@ -17,8 +17,13 @@ public class OtpVerificationRequest {
             regexp = "^\\d{6}$",
             message = "Invalid payload request"
     )
-
     @JsonProperty("otp")
     private String otp;
+
+    @JsonProperty("no_identitas")
+    private String noIdentitas;
+
+    @JsonProperty("email")
+    private String email;
 
 }
