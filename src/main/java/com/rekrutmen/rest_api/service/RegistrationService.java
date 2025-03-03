@@ -152,7 +152,7 @@ public class RegistrationService {
         pesertaService.saveUser(newUser);
 
         // Send verification email
-        emailService.sendOtpEmaiVerification(newUser.getEmail(), otpCode);
+        emailService.sendOtpEmailVerification(newUser.getEmail(), otpCode);
 
         Map<String, Object> responseData = new HashMap<>();
         responseData.put("nama", registerRequest.getNama());
