@@ -94,7 +94,7 @@ public class EmailService {
     private String getOtpEmailTemplate(String otpCode) {
         return String.format("""
                 %s
-                <p>Yth. Pengguna,</p>
+                <p>Yth. Peserta,</p>
                 <p>Anda telah mengajukan permintaan untuk mereset kata sandi akun Anda. Gunakan kode OTP berikut untuk melanjutkan proses reset kata sandi:</p>
                 <div style='background:#f7f7f7;padding:15px;text-align:center;font-size:20px;font-weight:bold;color:#005099;border-radius:5px;'>
                     %s
@@ -112,7 +112,7 @@ public class EmailService {
     private String getOtpVerificationTemplate(String otpCode) {
         return String.format("""
                 %s
-                <p>Yth. Pelamar,</p>
+                <p>Yth. Peserta,</p>
                 <p>Terima kasih telah mendaftar di PT Bank BPD DIY. Untuk menyelesaikan proses pendaftaran, gunakan kode OTP berikut untuk verifikasi akun Anda:</p>
                 <div style='background:#f7f7f7;padding:15px;text-align:center;font-size:20px;font-weight:bold;color:#005099;border-radius:5px;'>
                     %s
