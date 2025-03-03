@@ -60,23 +60,13 @@ public class LoginService {
         String jobId = LoggerUtil.getJobId();
         String ip = LoggerUtil.getUserIp(request);
 
-        String jsonRequestPayload = LoggerUtil.convertObjectToJson(loginRequest);
-
-        // Insert log into database
-        logService.log(
-                jobId, // Job ID
-                ip, // IP Address
-                "S", // Signal (Send)
-                "1", // Device (Client)
-                processName, // Process Name
-                jsonRequestPayload, // Message
-                loginRequest.getEmail(), // Username
-                1 // Sequence
-        );
+        LoginRequest maskedLoginRequest = new LoginRequest();
+        maskedLoginRequest.setEmail(loginRequest.getEmail());
+        maskedLoginRequest.setPassword(MaskingUtil.maskPassword(loginRequest.getPassword()));
 
         logger.info(LoggerUtil.formatLog(
                 jobId, ip, "S", processName,
-                LoggerUtil.convertObjectToMap(loginRequest)
+                LoggerUtil.convertObjectToMap(maskedLoginRequest)
         ));
 
         // Validate email format
