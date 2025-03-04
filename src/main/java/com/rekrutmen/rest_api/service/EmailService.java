@@ -101,10 +101,10 @@ public class EmailService {
                 </div>
                 <p>Silakan klik tombol di bawah ini untuk melanjutkan proses reset password:</p>
                 <div style='text-align:center;'>
-                    <a href='%s/reset-password' 
+                    <a href='%s/otp' 
                         style='display:inline-block;padding:10px 20px;color:white;background:#005099;text-decoration:none;border-radius:5px;font-weight:bold;'>Reset Password</a>
                 </div>
-                <p style='font-size:12px;color:#666;'>Jika tombol tidak berfungsi, silakan salin dan tempel URL berikut di browser Anda: %s/reset-password</p>
+                <p style='font-size:12px;color:#666;'>Jika tombol tidak berfungsi, silakan salin dan tempel URL berikut di browser Anda: %s/otp</p>
                 %s
         """, getEmailHeader(), otpCode, baseUrl, baseUrl, getEmailFooter());
     }
