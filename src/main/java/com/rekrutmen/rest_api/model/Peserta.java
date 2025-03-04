@@ -19,10 +19,6 @@ public class Peserta {
     @Column(name = "id_peserta", nullable = false)
     private Integer idPeserta;
 
-//    @Column(name = "username", length = 50, nullable = false)
-//    @Size(max = 50, message = "Username cannot exceed 50 characters")
-//    private String username;
-
     @Column(name = "password", length = 100, nullable = false)
     @Size(max = 100, message = "Password cannot exceed 50 characters")
     private String password;
