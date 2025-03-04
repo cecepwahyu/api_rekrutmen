@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -144,6 +145,7 @@ public class RegistrationService {
         newUser.setEmail(registerRequest.getEmail());
         newUser.setNoIdentitas(registerRequest.getNoIdentitas());
         newUser.setFlgStatus('0');
+        newUser.setCreatedAt(LocalDateTime.now());
         pesertaService.registerUser(newUser);
 
         // Generate a verification OTP
