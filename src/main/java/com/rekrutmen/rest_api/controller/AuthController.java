@@ -37,6 +37,15 @@ public class AuthController {
         return authService.handleResendOtp(processName, resendOtpRequest, request);
     }
 
+    @PostMapping("/resend-otp-akun-verif")
+    public ResponseEntity<ResponseWrapper<Object>> resendOtpAkunVerif(
+            @Valid @RequestBody ResendOtpRequest resendOtpRequest,
+            HttpServletRequest request
+    ) {
+        String processName = "RESEND_OTP_AKUN_VERIF";
+        return authService.handleResendOtpAkunVerif(processName, resendOtpRequest, request);
+    }
+
     @PostMapping("/otp-verification")
     public ResponseEntity<ResponseWrapper<Object>> otpVerification(
             @Valid @RequestBody OtpVerificationRequest otpVerificationRequest,

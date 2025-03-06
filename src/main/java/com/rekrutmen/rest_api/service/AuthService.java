@@ -220,6 +220,76 @@ public class AuthService {
         ));
     }
 
+    public ResponseEntity<ResponseWrapper<Object>> handleResendOtpAkunVerif(String processName, ResendOtpRequest resendOtpRequest, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        Optional<Peserta> pesertaOptional = profileService.validateEmailAndNoIdentitas(
+                resendOtpRequest.getEmail(),
+                resendOtpRequest.getNoIdentitas()
+        );
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                LoggerUtil.convertObjectToMap(resendOtpRequest)
+        ));
+
+        if (pesertaOptional.isEmpty()) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    Map.of("message", "Invalid email or No Identitas")
+            ));
+            return ResponseEntity.badRequest().body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("400"),
+                    responseCodeUtil.getMessage("400"),
+                    "Invalid email or No Identitas"
+            ));
+        }
+
+        Peserta peserta = pesertaOptional.get();
+
+        // Check if the last OTP generation was less than 30 seconds ago
+        LocalDateTime lastOtpUpdatedAt = profileService.updateOtpUpdatedAt(peserta.getIdPeserta(), peserta.getOtpUpdatedAt());
+        LocalDateTime now = LocalDateTime.now();
+        if (lastOtpUpdatedAt != null && Duration.between(lastOtpUpdatedAt, now).getSeconds() < 30) {
+            long secondsRemaining = 30 - Duration.between(lastOtpUpdatedAt, now).getSeconds();
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("429"),
+                    "OTP resend request blocked. Please wait " + secondsRemaining + " seconds.",
+                    Map.of("email", resendOtpRequest.getEmail(), "secondsRemaining", secondsRemaining)
+            ));
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("429"),
+                    "Please wait " + secondsRemaining + " seconds before resending OTP.",
+                    null
+            ));
+        }
+
+        // Generate and send OTP
+        String otpCode = OtpUtil.generateOtp();
+        LocalDateTime updatedAt = LocalDateTime.now();
+        profileService.updateOtp(peserta.getIdPeserta().intValue(), otpCode, updatedAt);
+        emailService.sendOtpEmailVerification(resendOtpRequest.getEmail(), otpCode);
+
+        Map<String, Object> responseData = new HashMap<>();
+        responseData.put("email", resendOtpRequest.getEmail());
+        responseData.put("no_identitas", resendOtpRequest.getNoIdentitas());
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                responseData
+        ));
+    }
+
     public ResponseEntity<ResponseWrapper<Object>> handleOtpVerification(String processName, OtpVerificationRequest otpVerificationRequest, HttpServletRequest request) {
         String jobId = LoggerUtil.getJobId();
         String ip = LoggerUtil.getUserIp(request);
