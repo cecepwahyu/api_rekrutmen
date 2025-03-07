@@ -32,6 +32,22 @@ public class LowonganController {
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
 
+    @GetMapping("/rekrutmen/all")
+    public ResponseEntity<ResponseWrapper<List<Lowongan>>> getAllLowongans(
+            @RequestHeader("Authorization") String token,
+            HttpServletRequest request) {
+        String processName = "REKRUTMEN_ALL";
+        return lowonganService.getAllLowongans(processName, token, request);
+    }
+
+    @GetMapping("/jobdesc/all")
+    public ResponseEntity<ResponseWrapper<List<Lowongan>>> getAllJobDesc(
+            @RequestHeader("Authorization") String token,
+            HttpServletRequest request) {
+        String processName = "JOBDESC_ALL";
+        return lowonganService.getAllJobDesc(processName, token, request);
+    }
+
     @GetMapping("/rekrutmen/paginated")
     public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongansRekrutmen(
             @RequestHeader("Authorization") String token,

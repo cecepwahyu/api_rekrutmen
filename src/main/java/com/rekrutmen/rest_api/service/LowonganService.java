@@ -35,6 +35,120 @@ public class LowonganService {
     @Autowired
     private ResponseCodeUtil responseCodeUtil;
 
+    public ResponseEntity<ResponseWrapper<List<Lowongan>>> getAllLowongans(String processName, String token, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Fetch all approved lowongans
+        List<Lowongan> lowongans = lowonganRepository.findAllApprovedLowongan();
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        lowongans
+                )
+        ));
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                lowongans
+        ));
+    }
+
+    public ResponseEntity<ResponseWrapper<List<Lowongan>>> getAllJobDesc(String processName, String token, HttpServletRequest request) {
+        String jobId = LoggerUtil.getJobId();
+        String ip = LoggerUtil.getUserIp(request);
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "S", processName,
+                Map.of("token", token)
+        ));
+
+        // Validate token
+        if (!tokenUtil.isValidToken(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    Map.of("message", "Invalid token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("299"),
+                    responseCodeUtil.getMessage("299"),
+                    null
+            ));
+        }
+
+        // Validate if token is expired
+        if (tokenUtil.isTokenExpired(token)) {
+            logger.warn(LoggerUtil.formatLog(
+                    jobId, ip, "R", processName,
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    Map.of("message", "Expired token")
+            ));
+            return ResponseEntity.status(401).body(new ResponseWrapper<>(
+                    responseCodeUtil.getCode("298"),
+                    responseCodeUtil.getMessage("298"),
+                    null
+            ));
+        }
+
+        // Fetch all approved lowongans
+        List<Lowongan> lowongans = lowonganRepository.findAllApprovedJobDesc();
+
+        logger.info(LoggerUtil.formatLog(
+                jobId, ip, "R", processName,
+                new ResponseWrapper<>(
+                        responseCodeUtil.getCode("000"),
+                        responseCodeUtil.getMessage("000"),
+                        lowongans
+                )
+        ));
+        return ResponseEntity.ok(new ResponseWrapper<>(
+                responseCodeUtil.getCode("000"),
+                responseCodeUtil.getMessage("000"),
+                lowongans
+        ));
+    }
+
     //GET REKRUTMEN LIST
     public ResponseEntity<ResponseWrapper<Object>> getPaginatedLowongansRekrutmen(String processName, String token, Integer page, HttpServletRequest request) {
         String jobId = LoggerUtil.getJobId();
