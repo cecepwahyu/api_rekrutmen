@@ -180,21 +180,21 @@ public class PesertaLowonganService {
         }
 
         // Update is_final field in Peserta
-        try {
-            pesertaRepository.setPesertaIsFinal(pesertaLowonganRequest.getIdPeserta(), LocalDateTime.now());
-        } catch (Exception e) {
-            logger.warn(LoggerUtil.formatLog(
-                    jobId, ip, "R", processName,
-                    responseCodeUtil.getCode("500"),
-                    responseCodeUtil.getMessage("500"),
-                    Map.of("message", "Internal server error while updating is_final")
-            ));
-            return ResponseEntity.status(500).body(new ResponseWrapper<>(
-                    responseCodeUtil.getCode("500"),
-                    "Internal server error while updating is_final",
-                    null
-            ));
-        }
+//        try {
+//            pesertaRepository.setPesertaIsFinal(pesertaLowonganRequest.getIdPeserta(), LocalDateTime.now());
+//        } catch (Exception e) {
+//            logger.warn(LoggerUtil.formatLog(
+//                    jobId, ip, "R", processName,
+//                    responseCodeUtil.getCode("500"),
+//                    responseCodeUtil.getMessage("500"),
+//                    Map.of("message", "Internal server error while updating is_final")
+//            ));
+//            return ResponseEntity.status(500).body(new ResponseWrapper<>(
+//                    responseCodeUtil.getCode("500"),
+//                    "Internal server error while updating is_final",
+//                    null
+//            ));
+//        }
 
         // Create and save new PesertaLowongan record
         PesertaLowongan pesertaLowongan = new PesertaLowongan();
