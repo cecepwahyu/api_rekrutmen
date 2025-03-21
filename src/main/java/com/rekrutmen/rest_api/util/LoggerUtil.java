@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -88,9 +89,46 @@ public class LoggerUtil {
             try (FileWriter writer = new FileWriter(filePath, true)) {
                 writer.write(logMessage + System.lineSeparator());
             }
-            //uploadLogToSFTP(filePath);
         } catch (IOException e) {
             System.err.println("Failed to write log: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Scheduled job to delete logs older than 3 days.
+     * Runs daily at 00:01 AM.
+     */
+    @Scheduled(cron = "1 0 * * * ?") // Runs at 00:01 AM every day
+    public void deleteOldLogFiles() {
+        File logDir = new File(LOG_DIRECTORY);
+        if (!logDir.exists() || !logDir.isDirectory()) {
+            return;
+        }
+
+        File[] logFiles = logDir.listFiles((dir, name) -> name.startsWith("log-") && name.endsWith(".log"));
+        if (logFiles == null) {
+            return;
+        }
+
+        LocalDate threeDaysAgo = LocalDate.now().minusDays(3);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        for (File logFile : logFiles) {
+            String fileName = logFile.getName();
+            try {
+                String datePart = fileName.substring(4, 14); // Extract "yyyy-MM-dd" from "log-yyyy-MM-dd.log"
+                LocalDate fileDate = LocalDate.parse(datePart, formatter);
+
+                if (fileDate.isBefore(threeDaysAgo)) {
+                    if (logFile.delete()) {
+                        System.out.println("🗑 Deleted old log file: " + logFile.getName());
+                    } else {
+                        System.err.println("❌ Failed to delete log file: " + logFile.getName());
+                    }
+                }
+            } catch (Exception e) {
+                //System.err.println("⚠ Error parsing log file date: " + fileName);
+            }
         }
     }
 
