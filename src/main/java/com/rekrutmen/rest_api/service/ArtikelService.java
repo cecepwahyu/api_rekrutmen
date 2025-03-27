@@ -18,6 +18,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -282,16 +285,23 @@ public class ArtikelService {
         System.out.println("Resolved file path: " + filePath);
 
         // Fetch the image from the FTP server
-        try (SFTPClient sftpClient = new SFTPClient("192.168.10.45", "root", "root")) {
-        //try (SFTPClient sftpClient = new SFTPClient("192.168.4.79", "devftp", "devftp")) {
-            byte[] imageBytes = sftpClient.downloadFile(filePath);
+        // Read the file directly from the filesystem
+        try {
+            File imageFile = new File(filePath);
+            if (!imageFile.exists()) {
+                return ResponseEntity.status(404).body("Image not found.");
+            }
 
-            // Return the image as a response
+            FileInputStream inputStream = new FileInputStream(imageFile);
+            byte[] imageBytes = inputStream.readAllBytes();
+            inputStream.close();
+
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
+                    .contentType(MediaType.IMAGE_JPEG) // or detect dynamically if needed
                     .body(imageBytes);
-        } catch (Exception e) {
-            e.printStackTrace(); // Log the stack trace for debugging
+
+        } catch (IOException e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body("Failed to fetch image: " + e.getMessage());
         }
     }
