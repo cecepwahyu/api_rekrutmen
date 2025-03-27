@@ -18,7 +18,10 @@ public class CorsConfig {
                                 "http://localhost:3000",
                                 "http://192.168.10.45:8025",
                                 "http://192.168.4.79:3000",
-                                "http://pod2.pub.bpddiy.co.id:8025"
+                                "http://pod2.pub.bpddiy.co.id:8025",
+                                "https://karir.bpddiy.co.id",
+                                "https://apikarir.bpddiy.co.id"
+
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
