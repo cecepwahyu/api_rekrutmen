@@ -17,7 +17,8 @@ public class CorsConfig {
                         .allowedOrigins(
                                 "http://localhost:3000",
                                 "http://192.168.10.45:8025",
-                                "http://192.168.4.79:3000"
+                                "http://192.168.4.79:3000",
+                                "http://pod2.pub.bpddiy.co.id:8025"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")

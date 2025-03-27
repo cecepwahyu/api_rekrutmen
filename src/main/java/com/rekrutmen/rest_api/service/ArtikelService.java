@@ -278,8 +278,8 @@ public class ArtikelService {
 
         // Get the file path from the `gambar` column
         String fileName = artikel.getGambar();
-//        String filePath = "/home/devftp/data/karir/public/uploads/artikel/" + fileName;
-        String filePath = "/home/sysadmin/app/karir/public/uploads/artikel/" + fileName;
+        String filePath = "/APIREKRUTMEN/image/" + fileName;
+        //String filePath = "D:\\Project 2024\\rest_api\\image\\" + fileName;
 
         // Log the file path
         System.out.println("Resolved file path: " + filePath);
